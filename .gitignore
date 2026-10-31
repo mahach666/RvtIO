@@ -6,3 +6,5 @@ TestResults/
 *.suo
 *.nupkg
 *.snupkg
+artifacts/
+

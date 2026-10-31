@@ -5,19 +5,20 @@ on:
     tags: ['v*']
 
 permissions:
-  contents: read
+  contents: write
   id-token: write
 
 jobs:
   publish:
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: actions/setup-dotnet@v6
         with:
           global-json-file: global.json
           dotnet-version: |
             8.0.x
+            10.0.x
       - name: Validate release version
         shell: pwsh
         run: |
@@ -29,14 +30,37 @@ jobs:
       - run: dotnet restore RvtIO.slnx
       - run: dotnet build RvtIO.slnx -c Release --no-restore
       - run: dotnet test RvtIO.slnx -c Release --no-build
-      - run: dotnet pack RvtIO.slnx -c Release --no-build -o artifacts
-      - uses: actions/upload-artifact@v4
+      - name: Pack release
+        shell: pwsh
+        run: ./tools/pack-release.ps1
+      - uses: actions/upload-artifact@v7
         with:
           name: packages
           path: artifacts/*
+      - name: Create release
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          $version = $env:GITHUB_REF_NAME.Substring(1)
+          $changelog = Get-Content -LiteralPath CHANGELOG.md -Encoding utf8
+          $start = [array]::FindIndex($changelog, [Predicate[string]] { param($line) $line.StartsWith("## [$version]") })
+          if ($start -lt 0) { throw "CHANGELOG.md has no entry for $version" }
+          $notes = @()
+          for ($i = $start + 1; $i -lt $changelog.Count -and -not $changelog[$i].StartsWith('## ['); $i++) { $notes += $changelog[$i] }
+          $notes | Set-Content -LiteralPath release-notes.md -Encoding utf8
+          $files = @(Get-ChildItem artifacts -File | ForEach-Object { $_.FullName })
+          gh release create $env:GITHUB_REF_NAME --title $env:GITHUB_REF_NAME --notes-file release-notes.md @files
+          if ($LASTEXITCODE -ne 0) { throw "gh release create failed with exit code $LASTEXITCODE" }
       # Trusted publishing: the NuGet policy for this repository and workflow file exchanges the GitHub OIDC token for a short-lived key.
       - uses: NuGet/login@v1
         id: nuget-login
         with:
-          user: ${{ secrets.NUGET_USER }}
-      - run: dotnet nuget push "artifacts/*.nupkg" --api-key ${{ steps.nuget-login.outputs.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
+          user: mahach
+      - name: Publish NuGet packages
+        shell: pwsh
+        run: |
+          foreach ($package in Get-ChildItem artifacts -Filter *.nupkg) {
+            dotnet nuget push $package.FullName --api-key '${{ steps.nuget-login.outputs.NUGET_API_KEY }}' --source https://api.nuget.org/v3/index.json --skip-duplicate
+            if ($LASTEXITCODE -ne 0) { throw "dotnet nuget push failed for $($package.Name) with exit code $LASTEXITCODE" }
+          }
