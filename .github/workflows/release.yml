@@ -18,6 +18,7 @@ jobs:
           global-json-file: global.json
           dotnet-version: |
             8.0.x
+            10.0.x
       - name: Validate release version
         shell: pwsh
         run: |
@@ -29,16 +30,9 @@ jobs:
       - run: dotnet restore RvtIO.slnx
       - run: dotnet build RvtIO.slnx -c Release --no-restore
       - run: dotnet test RvtIO.slnx -c Release --no-build
-      - run: dotnet pack RvtIO.slnx -c Release --no-build -o artifacts
-      - name: Prepare release assets
+      - name: Pack release
         shell: pwsh
-        run: |
-          $version = $env:GITHUB_REF_NAME.Substring(1)
-          git archive --format=zip --prefix=RvtIO/ --output="artifacts/RvtIO-$version-source.zip" HEAD
-          if ($LASTEXITCODE -ne 0) { throw "git archive failed with exit code $LASTEXITCODE" }
-          $files = Get-ChildItem artifacts -File | Where-Object { $_.Extension -in '.zip', '.nupkg', '.snupkg' } | Sort-Object Name
-          $files | ForEach-Object { '{0}  {1}' -f (Get-FileHash -LiteralPath $_.FullName -Algorithm SHA256).Hash.ToLowerInvariant(), $_.Name } |
-            Set-Content -LiteralPath artifacts/SHA256SUMS.txt -Encoding ascii
+        run: ./tools/pack-release.ps1
       - uses: actions/upload-artifact@v4
         with:
           name: packages
