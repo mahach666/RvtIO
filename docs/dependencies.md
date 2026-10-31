@@ -28,9 +28,9 @@ Build settings shared by every project live in `Directory.Build.props`; the SDK 
 
 ## Test packages
 
-Pinned to exact versions (previously `17.*`, `2.*`, `2.*`): Microsoft.NET.Test.Sdk 17.14.1, xunit 2.9.3,
-xunit.runner.visualstudio 2.8.2. These are the versions the floating ranges resolved to. Newer majors exist
-(Test.Sdk 18.x, runner 4.x); moving to them is a separate change. The tests project also references OpenMcdf directly (it opens containers itself).
+Pinned to exact versions: Microsoft.NET.Test.Sdk 18.11.0, xunit 2.9.3 and xunit.runner.visualstudio 4.0.1.
+The test SDK and Visual Studio adapter are updated together; the xUnit test framework remains at 2.9.3.
+The tests project also references OpenMcdf directly (it opens containers itself).
 
 ## Auditing
 
@@ -41,8 +41,8 @@ Check manually:
     dotnet list package --vulnerable --include-transitive
     dotnet list package --outdated
 
-Result at the time of writing: no vulnerable packages in any project; the only outdated entries are the pinned
-test packages mentioned above.
+After updating the test SDK and adapter, the audit reports no vulnerable packages in any project.
+Re-run the audit when changing dependencies.
 
 ## Build settings
 
