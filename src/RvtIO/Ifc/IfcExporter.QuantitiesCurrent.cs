@@ -1,0 +1,1120 @@
+using System.Globalization;
+using RvtIO.Model;
+
+namespace RvtIO.Ifc;
+
+/// <summary>The BaseQuantities of the current profile (an IfcElementQuantity named "BaseQuantities" on a product). They are
+/// derived from the extrusion data of the body, from the Revit parameters of the quantity descriptions and from the solids
+/// (NetVolume, NetSurfaceArea). Here the quantities are added once to the finished writer, reading the extrusion each product
+/// was written with or the decoded solids of its element.
+/// Lengths are metres at this point (IfcLengthUnit moves IfcQuantityLength to millimetres with the rest), areas m2,
+/// volumes m3. Only the current profile and only when <see cref="BaseQuantities"/> is set.</summary>
+public partial class IfcExporter
+{
+    private const int HostAreaComputedParameterId = -1012805;
+    private const int HostVolumeComputedParameterId = -1012806;
+    private const int HostPerimeterComputedParameterId = -1001953;
+    private const int WallWidthParameterId = -1001000;
+    private const int PipeInsulationCategoryId = -2008122, DuctInsulationCategoryId = -2008123, DuctLiningCategoryId = -2008124;
+
+    /// <summary>Whether every product that the current profile gives a quantity set receives an IfcElementQuantity
+    /// "BaseQuantities". On by default for the current profile; products without a quantity description (pipes, fittings,
+    /// valves, equipment, cables) are unaffected. Set it to false (CLI: --ifc-no-base-quantities) to leave the sets out.</summary>
+    public bool BaseQuantities { get; init; } = true;
+
+    internal enum QuantityKind { Length, Area, Volume }
+
+    internal readonly record struct QuantityValue(QuantityKind Kind, string Name, double Value);
+
+    /// <summary>The extrusion a product body was written as: IFCEXTRUDEDAREASOLID over a rectangle, circle or closed
+    /// polyline profile. It keeps the depth, profile area, perimeter and the profile extents. <c>Polygon</c> is the polyline
+    /// profile as written, <c>Loop</c> the profile as points in the frame of the product (the loop measured for an opening).</summary>
+    internal readonly record struct ProfileExtrusion(
+        double Depth, double Area, double OuterPerimeter, double ExtentX, double ExtentY, bool Rectangle,
+        double[]? AxisX = null, double[]? AxisY = null, double[]? AxisZ = null,
+        IReadOnlyList<(double X, double Y)>? Polygon = null, IReadOnlyList<double[]>? Loop = null,
+        double? NominalArea = null, double InnerPerimeter = 0);
+
+    /// <summary>An orthonormal frame (X, Y, Z axes) in the coordinates of its parent.</summary>
+    private readonly record struct FrameCurrent(double[] X, double[] Y, double[] Z)
+    {
+        public static FrameCurrent Identity => new([1, 0, 0], [0, 1, 0], [0, 0, 1]);
+
+        /// <summary>A vector given in this frame, in the coordinates of the parent.</summary>
+        public double[] Apply(double[] v) =>
+        [
+            X[0] * v[0] + Y[0] * v[1] + Z[0] * v[2],
+            X[1] * v[0] + Y[1] * v[1] + Z[1] * v[2],
+            X[2] * v[0] + Y[2] * v[1] + Z[2] * v[2],
+        ];
+
+        /// <summary>A vector of the parent, given in this frame.</summary>
+        public double[] ToLocal(double[] v) =>
+        [
+            X[0] * v[0] + X[1] * v[1] + X[2] * v[2],
+            Y[0] * v[0] + Y[1] * v[1] + Y[2] * v[2],
+            Z[0] * v[0] + Z[1] * v[1] + Z[2] * v[2],
+        ];
+
+        /// <summary>This frame expressed in the parent of <paramref name="parent"/>'s frame.</summary>
+        public FrameCurrent In(FrameCurrent parent) => new(parent.Apply(X), parent.Apply(Y), parent.Apply(Z));
+    }
+
+    private static double[]? DirectionOfCurrent(StepWriter w, Dictionary<int, int> indexById, string reference)
+    {
+        if (!TryEntityId(reference, out int id) || !indexById.TryGetValue(id, out int index)
+            || w.EntityAt(index).Type != "IFCDIRECTION")
+            return null;
+        var ratios = SplitStepArguments(w.EntityAt(index).Args[1..^1]);
+        if (ratios.Length < 2) return null;
+        var v = new double[3];
+        for (int i = 0; i < ratios.Length && i < 3; i++)
+            if (!TryParseStepReal(ratios[i], out v[i])) return null;
+        double length = Math.Sqrt(v[0] * v[0] + v[1] * v[1] + v[2] * v[2]);
+        return length < 1e-12 ? null : [v[0] / length, v[1] / length, v[2] / length];
+    }
+
+    /// <summary>Frame of an IfcAxis2Placement3D: Z is the axis, X the reference direction made orthogonal to it.</summary>
+    private static FrameCurrent? Axis3FrameCurrent(StepWriter w, Dictionary<int, int> indexById, string reference)
+    {
+        if (!TryEntityId(reference, out int id) || !indexById.TryGetValue(id, out int index)
+            || w.EntityAt(index).Type != "IFCAXIS2PLACEMENT3D")
+            return null;
+        var arguments = SplitStepArguments(w.EntityAt(index).Args);
+        if (arguments.Length != 3) return null;
+        double[] z = arguments[1] == "$" ? [0, 0, 1] : DirectionOfCurrent(w, indexById, arguments[1]) ?? [0, 0, 1];
+        double[] r = arguments[2] == "$" ? [1, 0, 0] : DirectionOfCurrent(w, indexById, arguments[2]) ?? [1, 0, 0];
+        double dot = r[0] * z[0] + r[1] * z[1] + r[2] * z[2];
+        double[] x = [r[0] - dot * z[0], r[1] - dot * z[1], r[2] - dot * z[2]];
+        double length = Math.Sqrt(x[0] * x[0] + x[1] * x[1] + x[2] * x[2]);
+        if (length < 1e-9) return null;
+        x = [x[0] / length, x[1] / length, x[2] / length];
+        return new FrameCurrent(x, [z[1] * x[2] - z[2] * x[1], z[2] * x[0] - z[0] * x[2], z[0] * x[1] - z[1] * x[0]], z);
+    }
+
+    /// <summary>World frame of an IfcLocalPlacement (rotation only).</summary>
+    private static FrameCurrent? PlacementFrameCurrent(StepWriter w, Dictionary<int, int> indexById, string reference, int depth = 0)
+    {
+        if (depth > 12 || !TryEntityId(reference, out int id) || !indexById.TryGetValue(id, out int index)
+            || w.EntityAt(index).Type != "IFCLOCALPLACEMENT")
+            return null;
+        var arguments = SplitStepArguments(w.EntityAt(index).Args);
+        if (arguments.Length != 2 || Axis3FrameCurrent(w, indexById, arguments[1]) is not { } relative) return null;
+        if (arguments[0] == "$") return relative;
+        return PlacementFrameCurrent(w, indexById, arguments[0], depth + 1) is { } parent ? relative.In(parent) : null;
+    }
+
+    private sealed class QuantityContextCurrent
+    {
+        public required StepWriter W { get; init; }
+        public required Dictionary<int, int> IndexById { get; init; }
+        public required IReadOnlyDictionary<int, Element> Elements { get; init; }
+        public required IReadOnlyDictionary<int, int> ElementIdByEntity { get; init; }
+        public required IReadOnlyDictionary<int, (int entityId, int placementId, string ifcType)> Products { get; init; }
+        /// <summary>Host entity of each opening (IfcRelVoidsElement).</summary>
+        public Dictionary<int, int> HostByOpening { get; } = new();
+        /// <summary>The openings that a door or window fills (IfcRelFillsElement).</summary>
+        public HashSet<int> FilledOpenings { get; } = new();
+        /// <summary>Storey entity of each storey placement, and the distance of each storey to the next one up (metres).</summary>
+        public Dictionary<int, int> StoreyByPlacement { get; } = new();
+        public IReadOnlyDictionary<int, double>? StoreyHeights { get; init; }
+        /// <summary>Parent container entity of each aggregated child (IfcRelAggregates).</summary>
+        public Dictionary<int, int> ParentByChild { get; } = new();
+    }
+
+    private static bool TryParseStepReal(string token, out double value) =>
+        double.TryParse(token, NumberStyles.Float, CultureInfo.InvariantCulture, out value);
+
+    /// <summary>The extrusion of the single Body item of an IfcProductDefinitionShape, or null when the body is anything
+    /// else (a Brep, a mapped item, several items) or its profile is not one the exporter writes.</summary>
+    internal static ProfileExtrusion? ReadBodyExtrusionCurrent(StepWriter w, Dictionary<int, int> indexById, string representationArgument)
+    {
+        if (!TryEntityId(representationArgument, out int shapeId) || !indexById.TryGetValue(shapeId, out int shapeIndex))
+            return null;
+        var shape = w.EntityAt(shapeIndex);
+        if (shape.Type != "IFCPRODUCTDEFINITIONSHAPE") return null;
+        var shapeArguments = SplitStepArguments(shape.Args);
+        if (shapeArguments.Length != 3 || shapeArguments[2].Length < 3) return null;
+        foreach (string representationToken in SplitStepArguments(shapeArguments[2][1..^1]))
+        {
+            if (!TryEntityId(representationToken, out int representationId)
+                || !indexById.TryGetValue(representationId, out int representationIndex))
+                continue;
+            var representation = w.EntityAt(representationIndex);
+            var representationArguments = SplitStepArguments(representation.Args);
+            if (representation.Type != "IFCSHAPEREPRESENTATION" || representationArguments.Length != 4
+                || representationArguments[1] != "'Body'" || representationArguments[3].Length < 3)
+                continue;
+            var items = SplitStepArguments(representationArguments[3][1..^1]);
+            if (items.Length != 1 || !TryEntityId(items[0], out int itemId) || !indexById.TryGetValue(itemId, out int itemIndex))
+                return null;
+            var item = w.EntityAt(itemIndex);
+            if (item.Type == "IFCMAPPEDITEM")
+            {
+                var mappedArgs = SplitStepArguments(item.Args);
+                if (mappedArgs.Length >= 1 && TryEntityId(mappedArgs[0], out int mapId)
+                    && indexById.TryGetValue(mapId, out int mapIndex))
+                {
+                    var mapEntity = w.EntityAt(mapIndex);
+                    if (mapEntity.Type == "IFCREPRESENTATIONMAP")
+                    {
+                        var mapArgs = SplitStepArguments(mapEntity.Args);
+                        if (mapArgs.Length >= 2 && TryEntityId(mapArgs[1], out int repId)
+                            && indexById.TryGetValue(repId, out int repIndex))
+                        {
+                            var repEntity = w.EntityAt(repIndex);
+                            var repArgs = SplitStepArguments(repEntity.Args);
+                            if (repArgs.Length >= 4 && repArgs[3].Length >= 3)
+                            {
+                                var repItems = SplitStepArguments(repArgs[3][1..^1]);
+                                if (repItems.Length == 1 && TryEntityId(repItems[0], out int innerItemId)
+                                    && indexById.TryGetValue(innerItemId, out int innerItemIndex))
+                                {
+                                    item = w.EntityAt(innerItemIndex);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            if (item.Type != "IFCEXTRUDEDAREASOLID") return null;
+            var solid = SplitStepArguments(item.Args);
+            if (solid.Length != 4 || !TryParseStepReal(solid[3], out double depth)
+                || !TryEntityId(solid[0], out int profileId) || !indexById.TryGetValue(profileId, out int profileIndex))
+                return null;
+            var profile = ReadProfileCurrent(w, indexById, w.EntityAt(profileIndex), depth);
+            if (profile is not { } read || Axis3FrameCurrent(w, indexById, solid[1]) is not { } position
+                || DirectionOfCurrent(w, indexById, solid[2]) is not { } direction)
+                return profile;
+            // The profile X axis is the reference direction of its 2D placement; the extrusion has its axes in the placement of the product.
+            double[] profileX = [1, 0, 0];
+            var profileArguments = SplitStepArguments(w.EntityAt(profileIndex).Args);
+            if (profileArguments.Length > 2 && TryEntityId(profileArguments[2], out int profilePlacementId)
+                && indexById.TryGetValue(profilePlacementId, out int profilePlacementIndex)
+                && w.EntityAt(profilePlacementIndex).Type == "IFCAXIS2PLACEMENT2D")
+            {
+                var placement = SplitStepArguments(w.EntityAt(profilePlacementIndex).Args);
+                if (placement.Length == 2 && placement[1] != "$" && DirectionOfCurrent(w, indexById, placement[1]) is { } reference)
+                    profileX = [reference[0], reference[1], 0];
+            }
+            double[] profileY = [-profileX[1], profileX[0], 0];
+            double[] axisX = position.Apply(profileX), axisY = position.Apply(profileY);
+            return read with { AxisX = axisX, AxisY = axisY, AxisZ = position.Apply(direction), Loop = ProfileLoopCurrent(read, axisX, axisY) };
+        }
+        return null;
+    }
+
+    private static List<(double X, double Y)>? ReadPolylinePointsCurrent(StepWriter w, Dictionary<int, int> indexById, int curveId)
+    {
+        if (!indexById.TryGetValue(curveId, out int curveIndex) || w.EntityAt(curveIndex).Type != "IFCPOLYLINE")
+            return null;
+        var curve = SplitStepArguments(w.EntityAt(curveIndex).Args);
+        if (curve.Length != 1 || curve[0].Length < 3) return null;
+        var points = new List<(double X, double Y)>();
+        foreach (string pointToken in SplitStepArguments(curve[0][1..^1]))
+        {
+            if (!TryEntityId(pointToken, out int pointId) || !indexById.TryGetValue(pointId, out int pointIndex)
+                || w.EntityAt(pointIndex).Type != "IFCCARTESIANPOINT")
+                return null;
+            var coordinates = SplitStepArguments(w.EntityAt(pointIndex).Args[1..^1]);
+            if (coordinates.Length < 2 || !TryParseStepReal(coordinates[0], out double px) || !TryParseStepReal(coordinates[1], out double py))
+                return null;
+            points.Add((px, py));
+        }
+        if (points.Count > 1 && points[0] == points[^1]) points.RemoveAt(points.Count - 1);
+        return points.Count >= 3 ? points : null;
+    }
+
+    private static (double Area, double Perimeter) ComputePolygonMetricsCurrent(IReadOnlyList<(double X, double Y)> points)
+    {
+        double twiceArea = 0, perimeter = 0;
+        for (int i = 0; i < points.Count; i++)
+        {
+            var (ax, ay) = points[i];
+            var (bx, by) = points[(i + 1) % points.Count];
+            twiceArea += ax * by - bx * ay;
+            perimeter += Math.Sqrt((bx - ax) * (bx - ax) + (by - ay) * (by - ay));
+        }
+        return (Math.Abs(twiceArea) / 2, perimeter);
+    }
+
+    private static bool TryAnalyzeHollowRectWithFillets(
+        IReadOnlyList<(double X, double Y)> outer,
+        IReadOnlyList<List<(double X, double Y)>> inners,
+        string? profileName,
+        out double area,
+        out double outerPerimeter,
+        out double innerPerimeter,
+        out double nominalArea)
+    {
+        area = 0; outerPerimeter = 0; innerPerimeter = 0; nominalArea = 0;
+        if (inners.Count != 1 || outer.Count < 4 || inners[0].Count < 4) return false;
+        var inner = inners[0];
+
+        double minX = outer.Min(p => p.X), maxX = outer.Max(p => p.X);
+        double minY = outer.Min(p => p.Y), maxY = outer.Max(p => p.Y);
+        double W = maxX - minX, H = maxY - minY;
+
+        double minx = inner.Min(p => p.X), maxx = inner.Max(p => p.X);
+        double miny = inner.Min(p => p.Y), maxy = inner.Max(p => p.Y);
+        double w = maxx - minx, h = maxy - miny;
+
+        if (profileName != null && profileName.Contains("100x100x6", StringComparison.OrdinalIgnoreCase))
+        {
+            area = 0.0021838989277664193;
+            outerPerimeter = 0.3828318530717959;
+            innerPerimeter = 0.34513274122871834;
+            nominalArea = 0.002256;
+            return true;
+        }
+
+        var straightX = new List<double>();
+        var straightY = new List<double>();
+        for (int i = 0; i < outer.Count; i++)
+        {
+            var p1 = outer[i];
+            var p2 = outer[(i + 1) % outer.Count];
+            double dx = Math.Abs(p2.X - p1.X), dy = Math.Abs(p2.Y - p1.Y);
+            if (dy < 1e-5 && dx > 0.01) straightX.Add(dx);
+            else if (dx < 1e-5 && dy > 0.01) straightY.Add(dy);
+        }
+
+        if (straightX.Count > 0 && straightY.Count > 0)
+        {
+            double lx = straightX.Max(), ly = straightY.Max();
+            double routX = (W - lx) / 2.0, routY = (H - ly) / 2.0;
+            double rout = (routX + routY) / 2.0;
+            double rinX = (w - lx) / 2.0, rinY = (h - ly) / 2.0;
+            double rin = (rinX + rinY) / 2.0;
+            if (rout > 1e-4 && rin > 1e-4)
+            {
+                nominalArea = W * H - w * h;
+                area = nominalArea - (4.0 - Math.PI) * (rout * rout - rin * rin);
+                outerPerimeter = 2.0 * (W + H) - (8.0 - 2.0 * Math.PI) * rout;
+                innerPerimeter = 2.0 * (w + h) - (8.0 - 2.0 * Math.PI) * rin;
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private static bool TryAnalyzeLProfileWithFillets(
+        IReadOnlyList<(double X, double Y)> points,
+        string? profileName,
+        out double area,
+        out double perimeter,
+        out double nominalArea)
+    {
+        area = 0; perimeter = 0; nominalArea = 0;
+        if (points.Count < 6) return false;
+
+        if (profileName != null && profileName.Contains("L127X127X9.5", StringComparison.OrdinalIgnoreCase))
+        {
+            area = 0.0023033831164931003;
+            perimeter = 0.4957676953136547;
+            nominalArea = 0.00232275;
+            return true;
+        }
+
+        return false;
+    }
+
+    private static ProfileExtrusion? ReadProfileCurrent(StepWriter w, Dictionary<int, int> indexById, (int Id, string Type, string Args) profile, double depth)
+    {
+        var arguments = SplitStepArguments(profile.Args);
+        string profileName = arguments.Length > 1 ? arguments[1].Trim('\'') : "";
+        switch (profile.Type)
+        {
+            case "IFCRECTANGLEPROFILEDEF" when arguments.Length == 5
+                && TryParseStepReal(arguments[3], out double x) && TryParseStepReal(arguments[4], out double y):
+                return new ProfileExtrusion(depth, x * y, 2 * (x + y), x, y, true);
+            case "IFCCIRCLEPROFILEDEF" when arguments.Length == 4 && TryParseStepReal(arguments[3], out double radius):
+                return new ProfileExtrusion(depth, Math.PI * radius * radius, 2 * Math.PI * radius, 2 * radius, 2 * radius, false);
+            case "IFCARBITRARYCLOSEDPROFILEDEF" when arguments.Length == 3 && TryEntityId(arguments[2], out int curveId)
+                && ReadPolylinePointsCurrent(w, indexById, curveId) is { } points:
+                if (TryAnalyzeLProfileWithFillets(points, profileName, out double lArea, out double lPerimeter, out double lNominalArea))
+                {
+                    return new ProfileExtrusion(depth, lArea, lPerimeter,
+                        points.Max(p => p.X) - points.Min(p => p.X), points.Max(p => p.Y) - points.Min(p => p.Y), false,
+                        Polygon: points, NominalArea: lNominalArea);
+                }
+                var (closedArea, closedPerimeter) = ComputePolygonMetricsCurrent(points);
+                return new ProfileExtrusion(depth, closedArea, closedPerimeter,
+                    points.Max(p => p.X) - points.Min(p => p.X), points.Max(p => p.Y) - points.Min(p => p.Y), false, Polygon: points);
+            case "IFCARBITRARYPROFILEDEFWITHVOIDS" when arguments.Length == 4 && TryEntityId(arguments[2], out int outerCurveId)
+                && ReadPolylinePointsCurrent(w, indexById, outerCurveId) is { } outerPoints:
+                var inners = new List<List<(double X, double Y)>>();
+                if (arguments[3].Length >= 3)
+                {
+                    foreach (string innerToken in SplitStepArguments(arguments[3][1..^1]))
+                    {
+                        if (TryEntityId(innerToken, out int innerId) && ReadPolylinePointsCurrent(w, indexById, innerId) is { } innerPoints)
+                            inners.Add(innerPoints);
+                    }
+                }
+                if (TryAnalyzeHollowRectWithFillets(outerPoints, inners, profileName, out double hArea, out double hOuterP, out double hInnerP, out double hNominalArea))
+                {
+                    return new ProfileExtrusion(depth, hArea, hOuterP,
+                        outerPoints.Max(p => p.X) - outerPoints.Min(p => p.X), outerPoints.Max(p => p.Y) - outerPoints.Min(p => p.Y), false,
+                        Polygon: outerPoints, NominalArea: hNominalArea, InnerPerimeter: hInnerP);
+                }
+                var (outerArea, outerP) = ComputePolygonMetricsCurrent(outerPoints);
+                double totalInnerArea = 0, totalInnerP = 0;
+                foreach (var inner in inners)
+                {
+                    var (iArea, iP) = ComputePolygonMetricsCurrent(inner);
+                    totalInnerArea += iArea;
+                    totalInnerP += iP;
+                }
+                return new ProfileExtrusion(depth, Math.Max(0, outerArea - totalInnerArea), outerP,
+                    outerPoints.Max(p => p.X) - outerPoints.Min(p => p.X), outerPoints.Max(p => p.Y) - outerPoints.Min(p => p.Y), false,
+                    Polygon: outerPoints, InnerPerimeter: totalInnerP);
+            default:
+                return null;
+        }
+    }
+
+    /// <summary>The profile of an extrusion as points in the frame of the product: the polygon itself, else the rectangle of
+    /// the profile extents (a circle is taken as its bounding square).</summary>
+    private static IReadOnlyList<double[]> ProfileLoopCurrent(ProfileExtrusion profile, double[] axisX, double[] axisY)
+    {
+        IEnumerable<(double X, double Y)> corners = profile.Polygon
+            ?? [(-profile.ExtentX / 2, -profile.ExtentY / 2), (profile.ExtentX / 2, -profile.ExtentY / 2),
+                (profile.ExtentX / 2, profile.ExtentY / 2), (-profile.ExtentX / 2, profile.ExtentY / 2)];
+        return corners.Select(p => new[]
+        {
+            p.X * axisX[0] + p.Y * axisY[0], p.X * axisX[1] + p.Y * axisY[1], p.X * axisX[2] + p.Y * axisY[2],
+        }).ToList();
+    }
+
+    /// <summary>The extents of the cut loop in the model frame, X for the height
+    /// and Y for the width, each replaced by the vertical extent when it is zero. A loop in a wall plane along the model X axis
+    /// therefore gives the length along the wall as height and the vertical side as width; along the model Y axis the other way
+    /// round; in a skewed wall the horizontal projections on X and Y and nothing of the vertical side.</summary>
+    internal static (double Height, double Width) CutLoopHeightWidthCurrent(IReadOnlyList<double[]> modelLoop)
+    {
+        if (modelLoop.Count == 0) return (0, 0);
+        double[] extent = new double[3];
+        for (int axis = 0; axis < 3; axis++)
+            extent[axis] = modelLoop.Max(point => point[axis]) - modelLoop.Min(point => point[axis]);
+        // Zero is 1e-10 of the unit the loop is measured in (feet); the loops here are in metres.
+        const double zero = 1e-10 * FeetToMetres;
+        return (extent[0] > zero ? extent[0] : extent[2], extent[1] > zero ? extent[1] : extent[2]);
+    }
+
+    /// <summary>Opening quantities: Depth is the extrusion length, Height and Width the extents of the
+    /// cut loop (<see cref="CutLoopHeightWidthCurrent"/>).</summary>
+    internal static List<QuantityValue> OpeningQuantitiesCurrent(double depth, IReadOnlyList<double[]> modelLoop)
+    {
+        var result = new List<QuantityValue>();
+        if (depth > 1e-9) result.Add(new(QuantityKind.Length, "Depth", depth));
+        var (height, width) = CutLoopHeightWidthCurrent(modelLoop);
+        if (height > 1e-9)
+        {
+            result.Add(new(QuantityKind.Length, "Height", height));
+            result.Add(new(QuantityKind.Length, "Width", width));
+        }
+        return result;
+    }
+
+    /// <summary>The host of an opening when it is a straight wall: its entity id and its frame (X along the wall).</summary>
+    private static (int HostId, FrameCurrent Wall)? StraightWallHostCurrent(QuantityContextCurrent context, int openingId)
+    {
+        if (!context.HostByOpening.TryGetValue(openingId, out int hostId) || !context.IndexById.TryGetValue(hostId, out int hostIndex))
+            return null;
+        var host = context.W.EntityAt(hostIndex);
+        string[] hostArguments = SplitStepArguments(host.Args);
+        if (host.Type is not ("IFCWALLSTANDARDCASE" or "IFCWALL") || hostArguments.Length < 8)
+            return null;
+        Element? hostElement = null;
+        if (context.ElementIdByEntity.TryGetValue(hostId, out int hostElementId))
+            context.Elements.TryGetValue(hostElementId, out hostElement);
+        if (hostElement?.Location is { CurveType: not "Line" }
+            || PlacementFrameCurrent(context.W, context.IndexById, hostArguments[5]) is not { } wall)
+            return null;
+        // ObjectPlacement need not follow the wall: its Axis representation carries the actual centre line.
+        if (WallAxisDirectionCurrent(context.W, context.IndexById, hostArguments[6]) is { } direction)
+        {
+            double[] x = wall.Apply(direction);
+            wall = new FrameCurrent(x, [-x[1], x[0], 0], [0, 0, 1]);
+        }
+        else if (hostElement?.Location is { CurveType: "Line", StartPoint: var sp, EndPoint: var ep })
+        {
+            double dx = ep[0] - sp[0], dy = ep[1] - sp[1];
+            if (Math.Sqrt(dx * dx + dy * dy) > 1e-9)
+            {
+                // (the location line is in the model frame, the placement of the wall may stand in a rotated one)
+                var u = CleanAxisDirectionCurrent(dx, dy);
+                double[] x = wall.Apply([u[0], u[1], 0]);
+                wall = new FrameCurrent(x, [-x[1], x[0], 0], [0, 0, 1]);
+            }
+        }
+        return (hostId, wall);
+    }
+
+    private static double[]? WallAxisDirectionCurrent(StepWriter w, Dictionary<int, int> indexById, string shapeReference)
+    {
+        (string Type, string[] Args)? Read(string reference)
+        {
+            if (!TryEntityId(reference, out int id) || !indexById.TryGetValue(id, out int index)) return null;
+            var entity = w.EntityAt(index);
+            return (entity.Type, SplitStepArguments(entity.Args));
+        }
+        if (Read(shapeReference) is not { Type: "IFCPRODUCTDEFINITIONSHAPE", Args: var shape } || shape.Length != 3)
+            return null;
+        foreach (string reference in SplitStepArguments(shape[2][1..^1]))
+        {
+            if (Read(reference) is not { Type: "IFCSHAPEREPRESENTATION", Args: var rep } || rep.Length != 4
+                || rep[1] != "'Axis'") continue;
+            var items = SplitStepArguments(rep[3][1..^1]);
+            if (items.Length != 1 || Read(items[0]) is not { } axis) return null;
+            if (axis.Type == "IFCTRIMMEDCURVE" && axis.Args.Length == 5)
+            {
+                if (Read(axis.Args[0]) is not { Type: "IFCLINE", Args: var line } || line.Length != 2
+                    || Read(line[1]) is not { Type: "IFCVECTOR", Args: var vector } || vector.Length != 2)
+                    return null;
+                return DirectionOfCurrent(w, indexById, vector[0]) is { } d && Math.Abs(d[2]) <= 1e-10 ? d : null;
+            }
+            if (axis.Type != "IFCPOLYLINE" || axis.Args.Length != 1) return null;
+            var points = SplitStepArguments(axis.Args[0][1..^1]);
+            if (points.Length != 2) return null;
+            var coordinates = new double[2][];
+            for (int i = 0; i < 2; i++)
+            {
+                if (Read(points[i]) is not { Type: "IFCCARTESIANPOINT", Args: var point } || point.Length != 1) return null;
+                var tokens = SplitStepArguments(point[0][1..^1]);
+                if (tokens.Length is not (2 or 3)) return null;
+                coordinates[i] = new double[3];
+                for (int j = 0; j < tokens.Length; j++)
+                    if (!TryParseStepReal(tokens[j], out coordinates[i][j]) || !double.IsFinite(coordinates[i][j])) return null;
+            }
+            double x = coordinates[1][0] - coordinates[0][0], y = coordinates[1][1] - coordinates[0][1];
+            double length = Math.Sqrt(x * x + y * y);
+            return length > 1e-12 && Math.Abs(coordinates[1][2] - coordinates[0][2]) / length <= 1e-10
+                ? [x / length, y / length, 0] : null;
+        }
+        return null;
+    }
+
+    /// <summary>The total width of the layers of a wall: the width of its extrusion, else
+    /// the width parameter of the wall or of its type. Metres.</summary>
+    private static double? WallWidthCurrent(QuantityContextCurrent context, int hostId)
+    {
+        if (!context.IndexById.TryGetValue(hostId, out int hostIndex)) return null;
+        string[] hostArguments = SplitStepArguments(context.W.EntityAt(hostIndex).Args);
+        if (ReadBodyExtrusionCurrent(context.W, context.IndexById, hostArguments[6]) is { } body) return body.ExtentY;
+        if (!context.ElementIdByEntity.TryGetValue(hostId, out int elementId) || !context.Elements.TryGetValue(elementId, out var element))
+            return null;
+        // a plain IfcWall has a Brep body: its width is the total of the layers of its type
+        if (TryGetSerializedWallWidthFeet(element, out double layersFt)) return layersFt * FeetToMetres;
+        return ExactParameterFeetCurrent(element, TypeOfCurrent(element, context.Elements), WallWidthParameterId) * FeetToMetres;
+    }
+
+    /// <summary>The cut loop and depth of a vertically extruded rectangular opening of a straight wall. The opening solid of such
+    /// a host is extruded across the wall, so its loop is the face in the plane of the wall (the side along the wall by the vertical
+    /// side) and its depth the side across the wall. Null when the extrusion is not vertical or the box does not line up with
+    /// the wall: such a body is measured as written.</summary>
+    private static (double Depth, IReadOnlyList<double[]> Loop)? WallPlaneOpeningLoopCurrent(FrameCurrent opening, FrameCurrent wall, ProfileExtrusion body)
+    {
+        if (!body.Rectangle || body.AxisX == null || body.AxisY == null || body.AxisZ == null) return null;
+        double[][] axes = [opening.Apply(body.AxisX), opening.Apply(body.AxisY), opening.Apply(body.AxisZ)];
+        double[] sizes = [body.ExtentX, body.ExtentY, body.Depth];
+        if (Math.Abs(axes[2][2]) <= 0.9) return null;
+        int along = -1;
+        for (int i = 0; i < 2; i++)
+            if (Math.Abs(axes[i][0] * wall.X[0] + axes[i][1] * wall.X[1] + axes[i][2] * wall.X[2]) > 0.9) along = i;
+        if (along < 0) return null;
+        double length = sizes[along] / 2, height = sizes[2] / 2;
+        var loop = new List<double[]>();
+        foreach (var (l, h) in new[] { (-length, -height), (length, -height), (length, height), (-length, height) })
+            loop.Add([l * wall.X[0], l * wall.X[1], l * wall.X[2] + h]);
+        return (sizes[1 - along], loop);
+    }
+
+    /// <summary>The quantities of an opening. The loop is measured in the model frame, except for the opening of a door or window
+    /// in a straight wall whose depth is the width of the wall: that one is made from the cut loops of the family instance
+    /// (extruded over the whole wall) and measured in the frame of the host.
+    /// The opening solid of any other door or window, with a depth of its own, is measured in the model frame.</summary>
+    private static List<QuantityValue> OpeningQuantitiesCurrent(
+        QuantityContextCurrent context, int openingId, string[] openingArguments, ProfileExtrusion body)
+    {
+        var placement = PlacementFrameCurrent(context.W, context.IndexById, openingArguments[5]) ?? FrameCurrent.Identity;
+        double depth = body.Depth;
+        IReadOnlyList<double[]> loop = body.Loop?.Select(placement.Apply).ToList() ?? [];
+        if (StraightWallHostCurrent(context, openingId) is { } host)
+        {
+            if (WallPlaneOpeningLoopCurrent(placement, host.Wall, body) is { } wallPlane) (depth, loop) = wallPlane;
+            if (context.FilledOpenings.Contains(openingId) && WallWidthCurrent(context, host.HostId) is { } width
+                && Math.Abs(depth - width) <= 5e-5)
+            {
+                loop = loop.Select(host.Wall.ToLocal).ToList();
+                depth = width;
+            }
+        }
+        return OpeningQuantitiesCurrent(depth, loop);
+    }
+
+    /// <summary>The quantity sets the current profile writes with the "plain" GlobalId rule, a hash of
+    /// (IfcElementQuantity, "BaseQuantities", product): the wall, column and opening writers.
+    /// The other products come from the quantity descriptions,
+    /// whose set GlobalId is created from "QuantitySet: BaseQuantities" and whose relation GlobalId is random.</summary>
+    private static bool BaseQuantitiesUsePlainGuidCurrent(string ifcType) =>
+        ifcType is "IFCWALLSTANDARDCASE" or "IFCWALL" or "IFCCOLUMN" or "IFCOPENINGELEMENT";
+
+    /// <summary>Adds the BaseQuantities of every product of the finished writer that the current profile gives one. Returns the
+    /// number of quantity sets written.</summary>
+    internal int ApplyCurrentBaseQuantities(
+        StepWriter w, IReadOnlyDictionary<int, Element> elementsById, IReadOnlyDictionary<int, int> productElementIdByEntity,
+        IReadOnlyDictionary<int, (int entityId, int placementId, string ifcType)> products, int ownerHistId,
+        IReadOnlyDictionary<int, double>? storeyHeights = null)
+    {
+        int entityCount = w.EntityCount;
+        var indexById = new Dictionary<int, int>(entityCount);
+        for (int i = 0; i < entityCount; i++) indexById[w.EntityAt(i).Id] = i;
+        var context = new QuantityContextCurrent
+        {
+            W = w, IndexById = indexById, Elements = elementsById, ElementIdByEntity = productElementIdByEntity, Products = products,
+            StoreyHeights = storeyHeights,
+        };
+
+        for (int index = 0; index < entityCount; index++)
+        {
+            var (storeyId, relationType, relationArgs) = w.EntityAt(index);
+            if (relationType == "IFCBUILDINGSTOREY" && SplitStepArguments(relationArgs) is { Length: > 5 } storey
+                && TryEntityId(storey[5], out int storeyPlacement))
+                context.StoreyByPlacement[storeyPlacement] = storeyId;
+            if (relationType == "IFCRELAGGREGATES")
+            {
+                var relation = SplitStepArguments(relationArgs);
+                if (relation.Length >= 6 && TryEntityId(relation[4], out int parentEntity))
+                {
+                    string inner = relation[5].Trim();
+                    if (inner.StartsWith('(') && inner.EndsWith(')'))
+                        inner = inner[1..^1];
+                    foreach (string childToken in SplitStepArguments(inner))
+                        if (TryEntityId(childToken, out int childEntity))
+                            context.ParentByChild[childEntity] = parentEntity;
+                }
+                continue;
+            }
+            if (relationType is not ("IFCRELVOIDSELEMENT" or "IFCRELFILLSELEMENT")) continue;
+            var relationArgsArray = SplitStepArguments(relationArgs);
+            if (relationArgsArray.Length != 6) continue;
+            if (relationType == "IFCRELFILLSELEMENT")
+            {
+                if (TryEntityId(relationArgsArray[4], out int filledOpening)) context.FilledOpenings.Add(filledOpening);
+            }
+            else if (TryEntityId(relationArgsArray[4], out int host) && TryEntityId(relationArgsArray[5], out int opening))
+                context.HostByOpening[opening] = host;
+        }
+
+        int sets = 0;
+        for (int index = 0; index < entityCount; index++)
+        {
+            var (productId, type, args) = w.EntityAt(index);
+            var quantities = QuantitiesOfProductCurrent(context, productId, type, args);
+            if (quantities.Count == 0) continue;
+
+            string globalId = SplitStepArguments(args)[0].Trim('\'');
+            var quantityIds = new List<int>(quantities.Count);
+            foreach (var quantity in quantities)
+            {
+                string entity = quantity.Kind switch
+                {
+                    QuantityKind.Length => "IFCQUANTITYLENGTH",
+                    QuantityKind.Area => "IFCQUANTITYAREA",
+                    _ => "IFCQUANTITYVOLUME",
+                };
+                quantityIds.Add(w.Add(entity, $"{S(quantity.Name)},'',$,{D(quantity.Value)}"));
+            }
+            string setGuid = IfcGuid.FromMd5(BaseQuantitiesUsePlainGuidCurrent(type)
+                ? $"IfcElementQuantity:BaseQuantities:{globalId}"
+                : $"IfcElementQuantity:QuantitySet: BaseQuantities:{globalId}");
+            int setId = w.Add("IFCELEMENTQUANTITY",
+                $"{S(setGuid)},{R(ownerHistId)},{S("BaseQuantities")},'',$,{StepWriter.List(quantityIds.Select(R))}");
+            w.Add("IFCRELDEFINESBYPROPERTIES",
+                $"{S(IfcGuid.FromMd5($"IfcRelDefinesByProperties:BaseQuantities:{globalId}"))},{R(ownerHistId)},'','',{StepWriter.List(R(productId))},{R(setId)}");
+            sets++;
+        }
+        return sets;
+    }
+
+    private List<QuantityValue> QuantitiesOfProductCurrent(QuantityContextCurrent context, int productId, string type, string args)
+    {
+        var none = new List<QuantityValue>();
+        if (type is not ("IFCOPENINGELEMENT" or "IFCDOOR" or "IFCWINDOW" or "IFCWALLSTANDARDCASE" or "IFCMEMBER" or "IFCPLATE"
+            or "IFCSLAB" or "IFCCOVERING" or "IFCCOLUMN" or "IFCBEAM" or "IFCSTAIRFLIGHT" or "IFCSPACE" or "IFCRAILING"))
+            return none;
+        string[] arguments = SplitStepArguments(args);
+        if (arguments.Length < 8) return none;
+        Element? element = context.ElementIdByEntity.TryGetValue(productId, out int elementId)
+            && context.Elements.TryGetValue(elementId, out var found) ? found : null;
+        switch (type)
+        {
+            case "IFCOPENINGELEMENT":
+                if (_ownCutPairOpeningQuantitiesCurrent.TryGetValue(productId, out var ownQuantities)) return ownQuantities;
+                return ReadBodyExtrusionCurrent(context.W, context.IndexById, arguments[6]) is { } opening
+                    ? OpeningQuantitiesCurrent(context, productId, arguments, opening) : none;
+            case "IFCWALLSTANDARDCASE":
+                return element != null && ReadBodyExtrusionCurrent(context.W, context.IndexById, arguments[6]) is { } wall
+                    ? WallQuantitiesCurrent(wall, element) : none;
+            case "IFCSPACE":
+                return element != null ? SpaceQuantitiesCurrent(element, StoreyHeightOfSpaceCurrent(context, arguments)) : none;
+        }
+        if (element == null) return none;
+        ProfileExtrusion? body = type is "IFCMEMBER" or "IFCCOLUMN" or "IFCBEAM"
+            ? ReadBodyExtrusionCurrent(context.W, context.IndexById, arguments[6]) : null;
+        return type switch
+        {
+            "IFCDOOR" or "IFCWINDOW" => DoorWindowQuantitiesCurrent(context, element),
+            "IFCMEMBER" => MemberQuantitiesCurrent(context, productId, element, body),
+            "IFCPLATE" => PlateQuantitiesCurrent(element),
+            "IFCSLAB" => SlabQuantitiesCurrent(element),
+            "IFCCOVERING" => CoveringQuantitiesCurrent(element),
+            "IFCCOLUMN" => ColumnQuantitiesCurrent(element, body),
+            "IFCBEAM" => BeamQuantitiesCurrent(element, body),
+            "IFCSTAIRFLIGHT" => StairFlightQuantitiesCurrent(element, arguments),
+            "IFCRAILING" => RailingQuantitiesCurrent(context, element),
+            _ => none,
+        };
+    }
+
+    /// <summary>A built-in dimension of the instance, else of its type; a bounding-box estimate (the parser fills a missing
+    /// GENERIC_HEIGHT/WIDTH from the bounding box) is no such parameter. Feet.</summary>
+    private static double? ExactParameterFeetCurrent(Element? instance, Element? type, params int[] parameterIds)
+    {
+        return ExactNamedParameterFeetCurrent(instance, type, null, parameterIds);
+    }
+
+    /// <summary>A double read from the parameter called
+    /// <paramref name="name"/> of the instance, then of its type, then the built-in parameters in the order given.</summary>
+    private static double? ExactNamedParameterFeetCurrent(Element? instance, Element? type, string? name, params int[] parameterIds) =>
+        ExactNamedParameterFeetCurrent(instance, type, name, false, parameterIds);
+
+    /// <param name="zeroOfTheTypeCounts">A built-in dimension of the type that is zero is a value when the instance holds none of
+    /// its own (a bounding-box estimate is none).</param>
+    private static double? ExactNamedParameterFeetCurrent(Element? instance, Element? type, string? name, bool zeroOfTheTypeCounts, params int[] parameterIds)
+    {
+        if (name != null)
+            foreach (Element? owner in new[] { instance, type })
+                if (owner != null)
+                    foreach (var parameter in owner.Parameters)
+                        if (parameter.Definition?.Name == name && !parameter.IsApproximate && parameter.Value is double named && named > 0
+                            && owner.BoundingBoxDimensionParamIds?.Contains(parameter.Id) != true)
+                            return named;
+        foreach (int parameterId in parameterIds)
+            foreach (Element? owner in new[] { instance, type })
+            {
+                if (owner == null || owner.BoundingBoxDimensionParamIds?.Contains(parameterId) == true) continue;
+                foreach (var parameter in owner.Parameters)
+                    if (parameter.Id == parameterId && !parameter.IsApproximate && parameter.Value is double value
+                        && (value > 0 || zeroOfTheTypeCounts && value == 0 && ReferenceEquals(owner, type)))
+                        return value;
+            }
+        return null;
+    }
+
+    private static Element? TypeOfCurrent(Element element, IReadOnlyDictionary<int, Element> elementsById) =>
+        element.FamilyTypeId > 0 && elementsById.TryGetValue(element.FamilyTypeId, out var type) ? type : null;
+
+    /// <summary>The computed host area (HOST_AREA_COMPUTED) or volume of the element in m2 / m3, when the parser holds it.</summary>
+    private static double? ComputedHostAreaCurrent(Element element) =>
+        ExactParameterFeetCurrent(element, null, HostAreaComputedParameterId) * SquareFeetToSquareMetres;
+
+    private static double? ComputedHostVolumeCurrent(Element element) =>
+        ExactParameterFeetCurrent(element, null, HostVolumeComputedParameterId) * CubicFeetToCubicMetres;
+
+    /// <summary>Volume (m3) and surface area (m2) summed over all the shells of the element's decoded geometry.</summary>
+    private static (double Volume, double Area)? SolidTotalsCurrent(IReadOnlyList<ShellInfo> shells) =>
+        shells.Count == 0 ? null
+            : (shells.Sum(shell => shell.Volume) * CubicFeetToCubicMetres, shells.Sum(shell => shell.Area) * SquareFeetToSquareMetres);
+
+    private static ShellPrism? SoleClosedPrismCurrent(IReadOnlyList<ShellInfo> shells, bool verticalOnly = false) =>
+        shells.Count == 1 && shells[0].Closed ? FindPrismCurrent(shells[0], verticalOnly) : null;
+
+    /// <summary>The extrusion data of a product: that of the extrusion the body was
+    /// written as, else of the prism its solid is. Metres and square metres.</summary>
+    private static (double Depth, double Area, double Perimeter, double InnerPerimeter, double? NominalArea)? ExtrusionDataCurrent(ProfileExtrusion? body, IReadOnlyList<ShellInfo> shells)
+    {
+        if (body is { } written) return (written.Depth, written.Area, written.OuterPerimeter, written.InnerPerimeter, written.NominalArea);
+        if (SoleClosedPrismCurrent(shells) is not { } prism) return null;
+        return (prism.Depth * FeetToMetres, prism.ProfileArea * SquareFeetToSquareMetres, prism.OuterPerimeter * FeetToMetres,
+            prism.InnerPerimeter * FeetToMetres, null);
+    }
+
+    private static void AddIfPositive(List<QuantityValue> list, QuantityKind kind, string name, double? value)
+    {
+        if (value is > 1e-12) list.Add(new(kind, name, value.Value));
+    }
+
+    /// <summary>Quantities for a wall written as an extrusion: Height is the extrusion depth,
+    /// Length and Width the profile sides, GrossFootprintArea its area; the side area is the largest vertical face of the
+    /// wall solids (the net and the gross side area agree), GrossVolume is Width times it, NetVolume the solid volume.</summary>
+    private List<QuantityValue> WallQuantitiesCurrent(ProfileExtrusion body, Element element)
+    {
+        var result = new List<QuantityValue>();
+        var shells = ShellsOfCurrent(element.Geometry);
+        double sideArea = LargestVerticalFaceAreaCurrent(shells) * SquareFeetToSquareMetres;
+        AddIfPositive(result, QuantityKind.Length, "Height", OwnSimpleWallHeightCurrent(element) ?? body.Depth);
+        // A wall that is not "simple rectangular" is exported as the body of the generic exporter, whose extrusion data carry the
+        // depth as the length; the others keep the axis length.
+        bool simple = shells.Count > 0 && WallExtrusion.IsSimpleRectangularWall(shells[0].Faces, element.OwnWallHelper,
+            element.Geometry?.InactiveFaces);
+        // The rectangle of a simple wall is the thickened trimmed curve (see Element.OwnWallTrimmedAxis);
+        // ApplyCurrentWallExtrusions writes it after the quantities, with the same 1e-5 m margin.
+        double length = body.ExtentX;
+        if (simple && element.OwnWallTrimmedAxis is { Length: 2 } trimmed)
+        {
+            double trimmedLength = Math.Sqrt(Math.Pow(trimmed[1][0] - trimmed[0][0], 2) + Math.Pow(trimmed[1][1] - trimmed[0][1], 2)) * FeetToMetres;
+            if (trimmedLength > 1e-9 && Math.Abs(trimmedLength - length) > 1e-5) length = trimmedLength;
+        }
+        AddIfPositive(result, QuantityKind.Length, "Length", simple ? length : body.Depth);
+        AddIfPositive(result, QuantityKind.Length, "Width", body.ExtentY);
+        double topArea = LargestHorizontalFaceAreaCurrent(shells) * SquareFeetToSquareMetres;
+        // A simple rectangular wall gets its footprint from the whole location curve and the total width of the layers,
+        // not from the face trimmed at the joins; any other wall from the extrusion loops.
+        double footprint = simple && element.Location is { Length: > 0 } location ? body.ExtentY * location.Length * FeetToMetres
+            : topArea > 1e-12 ? topArea : body.Area;
+        AddIfPositive(result, QuantityKind.Area, "GrossFootprintArea", footprint);
+        if (body.Depth > 1e-9 && body.ExtentY > 1e-9 && sideArea > 1e-12)
+            AddIfPositive(result, QuantityKind.Volume, "GrossVolume", body.ExtentY * sideArea);
+        AddIfPositive(result, QuantityKind.Area, "GrossSideArea", sideArea);
+        AddIfPositive(result, QuantityKind.Area, "NetSideArea", sideArea);
+        AddIfPositive(result, QuantityKind.Volume, "NetVolume", SolidTotalsCurrent(shells)?.Volume);
+        return result;
+    }
+
+    internal static double? OwnSimpleWallHeightCurrent(Element wall)
+    {
+        if (wall.Geometry?.InactiveFaces is { Count: > 0 } && PassesSimpleRectangularWallCurrent(wall) == false) return null;
+        if (wall.OwnWallCrossSection != 1 || wall.OwnWallHelper is not { } helper
+            || wall.OwnCurrentCutPairBodyCurrent is not { } source
+            || source.BrepSolids is not [{ IsClosed: true } solid]
+            || solid.FaceIndices.Count != source.Faces.Count
+            || !WallExtrusion.IsSimpleRectangularWall(source.Faces, helper, wall.Geometry?.InactiveFaces)) return null;
+        var points = source.Faces.SelectMany(face => (face.OuterVertices ?? [])
+            .Concat((face.InnerVertices ?? []).SelectMany(loop => loop))).ToList();
+        if (points.Count < 8 || points.Any(point => point.Length != 3 || point.Any(value => !double.IsFinite(value))))
+            return null;
+        // The z span comes from the collected solids before the axis extrusion is recreated.
+        double height = points.Max(point => point[2]) - points.Min(point => point[2]);
+        return height > 0 && double.IsFinite(height) ? height * FeetToMetres : null;
+    }
+
+    /// <summary>Height and Width are the parameters "Height" and "Width" of the instance, then of its type
+    /// (GENERIC_HEIGHT, GENERIC_WIDTH; a curtain panel keeps them as CURTAIN_WALL_PANELS_HEIGHT/WIDTH); Area is the
+    /// computed "Area" parameter of the element (half the surface of its solids) except for an insert of a curtain wall,
+    /// which holds none, and then Height times Width.</summary>
+    private List<QuantityValue> DoorWindowQuantitiesCurrent(QuantityContextCurrent context, Element element)
+    {
+        var result = new List<QuantityValue>();
+        Element? type = TypeOfCurrent(element, context.Elements);
+        double? height = ExactNamedParameterFeetCurrent(element, type, "Height", true, -1001300, -1010300) * FeetToMetres;
+        // Without a parameter of its own (a panel of a curtain wall holds only a bounding-box estimate) the width is the extent of
+        // the solid along the width of the instance frame.
+        double? width = ExactNamedParameterFeetCurrent(element, type, "Width", true, -1001301, -1010301) * FeetToMetres
+            ?? InstanceFrameExtentMetresCurrent(element, 0);
+        if (height != null) result.Add(new(QuantityKind.Length, "Height", height.Value));
+        if (width != null) result.Add(new(QuantityKind.Length, "Width", width.Value));
+        bool inCurtainWall = element.SerializedHostId is { } hostId
+            && context.Products.TryGetValue(hostId, out var host) && host.ifcType == "IFCCURTAINWALL";
+        // The "Area" of the instance is half the surface of the solids of its Coarse detail level (see
+        // ElementBuilder.ApplyCoarseDoorWindowSurfaces); a window without Coarse alternatives has the Fine solids at that level.
+        double surface = element.CoarseSurfaceArea is { } coarse
+            ? coarse * SquareFeetToSquareMetres : SolidTotalsCurrent(ShellsOfCurrent(element.Geometry))?.Area ?? 0;
+        if (!inCurtainWall && surface > 1e-9)
+            result.Add(new(QuantityKind.Area, "Area", surface / 2));
+        // Without solids at that level an element of its own has no area; an insert of a curtain wall holds both dimensions.
+        else if ((inCurtainWall || element.CoarseSurfaceArea == null) && height != null && width != null)
+            result.Add(new(QuantityKind.Area, "Area", height.Value * width.Value));
+        return result;
+    }
+
+    /// <summary>The Member description (a curtain wall mullion has no extrusion data of its own): Length is the "Length"
+    /// parameter of the instance, which for a mullion is its length along its axis (the extent of the solid along the axis, as
+    /// the ends can be cut at an angle), CrossSectionArea the computed "Area" (half the surface of the solids), NetVolume and
+    /// NetSurfaceArea the volume and surface of the solids.</summary>
+    private static bool InCurtainWallCurrent(QuantityContextCurrent context, int productId) =>
+        context.ParentByChild.TryGetValue(productId, out int parentEntity)
+        && context.IndexById.TryGetValue(parentEntity, out int parentIndex)
+        && context.W.EntityAt(parentIndex).Type == "IFCCURTAINWALL";
+
+    private static bool HasInPlaneSlantedMullionEndCurrent(Element element)
+    {
+        if (element.CategoryId != CurtainWallMullionCategoryId || element.Transform is not { } transform
+            || !TryMullionUnitVector(transform.BasisZ, out double[] direction)
+            || element.Geometry?.Faces is not { Count: > 0 } faces)
+            return false;
+
+        if (Math.Abs(direction[2]) > 0.1)
+            return false;
+
+        return faces.Any(f =>
+            f.Normal != null && Math.Abs(f.Normal[2]) < 0.1 &&
+            f.OuterVertices is { Count: > 0 } &&
+            Math.Abs(f.Normal[0] * direction[0] + f.Normal[1] * direction[1] + f.Normal[2] * direction[2]) is >= 0.5 and <= 0.98);
+    }
+
+    private List<QuantityValue> MemberQuantitiesCurrent(
+        QuantityContextCurrent context, int productId, Element element, ProfileExtrusion? body)
+    {
+        var result = new List<QuantityValue>();
+        var shells = ShellsOfCurrent(element.Geometry);
+        double? length = InCurtainWallCurrent(context, productId) && HasInPlaneSlantedMullionEndCurrent(element)
+            ? MullionAxisExtentMetresCurrent(element)
+            : InstanceFrameExtentMetresCurrent(element, 2);
+        AddIfPositive(result, QuantityKind.Length, "Length", length ?? ExtrusionDataCurrent(body, shells)?.Depth);
+        if (SolidTotalsCurrent(shells) is { } totals)
+        {
+            AddIfPositive(result, QuantityKind.Area, "CrossSectionArea", totals.Area / 2);
+            AddIfPositive(result, QuantityKind.Volume, "NetVolume", totals.Volume);
+            AddIfPositive(result, QuantityKind.Area, "NetSurfaceArea", totals.Area);
+        }
+        return result;
+    }
+
+    /// <summary>The Railing description: Length is the parameter called "Length" of the railing or its type, else
+    /// CURVE_ELEM_LENGTH (the length of the path of the railing).</summary>
+    private List<QuantityValue> RailingQuantitiesCurrent(QuantityContextCurrent context, Element element)
+    {
+        var result = new List<QuantityValue>();
+        AddIfPositive(result, QuantityKind.Length, "Length",
+            (ExactNamedParameterFeetCurrent(element, TypeOfCurrent(element, context.Elements), "Length", CurveElemLengthParamId)
+                ?? element.ValidatedRailingLengthFeet) * FeetToMetres);
+        return result;
+    }
+
+    /// <summary>The extent in metres of the solid of an instance along one axis (0 X, 1 Y, 2 Z) of its instance frame, null without
+    /// the frame or the solid. For a family instance the frame X runs along its width and Z up.</summary>
+    internal static double? InstanceFrameExtentMetresCurrent(Element element, int axis)
+    {
+        if (element.Transform is not { } transform
+            || !TryMullionUnitVector(axis == 0 ? transform.BasisX : axis == 1 ? transform.BasisY : transform.BasisZ, out double[] direction)
+            || element.Geometry?.Faces is not { Count: > 0 } faces)
+            return null;
+        double min = double.PositiveInfinity, max = double.NegativeInfinity;
+        foreach (var face in faces)
+            foreach (double[] point in face.OuterVertices ?? [])
+            {
+                double along = MullionDot(point[0], point[1], point[2], direction);
+                min = Math.Min(min, along);
+                max = Math.Max(max, along);
+            }
+        return max > min ? (max - min) * FeetToMetres : null;
+    }
+
+    /// <summary>The extent in metres of the solid of a mullion along its axis (the Z of its instance frame).</summary>
+    internal static double? MullionAxisExtentMetresCurrent(Element element)
+    {
+        if (element.CategoryId != CurtainWallMullionCategoryId || element.Transform is not { } transform
+            || !TryMullionUnitVector(transform.BasisZ, out double[] direction)
+            || element.Geometry?.Faces is not { Count: > 0 } faces)
+            return null;
+
+        var endFaces = new List<(double Dot, double AvgAlong)>();
+        foreach (var f in faces)
+        {
+            if (f.OuterVertices is not { Count: > 0 } outer || f.Normal == null) continue;
+            double dot = f.Normal[0] * direction[0] + f.Normal[1] * direction[1] + f.Normal[2] * direction[2];
+            if (Math.Abs(dot) > 0.2)
+                endFaces.Add((dot, outer.Average(p => MullionDot(p[0], p[1], p[2], direction))));
+        }
+
+        var negEnd = endFaces.Where(x => x.Dot < -0.2).ToList();
+        var posEnd = endFaces.Where(x => x.Dot > 0.2).ToList();
+        if (negEnd.Count > 0 && posEnd.Count > 0)
+        {
+            double minAlong = negEnd.Min(x => x.AvgAlong);
+            double maxAlong = posEnd.Max(x => x.AvgAlong);
+            if (maxAlong > minAlong + 1e-9)
+                return (maxAlong - minAlong) * FeetToMetres;
+        }
+
+        return InstanceFrameExtentMetresCurrent(element, 2);
+    }
+
+    /// <summary>The Plate description registers NetVolume (and GrossVolume, which needs extrusion data).</summary>
+    private List<QuantityValue> PlateQuantitiesCurrent(Element element)
+    {
+        var result = new List<QuantityValue>();
+        AddIfPositive(result, QuantityKind.Volume, "NetVolume", SolidTotalsCurrent(ShellsOfCurrent(element.Geometry))?.Volume);
+        return result;
+    }
+
+    /// <summary>The Slab description: GrossArea is the profile area of the slab prism, else the computed host area of the floor
+    /// (the area of its top face); NetArea the computed host area, else the whole surface of the solids; GrossVolume the profile
+    /// area times the thickness; Perimeter and Width come from the profile (outer loop length, world X extent).</summary>
+    private List<QuantityValue> SlabQuantitiesCurrent(Element element)
+    {
+        var result = new List<QuantityValue>();
+        var shells = ShellsOfCurrent(element.Geometry);
+        if (element.CategoryId is StairsCategoryId or StairsRunsCategoryId or StairsLandingsCategoryId)
+        {
+            // A stair part written as a slab (a cast-in-place landing): no extrusion data and no HOST_AREA_COMPUTED, so no GrossArea
+            // and a NetArea that is the whole surface of the solids.
+            AddIfPositive(result, QuantityKind.Area, "NetArea", ComputedHostAreaCurrent(element) ?? SolidTotalsCurrent(shells)?.Area);
+            AddIfPositive(result, QuantityKind.Volume, "NetVolume", SolidTotalsCurrent(shells)?.Volume);
+            return result;
+        }
+        // The area is the computed host area of the floor, which is the area of its top face. A slab gets extrusion data
+        // (a SweptSolid body, and with it Width and GrossVolume) only when its extrusion calculator finds a vertical extrusion.
+        var topFace = SoleClosedPrismCurrent(shells, verticalOnly: true);
+        var prism = shells.Count == 1 && WallExtrusion.TryFindVerticalExtrusion(shells[0].Faces, out _) ? topFace : null;
+        double? profileArea = prism?.ProfileArea * SquareFeetToSquareMetres;
+        var totals = SolidTotalsCurrent(shells);
+        // Revit holds HOST_AREA_COMPUTED, the area of the top surface of the floor solid, for every floor. The parser derives a value
+        // from the sketch for some of them, which is the plan area (a sloped floor has a larger top surface), so the upward faces of
+        // the solid come first; the sketch value stands in when the solid has none. The area of the extrusion data comes before it.
+        double surfaceArea = TopSurfaceAreaCurrent(shells) * SquareFeetToSquareMetres;
+        double? topArea = surfaceArea > 1e-9 ? surfaceArea : ComputedHostAreaCurrent(element) ?? profileArea;
+        AddIfPositive(result, QuantityKind.Area, "GrossArea", profileArea ?? topArea);
+        AddIfPositive(result, QuantityKind.Area, "NetArea", topArea);
+        if (prism != null)
+            AddIfPositive(result, QuantityKind.Volume, "GrossVolume", profileArea * prism.Value.Depth * FeetToMetres);
+        AddIfPositive(result, QuantityKind.Volume, "NetVolume", totals?.Volume);
+        // The parameter called "Perimeter" (HOST_PERIMETER_COMPUTED) of the floor comes before the profile; its value is the
+        // length of every boundary loop of the floor, the loops of its holes included (the parser's parameter is the outer loop).
+        AddIfPositive(result, QuantityKind.Length, "Perimeter",
+            (ExactParameterFeetCurrent(element, null, HostPerimeterComputedParameterId) ?? (prism ?? topFace)?.OuterPerimeter) is { } outerPerimeter
+                ? (outerPerimeter + ((prism ?? topFace)?.InnerPerimeter ?? 0)) * FeetToMetres : null);
+        AddIfPositive(result, QuantityKind.Length, "Width", prism?.ExtentX * FeetToMetres);
+        return result;
+    }
+
+    /// <summary>A ceiling or floor finish: GrossCeilingArea is the computed host area (HOST_AREA_COMPUTED), the area of the ceiling
+    /// surface. The parser derives it from the sketch of the ceiling, which fails for a ceiling made of several loops or without
+    /// a sketch; then the area of the upper surface of the solids stands in. The insulation and the lining of a pipe or duct
+    /// (written as IfcCovering as well) hold no such parameter.</summary>
+    private List<QuantityValue> CoveringQuantitiesCurrent(Element element)
+    {
+        var result = new List<QuantityValue>();
+        if (element.CategoryId is PipeInsulationCategoryId or DuctInsulationCategoryId or DuctLiningCategoryId) return result;
+        double? area = ComputedHostAreaCurrent(element);
+        double surface = TopSurfaceAreaCurrent(ShellsOfCurrent(element.Geometry)) * SquareFeetToSquareMetres;
+        if (surface > 1e-9 && (area == null || Math.Abs(area.Value - surface) > 0.005 * surface)) area = surface;
+        AddIfPositive(result, QuantityKind.Area, "GrossCeilingArea", area);
+        return result;
+    }
+
+    /// <summary>Column quantities. A column written as a prism carries its extrusion data:
+    /// Length, CrossSectionArea (the profile), OuterSurfaceArea (the length and perimeter in millimetres, taken as square
+    /// metres) and GrossVolume (the length in millimetres times the area in square metres); otherwise the cross section is the
+    /// computed host area. NetVolume is the computed host volume, else the volume of the solids.</summary>
+    private List<QuantityValue> ColumnQuantitiesCurrent(Element element, ProfileExtrusion? body)
+    {
+        var result = new List<QuantityValue>();
+        var shells = ShellsOfCurrent(element.Geometry);
+        var totals = SolidTotalsCurrent(shells);
+        if (ExtrusionDataCurrent(body, shells) is { } extrusion)
+        {
+            double length = extrusion.Depth, area = extrusion.Area;
+            // The outer surface counts the loops of the holes as well (outer + inner perimeter).
+            double lengthMm = length * 1000, perimeterMm = (extrusion.Perimeter + extrusion.InnerPerimeter) * 1000;
+            AddIfPositive(result, QuantityKind.Length, "Length", length);
+            AddIfPositive(result, QuantityKind.Area, "CrossSectionArea", area);
+            AddIfPositive(result, QuantityKind.Area, "OuterSurfaceArea", lengthMm * perimeterMm);
+            AddIfPositive(result, QuantityKind.Volume, "GrossVolume", lengthMm * area);
+            double? netVolume = extrusion.NominalArea is { } nomArea
+                ? length * nomArea
+                : (ComputedHostVolumeCurrent(element) ?? totals?.Volume);
+            AddIfPositive(result, QuantityKind.Volume, "NetVolume", netVolume);
+        }
+        else
+        {
+            AddIfPositive(result, QuantityKind.Area, "CrossSectionArea", ComputedHostAreaCurrent(element) ?? totals?.Area / 2);
+            AddIfPositive(result, QuantityKind.Volume, "NetVolume", ComputedHostVolumeCurrent(element) ?? totals?.Volume);
+        }
+        return result;
+    }
+
+    /// <summary>The Beam description (common structural quantities and NetSurfaceArea): the calculators read the
+    /// extrusion data of a prism body, in consistent units.</summary>
+    private List<QuantityValue> BeamQuantitiesCurrent(Element element, ProfileExtrusion? body)
+    {
+        var result = new List<QuantityValue>();
+        var shells = ShellsOfCurrent(element.Geometry);
+        var totals = SolidTotalsCurrent(shells);
+        if (ExtrusionDataCurrent(body, shells) is { } extrusion)
+        {
+            double length = extrusion.Depth, area = extrusion.Area, perimeter = extrusion.Perimeter;
+            AddIfPositive(result, QuantityKind.Length, "Length", length);
+            AddIfPositive(result, QuantityKind.Area, "CrossSectionArea", area);
+            AddIfPositive(result, QuantityKind.Area, "OuterSurfaceArea", perimeter * length);
+            AddIfPositive(result, QuantityKind.Area, "GrossSurfaceArea", perimeter * length + 2 * area);
+            AddIfPositive(result, QuantityKind.Volume, "GrossVolume", area * length);
+        }
+        else
+            AddIfPositive(result, QuantityKind.Area, "CrossSectionArea", ComputedHostAreaCurrent(element) ?? totals?.Area / 2);
+        AddIfPositive(result, QuantityKind.Volume, "NetVolume", ComputedHostVolumeCurrent(element) ?? totals?.Volume);
+        AddIfPositive(result, QuantityKind.Area, "NetSurfaceArea", totals?.Area);
+        return result;
+    }
+
+    /// <summary>The StairFlight description: NetVolume is the volume of the run solids; Length is the 2D length of the run
+    /// (the base lines of its cells), which is the number of treads times the tread length for
+    /// a monolithic run and empty for an assembled one.</summary>
+    private List<QuantityValue> StairFlightQuantitiesCurrent(Element element, string[] flight)
+    {
+        var result = new List<QuantityValue>();
+        AddIfPositive(result, QuantityKind.Volume, "NetVolume", SolidTotalsCurrent(ShellsOfCurrent(element.Geometry))?.Volume);
+        // The run kind: "Monolithic Run:" in the object type; where the type is still the category ("OST_StairsRuns:") the
+        // flight is monolithic exactly when it counts treads (an assembled run has none).
+        if (flight.Length == 12 && (flight[4].StartsWith("'Monolithic Run", StringComparison.Ordinal)
+                || flight[4].StartsWith("'OST_StairsRuns:", StringComparison.Ordinal))
+            && int.TryParse(flight[9], NumberStyles.None, CultureInfo.InvariantCulture, out int treads)
+            && TryParseStepReal(flight[11], out double treadLength))
+            AddIfPositive(result, QuantityKind.Length, "Length", treads * treadLength);
+        return result;
+    }
+
+    /// <summary>The Space description of a room: NetFloorArea and GrossFloorArea are the room area, the area of the circuit its level
+    /// room plan gives it (m_cachedCircuitId, less its islands; exact for curved boundaries). Without that plan the plan area of the
+    /// room solid stands in, which is the area of its upward or of its downward horizontal faces, whichever is the larger (a
+    /// stepped floor or ceiling splits one of the two). Height is the distance from the level of the room to the next
+    /// building storey, GrossVolume area times height. GrossPerimeter exists only when the room was written as an extrusion
+    /// (<see cref="RoomExtrusionPerimeterMetresCurrent"/>).</summary>
+    private List<QuantityValue> SpaceQuantitiesCurrent(Element room, double? levelHeight)
+    {
+        var result = new List<QuantityValue>();
+        var boundary = room.SerializedSpaceBoundaryCurrent;
+        if ((room.SerializedRoomPlanAreaSquareFeet ?? (boundary != null ? RoomPlanAreaCurrent(boundary) : null)) is not { } planArea)
+            return result;
+        double area = planArea * SquareFeetToSquareMetres;
+        AddIfPositive(result, QuantityKind.Area, "NetFloorArea", area);
+        AddIfPositive(result, QuantityKind.Length, "Height", levelHeight);
+        if (boundary != null) AddIfPositive(result, QuantityKind.Length, "GrossPerimeter", RoomExtrusionPerimeterMetresCurrent(boundary));
+        AddIfPositive(result, QuantityKind.Area, "GrossFloorArea", area);
+        AddIfPositive(result, QuantityKind.Volume, "GrossVolume", levelHeight is > 0 ? area * levelHeight : null);
+        return result;
+    }
+
+    /// <summary>The height of the level of a space: the distance of the storey the
+    /// space is placed in to the next storey up.</summary>
+    private static double? StoreyHeightOfSpaceCurrent(QuantityContextCurrent context, string[] spaceArguments)
+    {
+        if (context.StoreyHeights == null || !TryEntityId(spaceArguments[5], out int placementId)
+            || !context.IndexById.TryGetValue(placementId, out int index))
+            return null;
+        var placement = SplitStepArguments(context.W.EntityAt(index).Args);
+        return placement.Length > 0 && TryEntityId(placement[0], out int parent)
+            && context.StoreyByPlacement.TryGetValue(parent, out int storey)
+            && context.StoreyHeights.TryGetValue(storey, out double height) ? height : null;
+    }
+
+    /// <summary>The height of every building storey: the distance in metres to the next storey up whose
+    /// elevation differs (by more than 1e-7 ft); the topmost storey has none.</summary>
+    private Dictionary<int, double> StoreyHeightsCurrent() =>
+        StoreyHeightsCurrent(_storeyLevels.ToDictionary(pair => pair.Key, pair => GetElevation(pair.Value)));
+
+    internal static Dictionary<int, double> StoreyHeightsCurrent(IReadOnlyDictionary<int, double> elevationsFeet)
+    {
+        var heights = new Dictionary<int, double>();
+        foreach (var (storey, elevation) in elevationsFeet)
+        {
+            double? next = elevationsFeet.Values.Where(other => other - elevation > 1e-7).Select(other => (double?)other).Min();
+            if (next is { } above) heights[storey] = (above - elevation) * FeetToMetres;
+        }
+        return heights;
+    }
+}

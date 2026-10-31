@@ -1,0 +1,157 @@
+using System.Reflection;
+using OpenMcdf;
+using RvtIO.Internal;
+using RvtIO.Model;
+using RvtIO.Parsing;
+using Xunit;
+
+namespace RvtIO.Tests;
+
+[CollectionDefinition("ElemTableStaticMaps", DisableParallelization = true)]
+public sealed class ElemTableStaticMapsCollection { }
+
+// Synthetic parses replace the legacy static maps used by concurrent real-file fixtures.
+[Collection("ElemTableStaticMaps")]
+public class ElemTableAuthorityTests
+{
+    [Theory]
+    [InlineData(0)] [InlineData(1)] [InlineData(3)]
+    public void ExactCountedRowsRegisterMembershipWithoutAType(int count)
+    {
+        var bytes = Table(count); var result = Parse(bytes);
+        Assert.Equal(count, result.Count);
+        Assert.All(result.Values, value => Assert.Equal(0u, value));
+        for (int i = 0; i < count; i++)
+        {
+            uint id = (uint)(12345 + i);
+            Assert.Equal((uint)(i + 7), ElemTableReader.LastWorksets[id]);
+            Assert.Equal(64 + i, ElemTableReader.LastEpisodeNumbers[id]);
+        }
+    }
+
+    [Theory]
+    [InlineData("truncated")] [InlineData("duplicate")] [InlineData("unordered")] [InlineData("count")]
+    public void MalformedCountedRowsNeverLeakAPartialTableOrStaleMaps(string mode)
+    {
+        _ = Parse(Table(1)); byte[] bytes = Table(2);
+        if (mode == "truncated") bytes = bytes[..^1];
+        if (mode == "duplicate") BitConverter.GetBytes(12345u).CopyTo(bytes, 34);
+        if (mode == "unordered") BitConverter.GetBytes(12344u).CopyTo(bytes, 34);
+        if (mode == "count") BitConverter.GetBytes(uint.MaxValue).CopyTo(bytes, 2);
+        Assert.Empty(Parse(bytes)); Assert.Empty(ElemTableReader.LastWorksets); Assert.Empty(ElemTableReader.LastEpisodeNumbers);
+    }
+
+    [Fact]
+    public void DoesNotScanTrailingBytesForAdditionalElements()
+    {
+        byte[] first = Table(1), extra = Table(2);
+        var result = Parse(first.Concat(extra.AsSpan(6).ToArray()).ToArray());
+        Assert.Single(result); Assert.True(result.ContainsKey(12345)); Assert.False(result.ContainsKey(12346));
+    }
+
+    [Fact]
+    public void NonrepresentableIdsAndNegativePartitionSentinelsDoNotBecomePublicElementsOrWorksets()
+    {
+        byte[] bytes = Table(3);
+        BitConverter.GetBytes(0u).CopyTo(bytes, 6);
+        BitConverter.GetBytes(uint.MaxValue).CopyTo(bytes, 62);
+        BitConverter.GetBytes(-1).CopyTo(bytes, 54);
+        var result = Parse(bytes); Assert.Single(result); Assert.True(result.ContainsKey(12346));
+        Assert.Empty(ElemTableReader.LastWorksets);
+    }
+
+    [SkippableFact]
+    public void ProductionReadUsesTheExactR22CensusAndNotHistoryAsType()
+    {
+        using var root = RootStorage.OpenRead(TestFileFixture.FindTestFile("TESTFILE.rvt"));
+        var bytes = PagedGzipStream.Read(root, "Global", "ElemTable"); Assert.NotNull(bytes);
+        var exact = ElementExportIds.ParseElemTable(bytes); Assert.NotNull(exact);
+        var actual = ElemTableReader.Read(root);
+        Assert.Equal(exact.Keys.Where(ElementIdEncoding.IsSupported).Order(), actual.Keys.Order());
+        Assert.All(actual.Values, value => Assert.Equal(0u, value));
+    }
+
+    [SkippableFact]
+    public void ReentrantDiagnosticsCannotReplaceTheCurrentReadersWorksetMap()
+    {
+        string path = TestFileFixture.FindTestFile("TESTFILE.rvt");
+        Dictionary<uint, ElemRecHistory> expected;
+        using (var root = RootStorage.OpenRead(path))
+            expected = ElementExportIds.ParseElemTable(PagedGzipStream.Read(root, "Global", "ElemTable")!)!;
+        using var diagnostic = new ReentrantDiagnostic(() => Parse(Table(1)));
+        var reader = new RvtFileReader(new RvtReaderOptions { DiagnosticOutput = diagnostic });
+        _ = reader.Read(path);
+        Assert.True(diagnostic.Triggered);
+        Assert.Equal(expected.Keys.Where(ElementIdEncoding.IsSupported).Order(), reader.LastParsingState!.ElemWorksets.Keys.Order());
+    }
+
+    [Theory]
+    [InlineData(528u)] [InlineData(123456u)]
+    public void BuilderNeverPublishesTheLegacyHistoryValueAsAType(uint history)
+    {
+        var state = new ParsingState(); state.ElemTable[100] = history;
+        var info = new RevitFileInfo(); ElementBuilder.BuildElemTableElement(100, history, state, info);
+        Assert.Equal(-1, Assert.Single(info.Elements).TypeId);
+    }
+
+    [Theory]
+    [InlineData((ushort)2870, 1, true)] [InlineData((ushort)2873, 1, true)]
+    [InlineData((ushort)2876, 1, true)] [InlineData((ushort)512, 1, false)]
+    [InlineData((ushort)2870, 2, false)] [InlineData((ushort)0, 1, false)]
+    public void ParameterGuardsUseOnlyUniqueOwnNativeClasses(ushort cls, int count, bool expected)
+    {
+        var state = new ParsingState(); state.ElemTable[100] = 523;
+        state.ElemClassIdx[100] = 2870;
+        state.OwnedElementClassRoots[100] = new(count, cls == 0 ? null : cls);
+        var method = typeof(ParsingState).GetMethod("IsParameterElement", BindingFlags.NonPublic | BindingFlags.Instance);
+        Assert.NotNull(method); Assert.Equal(expected, (bool)method.Invoke(state, [100u])!);
+    }
+
+    [Theory]
+    [InlineData(false)] [InlineData(true)]
+    public void TableMembershipRetainsOwnGeometryAndTheRecordBoundingBoxPriority(bool hasRecord)
+    {
+        var state = new ParsingState(); state.ElemTable[100] = 0;
+        state.GrepBlocks[100] = new GRepData { BoundingBox = [1, 2, 3, 4, 5, 6] };
+        double[] expected = hasRecord ? [7, 8, 9, 10, 11, 12] : state.GrepBlocks[100].BoundingBox!;
+        if (hasRecord) state.Records[100] = new ElementRecord { ElemId = 100, Geometry = expected };
+        var info = new RevitFileInfo(); ElementBuilder.BuildElemTableElement(100, 0, state, info);
+        var element = Assert.Single(info.Elements);
+        Assert.Equal(expected, element.BoundingBox);
+        Assert.NotNull(element.Geometry);
+        Assert.Equal(state.GrepBlocks[100].BoundingBox, element.Geometry.BoundingBox);
+        Assert.Equal(-1, element.TypeId);
+    }
+
+    private static Dictionary<uint, uint> Parse(byte[] bytes)
+    {
+        var result = new Dictionary<uint, uint>();
+        typeof(ElemTableReader).GetMethod("ParseDecompressedElemTable", BindingFlags.NonPublic | BindingFlags.Static)!
+            .Invoke(null, [bytes, result]); return result;
+    }
+    private static byte[] Table(int count)
+    {
+        using var stream = new MemoryStream(); using var writer = new BinaryWriter(stream);
+        writer.Write((ushort)1312); writer.Write(count);
+        for (int i = 0; i < count; i++)
+        {
+            writer.Write(12345 + i); writer.Write(100 + i); writer.Write(64 + i);
+            writer.Write(523); writer.Write(999); writer.Write(7 + i); writer.Write(42);
+        }
+        return stream.ToArray();
+    }
+
+    private sealed class ReentrantDiagnostic(Action action) : StringWriter
+    {
+        internal bool Triggered { get; private set; }
+        public override void WriteLine(string? value)
+        {
+            if (!Triggered && value?.StartsWith("ElemTable:", StringComparison.Ordinal) == true)
+            {
+                Triggered = true;
+                action();
+            }
+            base.WriteLine(value);
+        }
+    }
+}

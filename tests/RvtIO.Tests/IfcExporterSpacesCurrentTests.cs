@@ -1,0 +1,206 @@
+using RvtIO.Ifc;
+using RvtIO.Model;
+using System.Text.RegularExpressions;
+using Xunit;
+
+namespace RvtIO.Tests;
+
+/// <summary>
+/// IfcSpace the way the current profile writes it: contained in its storey (never aggregated), Description from the Comments
+/// parameter, empty ObjectType, zero ElevationWithFlooring, rooms only of the last project phase that is a phase
+/// element, no locationless rooms, and an IfcGroup per area scheme. The legacy profile form is pinned by IfcExporterSpacesTests.
+/// </summary>
+public class IfcExporterSpacesCurrentTests
+{
+    private const int RoomCategoryId = -2000160;
+    private const int AreaCategoryId = -2003200;
+    private const int PhaseCategoryId = -2000112;
+    private const int AreaSchemeCategoryId = -2003201;
+
+    [Fact]
+    public void Space_IsContainedInItsStoreyAndWritesTheCurrentAttributes()
+    {
+        string ifc = Export(new RevitFileInfo { Elements = [Level(900), Room(100, "Living Room", "1.20", comments: "note")] });
+        int spaceId = Ids(ifc, "IFCSPACE").Single();
+        var args = Args(ifc, spaceId, "IFCSPACE");
+        Assert.Equal("'1.20'", args[2]);
+        Assert.Equal("'note'", args[3]);   // Description = Comments
+        Assert.Equal("''", args[4]);       // ObjectType
+        Assert.Equal("'Living Room'", args[7]);
+        Assert.Equal("0.", args[10]);      // ElevationWithFlooring
+
+        int storeyId = Ids(ifc, "IFCBUILDINGSTOREY").Single();
+        var relation = Ids(ifc, "IFCRELCONTAINEDINSPATIALSTRUCTURE").Select(id => Args(ifc, id, "IFCRELCONTAINEDINSPATIALSTRUCTURE"))
+            .Single(a => a[5] == $"#{storeyId}");
+        Assert.Equal($"(#{spaceId})", relation[4]);
+        foreach (int aggregate in Ids(ifc, "IFCRELAGGREGATES"))
+            Assert.DoesNotContain($"#{spaceId}", Args(ifc, aggregate, "IFCRELAGGREGATES")[5]);
+    }
+
+    [Fact]
+    public void SpaceWithoutComments_HasAnEmptyDescription()
+    {
+        string ifc = Export(new RevitFileInfo { Elements = [Level(900), Room(100, "Hall", "2", comments: "")] });
+        Assert.Equal("''", Args(ifc, Ids(ifc, "IFCSPACE").Single(), "IFCSPACE")[3]);
+    }
+
+    [Fact]
+    public void Spaces_ShareTheContainmentOfTheirStorey_InFrontOfItsProducts()
+    {
+        string ifc = Export(new RevitFileInfo { Elements = [Level(900), Room(100, "A", "1"), Room(200, "B", "2")] });
+        int storeyId = Ids(ifc, "IFCBUILDINGSTOREY").Single();
+        var relations = Ids(ifc, "IFCRELCONTAINEDINSPATIALSTRUCTURE").Select(id => Args(ifc, id, "IFCRELCONTAINEDINSPATIALSTRUCTURE"))
+            .Where(a => a[5] == $"#{storeyId}").ToList();
+        Assert.Single(relations);
+        Assert.Equal(2, Regex.Matches(relations[0][4], @"#\d+").Count);
+    }
+
+    [Theory]
+    [InlineData(7, new[] { 7, 31 }, 0)]       // the room is in the first phase, the last one is 31
+    [InlineData(31, new[] { 7, 31 }, 1)]
+    [InlineData(7, new[] { 7, 31, 99 }, 0)]    // 99 is no phase element: the last real phase is 31
+    [InlineData(31, new[] { 7, 31, 99 }, 1)]
+    public void Room_IsExportedOnlyInTheLastPhaseThatExists(int roomPhase, int[] order, int expected)
+    {
+        var room = Room(100, "A", "1");
+        room.SerializedRoomPhaseId = roomPhase;
+        var info = new RevitFileInfo { Elements = [Level(900), room, Phase(7), Phase(31)], SerializedProjectPhaseIds = order };
+        Assert.Equal(expected, Ids(Export(info), "IFCSPACE").Count);
+    }
+
+    [Fact]
+    public void RoomPhase_NoFilterWithoutPhaseSource()
+    {
+        var room = Room(100, "A", "1");
+        room.SerializedRoomPhaseId = 7;
+        // No validated order, an order without phase elements, a discovered-only phase element: every room stays.
+        Assert.Single(Ids(Export(new RevitFileInfo { Elements = [Level(900), room] }), "IFCSPACE"));
+        Assert.Single(Ids(Export(new RevitFileInfo { Elements = [Level(900), room], SerializedProjectPhaseIds = [7, 31] }), "IFCSPACE"));
+    }
+
+    [Fact]
+    public void RoomPhase_AllPhasesOptionAndExplicitPhaseOverrideTheDefault()
+    {
+        var room = Room(100, "A", "1");
+        room.SerializedRoomPhaseId = 7;
+        var info = new RevitFileInfo { Elements = [Level(900), room, Phase(7), Phase(31)], SerializedProjectPhaseIds = [7, 31] };
+        Assert.Empty(Ids(Export(info), "IFCSPACE"));
+        Assert.Single(Ids(Export(info, new IfcExporter { ExportRoomsOfAllPhases = true }), "IFCSPACE"));
+        Assert.Single(Ids(Export(info, new IfcExporter { RoomExportPhaseId = 7 }), "IFCSPACE"));
+    }
+
+    [Fact]
+    public void RoomPhase_AreasAreNeverFilteredByPhase()
+    {
+        var area = Room(100, "Office", "1", categoryId: AreaCategoryId);
+        area.SerializedRoomPhaseId = 7;
+        var info = new RevitFileInfo { Elements = [Level(900), area, Phase(7), Phase(31)], SerializedProjectPhaseIds = [7, 31] };
+        Assert.Single(Ids(Export(info), "IFCSPACE"));
+    }
+
+    [Fact]
+    public void LocationlessRoom_IsNotExported_ButAnAreaIs()
+    {
+        var room = Room(100, "A", "1");
+        room.SerializedRoomIsLocationless = true;
+        var area = Room(200, "B", "2", categoryId: AreaCategoryId);
+        area.SerializedRoomIsLocationless = true;
+        var placed = Room(300, "C", "3");
+        placed.SerializedRoomIsLocationless = false;
+        string ifc = Export(new RevitFileInfo { Elements = [Level(900), room, area, placed] });
+        Assert.Equal(["'2'", "'3'"], Ids(ifc, "IFCSPACE").Select(id => Args(ifc, id, "IFCSPACE")[2]).Order().ToArray());
+    }
+
+    [Fact]
+    public void AreaScheme_BecomesAnIfcGroupOfItsAreas()
+    {
+        var scheme = new Element { Id = 15979, CategoryId = AreaSchemeCategoryId, Name = "Gross Building",
+            SerializedAreaScheme = ("Gross Building", "Sum of the floor areas.") };
+        scheme.SerializedExportId = Guid.Parse("1f34752d-926d-4ab8-8425-c6d81fe02dab");
+        var area = Room(100, "Office", "1", categoryId: AreaCategoryId);
+        area.Parameters.Add(new Parameter { Id = -1012704, StorageType = StorageType.ElementId, Value = 15979 });
+        var room = Room(200, "Hall", "2");   // a room is never related to a scheme
+        string ifc = Export(new RevitFileInfo { Elements = [Level(900), scheme, area, room] });
+
+        int groupId = Ids(ifc, "IFCGROUP").Single();
+        string globalId = IfcGuid.ToIfcGuid(scheme.SerializedExportId.Value);
+        var group = Args(ifc, groupId, "IFCGROUP");
+        Assert.Equal($"'{globalId}'", group[0]);
+        Assert.Equal("'Gross Building'", group[2]);
+        Assert.Equal("'Sum of the floor areas.'", group[3]);
+        Assert.Equal("''", group[4]);
+        var relation = Args(ifc, Ids(ifc, "IFCRELASSIGNSTOGROUP").Single(), "IFCRELASSIGNSTOGROUP");
+        Assert.Equal($"'{IfcGuid.FromMd5("IfcRelAssignsToGroup:" + globalId)}'", relation[0]);
+        int areaSpace = Ids(ifc, "IFCSPACE").Single(id => Args(ifc, id, "IFCSPACE")[2] == "'1'");
+        Assert.Equal($"(#{areaSpace})", relation[4]);
+        Assert.Equal($"#{groupId}", relation[6]);
+    }
+
+    [Fact]
+    public void AreaWithoutSchemeText_GetsNoGroup()
+    {
+        var area = Room(100, "Office", "1", categoryId: AreaCategoryId);
+        area.Parameters.Add(new Parameter { Id = -1012704, StorageType = StorageType.ElementId, Value = 15979 });
+        string ifc = Export(new RevitFileInfo { Elements = [Level(900), area] });
+        Assert.Single(Ids(ifc, "IFCSPACE"));
+        Assert.Empty(Ids(ifc, "IFCGROUP"));
+    }
+
+
+    private static Element Phase(int id) => new() { Id = id, CategoryId = PhaseCategoryId, Name = $"Phase {id}" };
+
+    private static Element Level(int id) => new()
+    {
+        Id = id, Name = "Level 1", IsNativeLevel = true, SerializedFamilyId = -1, SerializedUnplacedOwnerId = -1,
+        SerializedOwnerDbViewId = -1,
+        Parameters =
+        [
+            new Parameter { Id = -1007102, Definition = new Definition { Name = "LEVEL_ELEV" }, StorageType = StorageType.Double, Value = 0.0 },
+            new Parameter { Id = -1007111, StorageType = StorageType.Integer, Value = 1 },
+        ],
+    };
+
+    private static Element Room(int id, string name, string number, string? comments = null, int categoryId = RoomCategoryId)
+    {
+        var parameters = new List<Parameter>
+        {
+            new() { Id = -1006916, StorageType = StorageType.ElementId, Value = 900 },
+            new() { Id = -1006901, StorageType = StorageType.String, Value = number },
+        };
+        if (comments != null) parameters.Add(new Parameter { Id = -1010106, StorageType = StorageType.String, Value = comments });
+        return new Element { Id = id, CategoryId = categoryId, Category = "OST_Rooms", Name = name, Parameters = parameters };
+    }
+
+    private static string Export(RevitFileInfo info, IfcExporter? exporter = null)
+    {
+        string path = Path.Combine(Path.GetTempPath(), $"revitreader-spacesCurrent-{Guid.NewGuid():N}.ifc");
+        try
+        {
+            (exporter ?? new IfcExporter()).Export(info, path);
+            return File.ReadAllText(path);
+        }
+        finally { if (File.Exists(path)) File.Delete(path); }
+    }
+
+    private static List<int> Ids(string ifc, string type) =>
+        Regex.Matches(ifc, $@"#(\d+)={type}\(").Select(match => int.Parse(match.Groups[1].Value)).ToList();
+
+    private static List<string> Args(string ifc, int id, string type)
+    {
+        string raw = Assert.Single(Regex.Matches(ifc, $@"#{id}={type}\((.*)\);\r?\n")).Groups[1].Value;
+        var parts = new List<string>();
+        int depth = 0, start = 0;
+        bool inString = false;
+        for (int i = 0; i < raw.Length; i++)
+        {
+            char c = raw[i];
+            if (c == '\'') inString = !inString;
+            else if (inString) continue;
+            else if (c == '(') depth++;
+            else if (c == ')') depth--;
+            else if (c == ',' && depth == 0) { parts.Add(raw[start..i]); start = i + 1; }
+        }
+        parts.Add(raw[start..]);
+        return parts;
+    }
+}

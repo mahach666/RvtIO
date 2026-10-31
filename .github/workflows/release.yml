@@ -1,0 +1,42 @@
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  publish:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+          dotnet-version: |
+            8.0.x
+      - name: Validate release version
+        shell: pwsh
+        run: |
+          $version = dotnet msbuild src/RvtIO/RvtIO.csproj -getProperty:Version -nologo
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          if ($env:GITHUB_REF_NAME -cne "v$($version.Trim())") {
+            throw "The release tag must match the package version v$($version.Trim())."
+          }
+      - run: dotnet restore RvtIO.slnx
+      - run: dotnet build RvtIO.slnx -c Release --no-restore
+      - run: dotnet test RvtIO.slnx -c Release --no-build
+      - run: dotnet pack RvtIO.slnx -c Release --no-build -o artifacts
+      - uses: actions/upload-artifact@v4
+        with:
+          name: packages
+          path: artifacts/*
+      # Trusted publishing: the NuGet policy for this repository and workflow file exchanges the GitHub OIDC token for a short-lived key.
+      - uses: NuGet/login@v1
+        id: nuget-login
+        with:
+          user: ${{ secrets.NUGET_USER }}
+      - run: dotnet nuget push "artifacts/*.nupkg" --api-key ${{ steps.nuget-login.outputs.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate

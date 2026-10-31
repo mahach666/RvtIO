@@ -1,0 +1,3345 @@
+# Generated from Autodesk Revit 2022 sources; do not edit.
+# sources: the table of the native builtin parameter definitions, the Revit 2022 en-US GeneratedRes.dll (sha256 39dd0b16c9b1e72c204e1efa207e230782de192b984371e89d77dd3fd2989ca7), RevitAPI.dll enum BuiltInParameterGroup (sha256 a60011776a7b4994235150ea3ff14929626db97c115ff59ac7524153bb98b48b)
+# builtin parameter id, BuiltInParameterGroup value (-1 = INVALID), English caption
+-1155224	-5000103	Model Bar Diameter
+-1155223	-5000101	Model Bar Diameter
+-1155222	-5000104	Show Grids
+-1155221	-5000103	Modified Rebar Set
+-1155220	-5000119	Moves With Grids
+-1155219	-5000100	Layer Index
+-1155218	-5000104	Cuts Geometry
+-1155217	-5000103	Hook Rotation At End
+-1155216	-5000103	Hook Rotation At Start
+-1155215	-5000103	Override Hook Lengths
+-1155214	-5000100	Name
+-1155213	-5000100	Description
+-1155212	-5000100	Displayed Start Station
+-1155211	-5000100	Displayed End Station
+-1155210	-5000175	Disable Precast Updates
+-1155206	-5000103	Hook Rotation At End
+-1155205	-5000103	Hook Rotation At Start
+-1155204	-5000103	Hook Rotation At End
+-1155203	-5000103	Hook Rotation At Start
+-1155202	-5000100	From Room
+-1155201	-5000100	To Room
+-1155150	-5000174	Max Number of Circuits
+-1155148	-5000112	Volume
+-1155147	-5000112	Length
+-1155146	-5000112	Profile Type
+-1155145	-5000174	Circuit Naming Settings
+-1155144	-5000112	Justification
+-1155143	-5000112	Paint Area
+-1155142	-5000112	Exact Weight
+-1155141	-5000112	Weight
+-1155140	-5000112	Volume
+-1155139	-5000112	Area
+-1155138	-5000112	Width
+-1155137	-5000112	Length
+-1155136	-5000112	Type
+-1155135	-5000112	Total Weight
+-1155134	-5000112	Total Weight
+-1155132	-5000112	Total Weight
+-1155130	-5000112	Anchor Orientation
+-1155128	-5000112	Cut Length
+-1155127	-5000112	Exact Weight
+-1155125	-5000112	Paint Area
+-1155124	-5000112	Weight
+-1155123	-5000101	Speed
+-1155122	-5000112	Location
+-1155121	-5000112	Finish Calculation At Gap
+-1155120	-5000112	Inverted
+-1155119	-5000112	Grip Length Increase
+-1155118	-5000112	Grip Length
+-1155117	-5000112	Bolt Length
+-1155116	-5000100	Name
+-1155115	-5000119	Bottom Elevation
+-1155114	-5000119	Top Elevation
+-1155113	-5000125	Feed Through Lugs Current Phase C
+-1155112	-5000125	Feed Through Lugs Current Phase B
+-1155111	-5000125	Feed Through Lugs Current Phase A
+-1155110	-5000125	Feed Through Lugs Apparent Load Phase C
+-1155109	-5000125	Feed Through Lugs Apparent Load Phase B
+-1155108	-5000125	Feed Through Lugs Apparent Load Phase A
+-1155107	-5000125	Branch Circuit Current Phase C
+-1155106	-5000125	Branch Circuit Current Phase B
+-1155105	-5000125	Branch Circuit Current Phase A
+-1155104	-5000125	Branch Circuit Apparent Load Phase C
+-1155103	-5000125	Branch Circuit Apparent Load Phase B
+-1155102	-5000125	Branch Circuit Apparent Load Phase A
+-1155101	-5000112	Hole Definition
+-1155100	-5000174	Feed Through Lugs
+-1155099	-5000174	Circuit Numbering Option
+-1155096	-1	Tag on Placement
+-1155095	-5000227	Route Analysis Settings
+-1155094	-5000100	View Name
+-1155093	-5000100	Level
+-1155092	-5000112	Override by Instance
+-1155091	-5000103	Modify Parameters
+-1155090	-5000101	Time
+-1155087	-5000112	Boundary
+-1155086	-5000112	Around beam axis
+-1155085	-5000112	Tilt angle
+-1155084	-5000112	Plan rotation
+-1155083	-5000112	Cross-section rotation
+-1155082	-5000112	Distance from axis
+-1155081	-5000112	Cutback
+-1155080	-5000112	Side 2
+-1155079	-5000112	Side 1
+-1155078	-5000112	Type
+-1155077	-5000112	Cut straight
+-1155076	-5000112	Suction
+-1155075	-5000112	Angle
+-1155074	-5000112	Prefix
+-1155073	-5000112	Text module
+-1155072	-5000112	Depth of bolt head
+-1155071	-5000112	Right-handed thread
+-1155070	-5000112	Back taper thread
+-1155069	-5000112	Tapping hole
+-1155068	-5000112	Head diameter
+-1155067	-5000112	Chamfer angle
+-1155066	-5000112	Taper Angle
+-1155065	-5000112	Hole Depth
+-1155064	-5000112	Along side 1
+-1155063	-5000112	Length of the slot
+-1155062	-5000112	Type
+-1155061	-5000112	Diameter
+-1155060	-5000112	Number
+-1155059	-5000112	Radius
+-1155058	-5000112	Edge distance on side 2
+-1155057	-5000112	Edge distance on side 1
+-1155056	-5000112	Intermediate distance on side 2
+-1155055	-5000112	Intermediate distance on side 1
+-1155054	-5000112	Length on side 2
+-1155053	-5000112	Length on side 1
+-1155052	-5000112	Number on side 2
+-1155051	-5000112	Number on side 1
+-1155050	-5000112	Double Preparation Depth
+-1155049	-5000112	Double Effective Throat
+-1155048	-5000112	Double Root Opening
+-1155047	-5000112	Double Weld preparation
+-1155046	-5000112	Double Surface Shape
+-1155045	-5000112	Double Text
+-1155044	-5000112	Double Thickness
+-1155043	-5000112	Double Type
+-1155042	-5000112	Main Preparation Depth
+-1155041	-5000112	Main Effective Throat
+-1155040	-5000112	Main Root Opening
+-1155039	-5000112	Main Weld preparation
+-1155038	-5000112	Surface Shape
+-1155037	-5000112	Main Text
+-1155036	-5000112	Pitch
+-1155035	-5000112	Continuous
+-1155034	-5000112	Location
+-1155033	-5000112	Length
+-1155032	-5000112	Main Thickness
+-1155031	-5000112	Main Type
+-1155029	-5000112	Boring out
+-1155028	-5000112	Radius
+-1155027	-5000112	Boundary distance 2
+-1155026	-5000112	Boundary distance 1
+-1155023	-5000112	Gap Width
+-1155022	-5000112	Angle along width
+-1155021	-5000112	Angle along height
+-1155020	-5000112	Length
+-1155019	-5000112	Length
+-1155018	-5000112	Coating
+-1155017	-5000112	Length
+-1155016	-5000112	Diameter
+-1155015	-5000112	Grade
+-1155014	-5000112	Standard
+-1155013	-5000112	Diameter
+-1155012	-5000112	Assembly
+-1155011	-5000112	Grade
+-1155010	-5000112	Standard
+-1155009	-5000112	Coating
+-1155008	-5000112	Diameter
+-1155007	-5000112	Assembly
+-1155006	-5000112	Grade
+-1155005	-5000112	Standard
+-1155003	-5000112	Thickness
+-1154695	-5000103	Workshop Instructions
+-1154694	-5000103	Geometry
+-1154693	-5000226	Lat
+-1154692	-5000226	Lon
+-1154691	-5000103	Hook Orientation At End
+-1154690	-5000103	Hook Orientation At Start
+-1154689	-5000127	Outdoor Airflow
+-1154687	-5000129	Outdoor Air Method
+-1154686	-5000100	Path
+-1154685	-5000100	ApplicationId
+-1154677	-5000100	Loaded
+-1154676	-5000100	ServerId
+-1154675	-5000100	Name
+-1154671	-5000129	Air Changes per Hour
+-1154668	-5000129	Outdoor Air per Area
+-1154665	-5000129	Outdoor Air per Person
+-1154662	-5000129	Outdoor Air Information
+-1154659	-1	INTERNAL: Multiplanar Arc Connector
+-1154658	-5000103	End Treatment At End
+-1154657	-5000103	End Treatment At Start
+-1154656	-5000103	End Treatment At End
+-1154655	-5000103	End Treatment At Start
+-1154654	-5000103	End Treatment
+-1154653	-5000103	End Treatment 2
+-1154652	-5000103	End Treatment 1
+-1154651	-5000101	External Diameter
+-1154649	-5000103	Schedule Mark
+-1154647	-5000119	Default Elevation
+-1154646	-5000101	Bar Engagement 2
+-1154645	-5000101	Bar Engagement 1
+-1154644	-5000101	Total Length
+-1154643	-5000112	Mass
+-1154642	-5000103	Coupler Number
+-1154641	-5000218	Quantity
+-1154640	-5000103	Bar Size 2
+-1154639	-5000103	Bar Size 1
+-1154638	-5000100	Part Number
+-1154634	-5000101	Actual Tread Depth
+-1154630	-5000119	Reference Level
+-1154619	-5000100	Host Mark
+-1154618	-5000103	Shape Image
+-1154617	-5000103	Fabric Number
+-1154616	-5000103	Rebar Number
+-1154615	-5000104	Sketchy Lines
+-1154614	-5000103	Partition
+-1154613	-5000104	Show Hidden Lines
+-1153542	-5000231	Supply From 2
+-1153541	-5000231	Supply From
+-1153540	-5000231	Area Measurement
+-1153539	-5000231	Supply From 1
+-1153538	-5000231	Power Source
+-1153537	-5000100	Name
+-1153535	-5000231	Load Type
+-1153534	-5000231	Specified Area
+-1153533	-5000231	Electrial Load Zone Type
+-1153532	-5000125	Load Density
+-1153529	-5000231	Equipment Type
+-1153528	-5000129	Draw Ventilation
+-1153527	-5000129	Variable Refrigerant Flow Loop
+-1153526	-5000129	Reheat Hot Water Loop
+-1153519	-5000129	Zone Equipment
+-1153518	-5000100	Name
+-1153517	-5000129	Heating Hot Water Loop
+-1153516	-5000129	Air System
+-1153514	-5000129	Reheat Coil
+-1153513	-5000129	Behavior
+-1153512	-5000129	Equipment Type
+-1153511	-5000129	Fan
+-1153510	-5000129	Chilled Water Loop
+-1153509	-5000129	Cooling Coil
+-1153508	-5000129	Heating Hot Water Loop
+-1153507	-5000129	Heating Coil
+-1153506	-5000129	Preheat Hot Water Loop
+-1153505	-5000129	Preheat Coil
+-1153504	-5000129	Heat Exchanger
+-1153503	-5000129	Condenser Water Loop
+-1153502	-5000129	Chiller Type
+-1153501	-5000129	Loop Type
+-1153500	-5000100	Name
+-1153115	-1	Equipment Sets
+-1153114	-5000127	Ignore Flow Analysis
+-1153113	-5000127	Loop Boundary
+-1153112	-5000113	Mechanical Equipment Set
+-1153111	-5000100	Name
+-1153110	-5000119	On Standby
+-1153109	-5000119	On Duty
+-1153106	-5000127	Critical Path
+-1153105	-5000113	Design Flow
+-1153104	-5000113	Calculated Pressure Drop
+-1153103	-5000113	Calculated Flow
+-1153100	-5000113	Classification
+-1153004	-5000112	Input Elements
+-1153003	-5000103	Noble Status
+-1153002	-5000128	Code Checking Status
+-1153001	-5000112	Approval Status
+-1153000	-5000112	Detailed Parameters
+-1152385	-5000100	Image
+-1152384	-5000100	Type Image
+-1152383	-5000207	Join Status
+-1152380	-5000100	Referenced View
+-1152379	-5000217	Other Options
+-1152378	-5000171	Mode
+-1152377	-5000171	Analytical Surface Resolution
+-1152376	-5000171	Analytical Space Resolution
+-1152375	-5000101	Round Connector Dimension
+-1152374	-1	Profile Definition
+-1152373	-5000207	End z Offset Value
+-1152372	-5000207	End z Justification
+-1152371	-5000207	End y Offset Value
+-1152370	-5000207	End y Justification
+-1152369	-5000207	Start z Offset Value
+-1152368	-5000207	Start z Justification
+-1152367	-5000207	Start y Offset Value
+-1152366	-5000207	Start y Justification
+-1152365	-5000207	z Offset Value
+-1152364	-5000207	z Justification
+-1152363	-5000207	y Offset Value
+-1152362	-5000207	y Justification
+-1152361	-5000207	yz Justification
+-1152360	-5000207	End Join Cutback
+-1152359	-5000207	Start Join Cutback
+-1152358	-5000207	End Extension
+-1152357	-5000207	Start Extension
+-1152356	-5000206	Profile Override
+-1152352	-5000206	Extend to Silhouette
+-1152351	-5000158	Division Rule
+-1152350	-5000158	Mirror
+-1152349	-5000119	All Grid Rotation
+-1152348	-5000158	Indent 2
+-1152347	-5000158	Indent 1
+-1152346	-5000158	Division Pattern
+-1152345	-5000101	Shape is modified
+-1152344	-5000101	Excluded
+-1152343	-5000191	Manually Adjusted
+-1152342	-5000105	Keywords
+-1152341	-5000105	Source URL
+-1152340	-5000105	Source
+-1152339	-5000105	External Material ID
+-1152338	-5000105	Sharing
+-1152337	-5000105	Asset library id
+-1152336	-5000119	Base Level By Original
+-1152335	-5000119	Base Level
+-1152334	-5000172	Number
+-1152333	-5000172	Show Placement Number
+-1152332	-5000172	Constrained
+-1152331	-5000172	Orients to
+-1152330	-5000105	Electrical Resistivity
+-1152329	-5000105	Reflectivity
+-1152328	-5000105	Porosity
+-1152327	-5000105	Permeability
+-1152326	-5000105	Transmits Light
+-1152325	-5000105	Vapor Pressure
+-1152324	-5000105	Specific Heat of Vaporization
+-1152323	-5000105	Liquid Viscosity
+-1152322	-5000105	Compressibility
+-1152321	-5000105	Gas Viscosity
+-1152320	-5000105	Emissivity
+-1152319	-5000105	Construction
+-1152318	-5000105	5% Modulus of Elasticity
+-1152317	-5000105	Average Modulus
+-1152316	-5000105	Tension Perpendicular to Grain
+-1152315	-5000105	Tension Parallel to Grain
+-1152314	-5000105	Thermally Treated
+-1152313	-5000105	Density
+-1152312	-5000105	Specific Heat
+-1152311	-5000105	Thermal Conductivity Z
+-1152310	-5000105	Thermal Conductivity Y
+-1152309	-5000105	Thermal Conductivity X
+-1152308	-5000105	Thermal Conductivity
+-1152307	-5000105	Thermal Expansion Coefficient 2
+-1152306	-5000105	Thermal Expansion Coefficient 1
+-1152305	-5000105	Shear Modulus 12
+-1152304	-5000105	Poisson Ratio 23
+-1152303	-5000105	Poisson Ratio 12
+-1152302	-5000105	Young's Modulus 2
+-1152301	-5000105	Young's Modulus 1
+-1152300	-5000119	Offset from Path
+-1152177	-5000108	Slanted
+-1152176	-5000108	Riser
+-1152175	-5000107	Apply Nosing Profile
+-1152174	-5000108	Riser Profile
+-1152167	-5000119	Extension Length
+-1152166	-5000103	Height
+-1152165	-5000119	Hand Clearance
+-1152164	-5000107	Tread Profile
+-1152163	-5000105	Riser Material
+-1152162	-5000105	Tread Material
+-1152161	-5000108	Riser To Tread Connection
+-1152160	-5000108	Riser Thickness
+-1152159	-5000108	Riser Type
+-1152158	-5000107	Back Nosing
+-1152157	-5000107	Left Nosing
+-1152156	-5000107	Right Nosing
+-1152155	-5000107	Front Nosing
+-1152154	-5000107	Nosing Length
+-1152153	-5000107	Nosing Profile
+-1152152	-5000107	Tread Thickness
+-1152151	-5000107	Tread
+-1152105	-5000100	Riser Mark
+-1152104	-5000100	Tread Mark
+-1152103	-5000100	Riser Number
+-1152102	-5000100	Tread Number
+-1152101	-5000100	Overridden
+-1151908	-5000202	Parallel Treads at End
+-1151907	-5000202	Parallel Treads at Start
+-1151906	-5000202	Fillet Radius
+-1151905	-5000202	Fillet on Corner
+-1151904	-5000202	Inside Walk Line Offset
+-1151903	-5000202	Minimum Width on Inside Walk Line
+-1151902	-5000202	Minimum Width on Inside Boundary
+-1151901	-5000202	Winder Style
+-1151811	-5000101	Flip Section Profile
+-1151810	-5000101	Structural Depth On Landing
+-1151809	-5000101	Structural Depth On Run
+-1151808	-5000105	Material
+-1151807	-5000101	Width
+-1151806	-5000101	Total Depth
+-1151805	-5000101	Structural Depth
+-1151804	-5000101	Underside Surface
+-1151803	-5000101	Topside Surface
+-1151801	-5000101	Section Profile
+-1151710	-5000100	Landing Support Type
+-1151709	-5000100	Overridden
+-1151708	-5000119	Trim Support at Upper
+-1151706	-5000119	Upper End Cut
+-1151705	-5000119	Lower End Cut
+-1151702	-5000119	Vertical Offset
+-1151701	-5000119	Lateral Offset
+-1151606	-5000105	Monolithic Material
+-1151604	-5000107	Same as Run
+-1151603	-5000103	Monolithic Thickness
+-1151602	-5000103	Structure
+-1151601	-5000103	Monolithic Support
+-1151508	-5000100	Overridden
+-1151507	-5000101	Total Thickness
+-1151502	-5000112	Structural
+-1151501	-5000119	Relative Height
+-1151406	-5000105	Monolithic Material
+-1151405	-5000103	Total Depth
+-1151404	-5000103	Structural Depth
+-1151403	-5000103	Structure
+-1151402	-5000103	Underside Surface
+-1151401	-5000103	Monolithic Support
+-1151323	-5000103	Extend Below Tread Base
+-1151322	-5000119	CCW
+-1151321	-5000119	With Automatic Landing
+-1151320	-5000119	End with Straight Run
+-1151319	-5000119	Begin with Straight Run
+-1151318	-5000119	Location Line
+-1151317	-5000103	End with Riser
+-1151316	-5000103	Begin with Riser
+-1151315	-5000100	Overridden
+-1151314	-5000112	Structural
+-1151313	-5000104	Center Mark Visible
+-1151309	-5000101	Actual Run Width
+-1151308	-5000101	Actual Tread Depth
+-1151307	-5000101	Actual Riser Height
+-1151306	-5000101	Actual Number of Treads
+-1151305	-5000101	Actual Number of Risers
+-1151304	-5000103	Extend Below Riser Base
+-1151303	-5000119	Run Height
+-1151302	-5000119	Relative Top Height
+-1151301	-5000119	Relative Base Height
+-1151237	-5000201	Middle Support
+-1151236	-5000201	Left Lateral Offset
+-1151235	-5000201	Right Lateral Offset
+-1151234	-5000104	Cut Mark Type
+-1151233	-5000103	Construction Method
+-1151232	-5000201	Right Support
+-1151231	-5000201	Left Support
+-1151230	-5000200	Notch Width
+-1151229	-5000200	Vertical Gap Distance
+-1151228	-5000200	Horizontal Gap Distance
+-1151227	-5000200	Custom
+-1151226	-5000200	Notch Thickness
+-1151225	-5000200	Notch Extension
+-1151224	-5000200	Connection Method
+-1151223	-5000196	Target Result
+-1151222	-5000196	Min. Result
+-1151221	-5000196	Max. Result
+-1151220	-5000196	Tread Multiplier
+-1151219	-5000196	Riser Multiplier
+-1151218	-5000103	Assembled Stair
+-1151217	-5000201	Middle Support Number
+-1151216	-5000196	Minimum Run Width
+-1151215	-5000196	Winder Algorithm
+-1151214	-5000104	Show Up/Down in Plan
+-1151213	-5000104	Show Stair Path in Plan
+-1151212	-5000104	Show Cut Line in Plan
+-1151211	-5000201	Middle Support Type
+-1151210	-5000201	Left Support Type
+-1151209	-5000201	Right Support Type
+-1151208	-5000103	Landing Type
+-1151207	-5000103	Run Type
+-1151206	-5000196	Calculation Rules
+-1151205	-5000196	Min. Tread Depth on Winder Inner Boundary
+-1151204	-5000196	Min. Tread Depth
+-1151203	-5000196	Max. Riser Height
+-1151154	-5000101	Tread/Riser Start Number
+-1151153	-5000101	Cut by Cut Plane
+-1151152	-5000101	Show Monolithic Support Corse Geometry
+-1151151	-5000101	Show Triser Corse Geometry
+-1151150	-5000101	Show Run Corse Geometry
+-1151149	-5000101	Show Monolithic Support Geometry
+-1151148	-5000101	Show Triser Geometry
+-1151147	-5000101	Show Run Geometry
+-1151146	-5000101	Show Support Path
+-1151145	-5000101	Show Stairs' Boundary 3D
+-1151144	-5000101	Show Stairs' Boundary 2D
+-1151143	-5000101	Show Landing Path
+-1151142	-5000101	Show Landing Boundary
+-1151141	-5000101	Show Run Outline For Plan
+-1151140	-5000101	Show Run's Nosings
+-1151139	-5000101	Show Run's Risers
+-1151138	-5000101	Show Run's Path 3D
+-1151137	-5000101	Show Run's Path 2D
+-1151136	-5000101	Show Run's Right Boundary 3D
+-1151135	-5000101	Show Run's Left Boundary 3D
+-1151134	-5000101	Show Run's Right Boundary 2D
+-1151133	-5000101	Show Run's Left Boundary 2D
+-1151132	-5000101	Show Landing Faces
+-1151131	-5000101	Show Run's Tread Faces
+-1151118	-5000101	Enable Calculator Rules Check
+-1151117	-5000101	Minimum Automatic Landing Depth
+-1151116	-5000101	Run Width Measurement
+-1151113	-5000101	Total Number of Treads
+-1151112	-5000101	Total Number of Risers
+-1151111	-5000101	Actual Number of Risers
+-1151110	-5000101	Desired Number of Risers
+-1151106	-5000119	Multistory Top Level
+-1151105	-5000119	Desired Stair Height
+-1151103	-5000119	Top Level
+-1151101	-5000119	Base Level
+-1150624	-5000206	Profile Offset
+-1150623	-5000101	Width
+-1150622	-5000206	Edge Match
+-1150605	-5000206	Profile Along Flip
+-1150604	-5000206	Profile Across Flip
+-1150603	-5000206	Division Profile
+-1150602	-1	Content protection enabled
+-1150601	-5000206	Gap
+-1150600	-5000100	Name
+-1150501	-5000192	Cross-Section Rotation
+-1150500	-5000101	Scale
+-1150481	-5000105	Description
+-1150480	-5000105	Material aspect
+-1150468	-5000113	System Abbreviation
+-1150467	-5000105	Properties
+-1150466	-5000105	Property Set Name
+-1150465	-5000105	Subclass
+-1150464	-5000105	Class
+-1150463	-5000192	Perimeter
+-1150462	-5000192	Area
+-1150461	-5000192	Length
+-1150460	-5000100	Assembly: Keynote
+-1150459	-5000100	Assembly: Assembly Description
+-1150458	-5000100	Assembly: Cost
+-1150457	-5000100	Assembly: Type Mark
+-1150456	-5000100	Assembly: Assembly Code
+-1150455	-5000100	Assembly: Description
+-1150454	-5000100	Assembly: URL
+-1150453	-5000100	Assembly: Type Comments
+-1150452	-5000100	Assembly: Manufacturer
+-1150451	-5000100	Assembly: Model
+-1150450	-5000100	Assembly: Name
+-1150435	-5000189	Free Size
+-1150434	-5000188	Overall Size
+-1150433	-5000189	Lining Thickness
+-1150432	-5000189	Lining Type
+-1150431	-5000188	Insulation Thickness
+-1150430	-5000188	Insulation Type
+-1150427	-5000101	Pipe Size
+-1150426	-5000101	Duct Size
+-1150425	-5000113	Volume
+-1150420	-5000100	Assembly Name
+-1150412	-5000113	Component Classification
+-1150411	-5000190	Rise / Drop Symbol
+-1150410	-5000190	Two Line Drop Symbol
+-1150409	-5000190	Two Line Rise Symbol
+-1150408	-5000190	Single Line Drop Symbol
+-1150407	-5000190	Single Line Rise Symbol
+-1150406	-5000190	Single Line Tee Up Symbol
+-1150405	-5000190	Single Line Tee Down Symbol
+-1150403	-5000100	Naming Category
+-1150380	-5000177	Use Top Rail
+-1150373	-5000103	Rail Path Join
+-1150361	-5000203	Plus Tread Depth
+-1150360	-5000101	Length
+-1150355	-5000185	Justification
+-1150354	-5000185	Number
+-1150353	-5000185	Spacing
+-1150352	-5000185	Layout
+-1150351	-5000185	Family
+-1150350	-5000204	Length
+-1150349	-5000204	Extension Style
+-1150348	-5000203	Length
+-1150347	-5000203	Extension Style
+-1150346	-5000198	End/Top Termination
+-1150345	-5000198	Beginning/Bottom Termination
+-1150344	-5000105	Material
+-1150343	-5000103	Transitions
+-1150342	-5000103	Hand Clearance
+-1150341	-5000103	Projection
+-1150340	-5000103	Height
+-1150339	-5000103	Profile
+-1150338	-5000103	Fillet Radius
+-1150337	-5000103	Default Join
+-1150336	-5000199	Lateral Offset
+-1150335	-5000199	Height
+-1150334	-5000199	Position
+-1150333	-5000199	Type
+-1150332	-5000178	Lateral Offset
+-1150331	-5000178	Height
+-1150330	-5000178	Position
+-1150329	-5000178	Type
+-1150328	-5000177	Height
+-1150327	-5000177	Type
+-1150322	-5000119	Rotation Angle
+-1150321	-5000172	Flip
+-1150320	-5000172	Orientation
+-1150310	-1	Mass Floor
+-1150309	-1	Mass Opening
+-1150307	-1	Mass Skylight
+-1150306	-1	Mass Glazing
+-1150305	-1	Mass Exterior Wall - Underground
+-1150304	-1	Mass Slab
+-1150303	-1	Mass Shade
+-1150302	-1	Mass Roof
+-1150301	-1	Mass Interior Wall
+-1150300	-1	Mass Exterior Wall
+-1150236	-5000129	Analytical Space Bounding
+-1150235	-5000171	Horizontal Void/Chase Area Threshold
+-1150234	-5000171	Average Vertical Void Height Threshold
+-1150233	-5000217	Analytical Grid Cell Size
+-1150232	-5000217	Building Envelope
+-1150231	-5000104	Right Attachment
+-1150230	-5000104	Left Attachment
+-1150227	-5000101	Measure From
+-1150226	-5000101	Angle
+-1150225	-5000101	Chord Length
+-1150224	-5000101	Normalized Segment Length
+-1150223	-5000101	Segment Length
+-1150222	-5000101	Normalized Curve Parameter
+-1150221	-5000101	Non-Normalized Curve Parameter
+-1150220	-5000101	Measurement Type
+-1150219	-5000112	End of Attachment to Reference Column
+-1150218	-5000112	Start of Attachment to Reference Column
+-1150217	-5000112	End Attachment Distance
+-1150216	-5000112	Start Attachment Distance
+-1150215	-5000112	End Attachment Type
+-1150214	-5000112	Start Attachment Type
+-1150213	-5000104	Show Border
+-1150212	-5000119	Projection Type
+-1150211	-5000119	Follow Surface
+-1150210	-5000221	Detailed Elements
+-1150209	-5000172	Number
+-1150208	-5000112	Structural Framing Length Roundoff
+-1150207	-5000103	Base Extension
+-1150206	-5000103	Top Extension
+-1150205	-5000103	Base Cut Style
+-1150204	-5000103	Top Cut Style
+-1150203	-5000129	Use Load Credits
+-1150202	-1	Component Extents
+-1150201	-5000101	Number of vertical cells
+-1150200	-5000101	Number of horizontal cells
+-1150199	-5000101	Vertical spacing
+-1150198	-5000101	Horizontal spacing
+-1150197	-5000104	Show Normal Reference Plane Only
+-1150195	-5000162	Is ground plane
+-1150194	-5000100	Angle to True North
+-1150193	-5000100	Elev
+-1150192	-5000100	E/W
+-1150191	-5000100	N/S
+-1150190	-5000103	Base Geometry Alignment
+-1150189	-5000103	Top Geometry Alignment
+-1150188	-5000129	Plenum Lighting Contribution
+-1150183	-5000112	Top Attachment Referenced End
+-1150182	-5000112	Top Attachment Ratio
+-1150181	-5000112	Top Attachment Distance
+-1150180	-5000112	Top Attachment Type
+-1150179	-5000112	Base Attachment Referenced End
+-1150178	-5000112	Base Attachment Ratio
+-1150177	-5000112	Base Attachment Distance
+-1150176	-5000112	Base Attachment Type
+-1150173	-5000119	Move Base With Grids
+-1150172	-5000119	Move Top With Grids
+-1150171	-5000119	Column Style
+-1150170	-5000121	Column Symbolic Offset
+-1150169	-5000119	Mirrored
+-1150168	-5000119	Flipped
+-1150167	-5000101	Hosted V Parameter
+-1150166	-5000101	Hosted U Parameter
+-1150165	-5000119	Positive Offset
+-1150164	-5000119	Negative Offset
+-1150163	-5000119	Negative Offset
+-1150162	-5000119	Positive Offset
+-1150161	-5000170	Report Type
+-1150160	-5000217	Building Infiltration Class
+-1150159	-5000100	Utility
+-1150158	-5000172	Show Placement Number
+-1150157	-5000172	Constrained
+-1150156	-1	Name
+-1150155	-5000172	Point
+-1150154	-5000229	Units Format
+-1150153	-5000101	Driving Curve(s)
+-1150152	-5000104	Leader Line Length
+-1150151	-5000123	Suffix
+-1150150	-5000123	Prefix
+-1150149	-5000104	Visibility/Graphics Overrides
+-1150148	-5000104	Show Reference Planes
+-1150147	-5000100	Is Reference Line
+-1150146	-5000101	Hosted Parameter
+-1150145	-5000101	Driven by Host
+-1150144	-5000101	Offset
+-1150143	-5000230	Alternate Units Format
+-1150142	-1	None
+-1150141	-5000159	Light Source Definition (family)
+-1150140	-1	Attachment Point
+-1150139	-5000159	Light Loss Factor
+-1150138	-5000159	Initial Color
+-1150137	-5000159	Light Loss Input Method
+-1150134	-5000159	Temperature Color
+-1150133	-5000159	At a distance
+-1150132	-5000159	Initial Light Intensity Input Method
+-1150131	-5000101	Light Source Symbol Length
+-1150130	-5000101	Light Source Symbol Size
+-1150129	-5000159	Emit from Circle Diameter
+-1150128	-5000159	Emit from Rectangle Length
+-1150127	-5000159	Emit from Rectangle Width
+-1150126	-5000159	Emit from Line Length
+-1150118	-5000159	Emit Shape Visible in Rendering
+-1150117	-5000159	Dimming Lamp Color Temperature Shift
+-1150115	-5000159	Luminaire Dirt Depreciation
+-1150114	-5000159	Lamp Lumen Depreciation
+-1150113	-5000159	Surface Depreciation Loss
+-1150112	-5000159	Lamp Tilt Loss
+-1150110	-5000159	Voltage Loss
+-1150109	-5000159	Temperature Loss
+-1150108	-5000159	Color Filter
+-1150107	-5000159	Initial Color Temperature
+-1150106	-5000159	Illuminance
+-1150105	-5000159	Luminous Intensity
+-1150104	-5000159	Efficacy
+-1150103	-5000159	Wattage
+-1150102	-5000159	Initial Intensity
+-1150101	-5000159	Light Source Definition
+-1150100	-1	Light Source
+-1150086	-5000158	Option 2
+-1150085	-5000158	Option 1
+-1150084	-5000162	Discarded Division Lines
+-1150083	-5000158	Component Trim
+-1150082	-5000158	Component Mirror
+-1150081	-5000136	Is grid 2 suspended?
+-1150080	-5000134	Is grid 1 suspended?
+-1150079	-5000162	Components
+-1150078	-5000162	Pattern Fill Material
+-1150077	-5000162	Pattern Fill
+-1150076	-5000162	Pattern Lines Style
+-1150075	-5000162	Pattern Lines
+-1150074	-5000162	Gridlines Style
+-1150073	-5000162	Gridlines
+-1150072	-5000162	Nodes
+-1150071	-5000162	Surface Material
+-1150070	-5000162	Surface
+-1150069	-5000162	Display Surface Option
+-1150068	-5000119	All Grid Rotation
+-1150067	-5000119	Border Tile
+-1150062	-5000119	Show all points
+-1150061	-5000158	Tile Pattern
+-1150060	-5000158	Component Flip
+-1150059	-5000158	Component Rotation
+-1150058	-5000158	Indent 2
+-1150057	-5000158	Indent 1
+-1150056	-5000119	Cover face completely
+-1150055	-5000119	Offset from surface
+-1150054	-5000101	Total edge length
+-1150053	-5000101	Edge number
+-1150052	-5000101	Point number
+-1150051	-5000101	Facet number
+-1150050	-5000166	Divided Surface Area
+-1144331	-5000124	Lighting Calculation Luminaire Plane
+-1142000	-1	Curve Type Reference
+-1141014	-5000113	Part Pattern Number
+-1141013	-5000101	Size of Connector End
+-1141012	-5000101	Size of Primary Branch End
+-1141011	-5000101	Size of Secondary End
+-1141010	-5000101	Size of Primary End
+-1141009	-5000113	Change Service
+-1141008	-5000100	SU/SD from Bottom
+-1141007	-5000105	Insulation Material
+-1141006	-5000101	Z Displacement
+-1141005	-5000101	Y Displacement
+-1141004	-5000101	X Displacement
+-1141003	-5000101	Style
+-1141002	-5000101	Depth
+-1141001	-5000119	Target view
+-1141000	-5000119	Filter
+-1140999	-5000100	Fabrication Fitting Description
+-1140998	-5000113	Double Wall Material Abbreviation
+-1140997	-5000113	Material Abbreviation
+-1140996	-5000113	Insulation Specification Abbreviation
+-1140995	-5000113	Insulation Abbreviation
+-1140994	-5000113	Specification Abbreviation
+-1140993	-5000101	Pipe Invert Elevation
+-1140992	-5000101	Bottom Elevation with Insulation
+-1140991	-5000101	Bottom Elevation
+-1140990	-5000101	Top Elevation with Insulation
+-1140989	-5000101	Top Elevation
+-1140988	-5000101	Centerline Elevation
+-1140987	-5000101	Spot Bottom Elevation with Insulation
+-1140986	-5000101	Spot Bottom Elevation
+-1140985	-5000101	Spot Top Elevation with Insulation
+-1140984	-5000101	Spot Top Elevation
+-1140983	-5000113	Double Wall Material Area
+-1140982	-5000100	SU/SD from Top
+-1140981	-5000113	Part Sheet Metal Area
+-1140979	-5000113	Fabrication Service Abbreviation
+-1140978	-5000113	Part Material Thickness
+-1140977	-5000100	Fabrication Notes
+-1140976	-5000189	Lining Area
+-1140975	-5000100	Item Number
+-1140974	-5000188	Insulation Area
+-1140973	-5000113	Fabrication Service Name
+-1140972	-5000113	Double Wall Material Thickness
+-1140971	-5000113	Double Wall Material
+-1140970	-5000113	Cut Type
+-1140969	-5000113	Bought Out
+-1140968	-5000100	Alias
+-1140967	-5000100	x of XX
+-1140966	-5000100	Product Code
+-1140965	-5000113	More Parameters
+-1140957	-5000214	Main Secondary Depth Option
+-1140956	-5000214	Main Secondary Width Option
+-1140955	-5000214	Main Secondary Diameter Option
+-1140952	-5000213	Main Primary Diameter Option
+-1140951	-5000213	Main Primary Depth Option
+-1140950	-5000213	Main Primary Width Option
+-1140949	-5000101	Angle Option
+-1140948	-5000101	Length Option
+-1140947	-5000113	Insulation Specification
+-1140944	-5000101	Length
+-1140943	-5000119	Product Entry
+-1140935	-5000214	Main Secondary Depth
+-1140934	-5000214	Main Secondary Width
+-1140933	-5000214	Main Secondary Diameter
+-1140930	-5000213	Main Primary Depth
+-1140929	-5000213	Main Primary Width
+-1140925	-5000119	End Middle Elevation
+-1140924	-5000119	Start Middle Elevation
+-1140923	-5000119	Slope
+-1140921	-5000100	Relative File Name
+-1140920	-5000100	Vendor
+-1140919	-5000119	Bottom
+-1140918	-5000119	Top
+-1140917	-5000119	Middle Elevation
+-1140916	-5000119	Reference Level
+-1140915	-5000113	Specification
+-1140914	-5000100	Vendor Code
+-1140913	-5000113	Weight
+-1140912	-5000213	Main Primary Diameter
+-1140911	-5000101	Angle
+-1140910	-5000210	Install Type
+-1140909	-5000113	Part Material
+-1140908	-5000210	OEM
+-1140907	-5000210	Product Name
+-1140906	-5000210	Product Short Description
+-1140905	-5000210	Product Size Description
+-1140904	-5000210	Product Material Description
+-1140903	-5000210	Product Specification Description
+-1140902	-5000210	Product Long Description
+-1140901	-5000210	Product Range
+-1140900	-5000210	Product Finish Description
+-1140766	-5000153	Structural Framing Type
+-1140764	-5000153	Angle
+-1140763	-5000153	Analytical Vertical Projection
+-1140762	-5000153	Start Release
+-1140761	-5000153	End Release
+-1140759	-5000119	Reference View
+-1140758	-5000119	Reference Other View
+-1140757	-5000100	Tag new members in view
+-1140756	-5000104	View Reference Tag
+-1140755	-5000119	Target view
+-1140754	-5000119	Bottom Constraint
+-1140753	-5000119	Top Constraint
+-1140752	-5000119	Bottom Offset
+-1140751	-5000119	Top Offset
+-1140746	-5000152	Structural Framing Type
+-1140744	-5000152	Angle
+-1140743	-5000152	Analytical Vertical Projection
+-1140742	-5000152	Start Release
+-1140741	-5000152	End Release
+-1140736	-5000151	Structural Framing Type
+-1140734	-5000151	Angle
+-1140732	-5000151	Start Release
+-1140731	-5000151	End Release
+-1140726	-5000150	Structural Framing Type
+-1140724	-5000150	Angle
+-1140722	-5000150	Start Release
+-1140721	-5000150	End Release
+-1140718	-5000100	Tag new members in view
+-1140717	-5000101	Non Bearing Offset
+-1140716	-5000112	Bearing Chord
+-1140715	-5000101	Span
+-1140714	-5000112	Stick Symbol Location
+-1140713	-5000103	Webs have symbolic cutback
+-1140712	-5000101	Truss Height
+-1140711	-5000103	Web Orientation
+-1140710	-5000112	Rotate Chords With Truss
+-1140709	-5000119	Reference Level
+-1140708	-5000119	End Level Offset
+-1140707	-5000119	Start Level Offset
+-1140706	-5000112	Bearing Vertical Justification
+-1140705	-5000112	Create Bottom Chord
+-1140704	-5000112	Create Top Chord
+-1140703	-5000112	Rotation Angle
+-1140702	-5000100	Engineering Type
+-1140700	-5000101	Truss Length
+-1140635	-5000128	State
+-1140634	-5000128	State
+-1140633	-5000128	State
+-1140532	-5000146	Z Translation - Spring
+-1140531	-5000146	Z Translation - Fixed
+-1140530	-5000147	Z Rotation - Spring
+-1140529	-5000147	Z Rotation - Fixed
+-1140528	-5000146	Y Translation - Spring
+-1140527	-5000146	Y Translation - Fixed
+-1140526	-5000147	Y Rotation - Spring
+-1140525	-5000147	Y Rotation - Fixed
+-1140524	-5000146	X Translation - Spring
+-1140523	-5000146	X Translation - Fixed
+-1140522	-5000147	X Rotation - Spring
+-1140521	-5000147	X Rotation - Fixed
+-1140520	-5000146	Z Spring Modulus
+-1140519	-5000146	Y Spring Modulus
+-1140518	-5000146	X Spring Modulus
+-1140517	-5000147	X Spring Modulus
+-1140516	-5000146	Z Spring Modulus
+-1140515	-5000146	Y Spring Modulus
+-1140514	-5000146	X Spring Modulus
+-1140513	-5000147	Z Spring Modulus
+-1140512	-5000147	Y Spring Modulus
+-1140511	-5000147	X Spring Modulus
+-1140510	-5000146	Z Spring Modulus
+-1140509	-5000146	Y Spring Modulus
+-1140508	-5000146	X Spring Modulus
+-1140507	-5000147	Z Rotation
+-1140506	-5000147	Y Rotation
+-1140505	-5000147	X Rotation
+-1140504	-5000146	Z Translation
+-1140503	-5000146	Y Translation
+-1140502	-5000146	X Translation
+-1140501	-5000128	Is Boundary Conditions External?
+-1140500	-5000128	Boundary Conditions Type
+-1140423	-5000100	Key Source
+-1140422	-5000100	Keynote
+-1140421	-5000100	Key Value
+-1140420	-5000100	Sheet Key Number
+-1140419	-5000100	Keynote Text
+-1140418	-5000100	Key Value
+-1140417	-5000105	Grade
+-1140416	-5000105	Species
+-1140415	-5000105	Thermal expansion coefficient
+-1140414	-5000105	Bending
+-1140413	-5000105	Shear modulus
+-1140412	-5000105	Poisson ratio
+-1140410	-5000105	Tension perpendicular to grain
+-1140409	-5000105	Shear parallel to grain
+-1140408	-5000105	Compression perpendicular to grain
+-1140407	-5000105	Compression parallel to grain
+-1140401	-5000105	Young modulus
+-1140400	-5000105	Material Type
+-1140363	-1	Category
+-1140362	-1	Category
+-1140361	-5000105	Volume
+-1140360	-5000105	Area
+-1140359	-5000105	As Paint
+-1140355	-5000105	Name
+-1140340	-5000113	Pipe Slope Options
+-1140339	-5000113	Fabrication Service
+-1140338	-5000113	Angle of Deflection
+-1140337	-5000101	Length
+-1140336	-5000113	Calculations
+-1140335	-5000113	Calculations
+-1140334	-5000113	System Type
+-1140333	-5000113	System Type
+-1140332	-5000100	Abbreviation
+-1140331	-5000104	Graphic Overrides
+-1140330	-5000113	Pipe Slope Definitions
+-1140329	-5000113	Engagement Length
+-1140328	-5000113	Flow Conversion Method
+-1140327	-5000113	Number of Elements
+-1140326	-5000113	System Equipment
+-1140325	-5000113	System Classification
+-1140324	-5000113	System Name
+-1140323	-5000105	Lightweight
+-1140322	-5000105	Behavior
+-1140321	-5000105	Resistance calculation strength
+-1140320	-5000105	Reduction factor for shear
+-1140319	-5000105	Minimum tensile strength
+-1140318	-5000105	Minimum yield stress
+-1140317	-5000105	Shear strength modification
+-1140316	-5000105	Shear reinforcement yield stress
+-1140315	-5000105	Bending reinforcement
+-1140314	-5000105	Concrete compression
+-1140312	-5000105	Thermal expansion coefficient Z
+-1140311	-5000105	Thermal expansion coefficient Y
+-1140310	-5000105	Thermal expansion coefficient X
+-1140309	-5000105	Unit weight
+-1140308	-5000105	Shear modulus Z
+-1140307	-5000105	Shear modulus Y
+-1140306	-5000105	Shear modulus X
+-1140305	-5000105	Poisson ratio Z
+-1140304	-5000105	Poisson ratio Y
+-1140303	-5000105	Poisson ratio X
+-1140302	-5000105	Young modulus Z
+-1140301	-5000105	Young modulus Y
+-1140300	-5000105	Young modulus X
+-1140284	-5000101	Maximum Size
+-1140283	-5000101	Minimum Size
+-1140282	-5000127	Pressure Drop
+-1140281	-5000113	Routing Preference
+-1140280	-5000168	Routing Preferences
+-1140279	-5000113	Segment Description
+-1140278	-5000113	Connection Type
+-1140277	-5000113	Pipe Segment
+-1140276	-5000205	Routing Preferences
+-1140275	-5000113	Vertical Offset value for parallel pipes
+-1140274	-5000113	Horizontal Offset value for parallel pipes
+-1140273	-5000113	Vertical Number for parallel pipes
+-1140272	-5000113	Horizontal Number for parallel pipes
+-1140271	-5000110	Vertical Offset value for parallel conduits
+-1140270	-5000110	Horizontal Offset value for parallel conduits
+-1140269	-5000110	Vertical Number for parallel conduits
+-1140268	-5000110	Horizontal Number for parallel conduits
+-1140266	-5000148	Orifice Size
+-1140265	-5000148	Temperature Rating
+-1140264	-5000148	K-Factor
+-1140263	-5000148	Pressure Class
+-1140262	-5000148	Orifice
+-1140261	-5000148	Coverage
+-1140260	-5000148	Response
+-1140259	-5000101	Shape
+-1140258	-5000101	Show Round
+-1140257	-5000113	Fixture Units
+-1140256	-5000119	Slope
+-1140255	-5000119	Slope
+-1140254	-5000119	Slope
+-1140253	-5000113	Volume
+-1140252	-5000113	WFU
+-1140251	-5000113	HWFU
+-1140250	-5000113	CWFU
+-1140249	-5000113	Flow Configuration
+-1140248	-5000113	Flow Direction
+-1140246	-5000127	Fixture Units
+-1140242	-5000113	Static Pressure
+-1140241	-5000113	Insulation Thickness
+-1140240	-5000119	Bottom Elevation
+-1140239	-5000119	Top Elevation
+-1140238	-5000101	Outside Diameter
+-1140237	-5000113	Invert Elevation
+-1140234	-5000113	Loss Method
+-1140233	-5000113	K Coefficient Table
+-1140232	-5000113	K Coefficient
+-1140231	-5000113	Cv Coefficient
+-1140230	-5000113	Loss Method
+-1140229	-5000113	K Coefficient Table
+-1140228	-5000113	K Coefficient
+-1140227	-5000113	Cv Coefficient
+-1140226	-5000127	Additional Flow
+-1140225	-5000113	Diameter
+-1140224	-5000119	Slope Percentage (%)
+-1140223	-5000113	Allow Slope Adjustments
+-1140222	-5000113	Flow Factor
+-1140221	-5000113	Flow Configuration
+-1140219	-5000113	Flow Direction
+-1140218	-5000113	Fluid Type
+-1140217	-5000113	Fluid Temperature
+-1140215	-5000113	Fluid Dynamic Viscosity
+-1140214	-5000113	Fluid Density
+-1140213	-5000127	Flow
+-1140212	-5000101	Inside Diameter
+-1140211	-5000127	Reynolds Number
+-1140210	-5000127	Relative Roughness
+-1140209	-5000127	Flow State
+-1140208	-5000127	Friction Factor
+-1140207	-5000127	Velocity
+-1140206	-5000127	Friction
+-1140205	-5000127	Pressure Drop
+-1140204	-5000113	Roughness
+-1140202	-5000113	Material
+-1140201	-5000113	Connection Type
+-1140200	-5000113	Schedule/Type
+-1140181	-5000125	Slot Index
+-1140180	-5000125	Ways
+-1140179	-5000125	Load Classification Abbreviation
+-1140178	-5000125	Phase Label
+-1140177	-5000125	Circuit Naming Index
+-1140176	-5000125	Connection Type
+-1140175	-5000125	Offset
+-1140174	-5000125	Path Mode
+-1140173	-5000125	Start Slot
+-1140172	-5000113	Connector Gender Type
+-1140171	-5000113	Connector Joint Type
+-1140170	-5000110	Panel Configuration
+-1140169	-5000173	Location
+-1140168	-5000100	Panel Schedule Name
+-1140167	-1	Template
+-1140166	-5000125	Current Phase C
+-1140165	-5000125	Current Phase B
+-1140164	-5000125	Current Phase A
+-1140163	-1	Description
+-1140162	-1	Estimated Demand Current
+-1140161	-1	Connected Current
+-1140160	-1	Estimated Demand (VA)
+-1140159	-1	Demand Factor
+-1140158	-1	Connected Load (VA)
+-1140157	-1	Load Classification
+-1140156	-5000110	Schedule Circuit Notes
+-1140155	-5000125	Number of Elements
+-1140154	-5000125	Frame
+-1140153	-5000125	Total Estimated Demand Current
+-1140152	-5000125	Total Connected Current
+-1140151	-5000125	Total Demand Factor
+-1140150	-5000110	Schedule Footer Notes
+-1140149	-5000110	Schedule Header Notes
+-1140148	-5000174	Number of Wires
+-1140147	-5000174	Number of Phases
+-1140146	-5000174	Neutral Rating
+-1140145	-5000174	Neutral Bus
+-1140144	-5000174	Ground Bus
+-1140143	-5000174	Bussing
+-1140142	-5000174	SubFeed Lugs
+-1140141	-5000174	Supply From
+-1140140	-5000174	MCB Rating
+-1140139	-5000174	Mains Type
+-1140138	-5000174	Feed
+-1140137	-5000101	Outside Diameter
+-1140136	-5000101	Inside Diameter
+-1140135	-5000101	Diameter(Trade Size)
+-1140134	-5000101	Width
+-1140133	-5000101	Height
+-1140132	-5000101	Length
+-1140131	-5000125	Load Sub-Classification Motor
+-1140130	-5000104	Shape
+-1140129	-1	Bend or Fitting
+-1140128	-5000100	Service Type
+-1140127	-5000101	Outside Diameter
+-1140126	-5000101	Inside Diameter
+-1140125	-5000119	Bottom Elevation
+-1140124	-5000119	Top Elevation
+-1140123	-5000101	Diameter(Trade Size)
+-1140122	-5000101	Width
+-1140121	-5000101	Height
+-1140120	-5000125	Load Classification
+-1140119	-5000130	Bend Radius Multiplier
+-1140118	-5000130	Standard
+-1140117	-1	Conduit Size Lookup
+-1140116	-5000101	Bend Radius
+-1140115	-5000101	Bend Radius
+-1140114	-5000101	Rung Height
+-1140113	-5000101	Rung Width
+-1140112	-5000101	Rung Space
+-1140111	-5000101	Thickness
+-1140110	-5000124	Switch ID
+-1140109	-5000125	Circuit Description
+-1140108	-5000125	Circuit Load Name
+-1140107	-5000125	Number of Conductors
+-1140106	-5000125	Tick Marks
+-1140104	-5000125	Panel
+-1140103	-5000125	Circuit Number
+-1140102	-5000125	Circuits
+-1140101	-5000125	# of Runs
+-1140100	-5000125	# of Hot Conductors
+-1140099	-5000125	# of Neutral Conductors
+-1140098	-5000125	# of Ground Conductors
+-1140097	-5000125	Type
+-1140096	-5000125	Elevation
+-1140094	-5000125	Hot Conductors
+-1140093	-5000125	Neutral Conductors
+-1140092	-5000125	Ground Conductors
+-1140091	-5000125	Share Neutral Conductor
+-1140090	-5000125	Share Ground Conductor
+-1140089	-5000125	Load Name
+-1140088	-5000125	Secondary Distribution System
+-1140087	-5000174	Circuit Naming
+-1140086	-5000174	Circuit Prefix Separator
+-1140085	-5000174	Circuit Prefix
+-1140084	-5000174	Modifications
+-1140083	-5000173	Enclosure
+-1140082	-5000174	Mains
+-1140081	-5000173	Mounting
+-1140080	-5000174	Short Circuit Rating
+-1140079	-5000174	Max Number of Single Pole Breakers
+-1140078	-5000173	Panel Name
+-1140077	-5000125	HVAC Total Estimated Demand
+-1140076	-5000125	HVAC Total Connected
+-1140075	-5000125	Lighting Total Estimated Demand
+-1140074	-5000125	Lighting Total Connected
+-1140073	-5000125	Power Total Estimated Demand
+-1140072	-5000125	Power Total Connected
+-1140071	-5000125	Other Total Estimated Demand
+-1140070	-5000125	Other Total Connected
+-1140069	-5000125	Total Estimated Demand
+-1140068	-5000125	Total Connected
+-1140067	-5000125	Load Classification
+-1140066	-5000125	Connected Load
+-1140065	-5000125	Estimated Demand Load
+-1140064	-5000174	Distribution System
+-1140063	-5000125	Line to Line Voltage
+-1140062	-5000125	Line to Ground Voltage
+-1140061	-5000125	Phase
+-1140060	-5000125	Configuration
+-1140059	-5000125	Wires
+-1140058	-5000125	Actual Voltage
+-1140057	-5000125	Minimum Voltage
+-1140056	-5000125	Maximum Voltage
+-1140055	-5000125	Apparent Load Phase C
+-1140054	-5000125	Apparent Load Phase B
+-1140053	-5000125	Apparent Load Phase A
+-1140052	-5000125	True Load Phase C
+-1140051	-5000125	True Load Phase B
+-1140050	-5000125	True Load Phase A
+-1140049	-5000125	True Current
+-1140048	-5000125	True Current Phase A
+-1140047	-5000125	True Current Phase B
+-1140046	-5000125	True Current Phase C
+-1140045	-5000125	Apparent Current
+-1140044	-5000125	Apparent Current Phase A
+-1140043	-5000125	Apparent Current Phase B
+-1140042	-5000125	Apparent Current Phase C
+-1140041	-5000125	Voltage Drop
+-1140040	-5000124	Calculate Coefficient of Utilization
+-1140039	-5000125	Length
+-1140038	-5000125	Rating
+-1140037	-5000125	Wire Size
+-1140036	-5000125	Wire Type
+-1140035	-5000124	Room Cavity Ratio
+-1140034	-5000159	Photometric Web File
+-1140033	-5000124	Average Estimated Illumination
+-1140032	-5000124	Floor Reflectance
+-1140031	-5000124	Wall Reflectance
+-1140030	-5000124	Ceiling Reflectance
+-1140029	-5000124	Lighting Calculation Workplane
+-1140028	-5000125	Material
+-1140027	-5000125	Temperature Rating
+-1140026	-5000125	Insulation
+-1140025	-5000125	Max Size
+-1140024	-5000125	Neutral Multiplier
+-1140023	-5000125	Neutral Included in Balanced Load
+-1140022	-5000125	Neutral Size
+-1140021	-5000125	Conduit Type
+-1140020	-5000125	Ambient Temperature
+-1140018	-5000125	System Type
+-1140014	-5000125	Load Classification
+-1140013	-5000125	True Load Phase 3
+-1140012	-5000125	True Load Phase 2
+-1140011	-5000125	True Load Phase 1
+-1140010	-5000125	True Load
+-1140009	-5000125	Power Factor State
+-1140008	-5000125	Power Factor
+-1140007	-5000125	Apparent Load Phase 3
+-1140006	-5000125	Apparent Load Phase 2
+-1140005	-5000125	Apparent Load Phase 1
+-1140004	-5000125	Apparent Load
+-1140003	-5000125	Balanced Load
+-1140002	-5000125	Voltage
+-1140001	-5000125	Number of Poles
+-1140000	-5000100	Connector Description
+-1139999	-1	Family
+-1139998	-1	Family and Type
+-1139997	-1	Type
+-1133908	-5000100	Private
+-1133907	-5000100	Notes
+-1133906	-5000100	History
+-1133905	-5000100	Status
+-1133904	-5000100	Label
+-1133903	-5000100	Creator
+-1133902	-5000100	Created
+-1133901	-5000100	Modified
+-1133900	-5000104	System Color Schemes
+-1133753	-5000104	Detail Level
+-1133752	-5000104	Host Length
+-1133751	-5000104	View Direction
+-1133750	-5000100	Component Type
+-1133603	-5000100	Design Option Set Id
+-1133602	-5000100	Name
+-1133601	-5000100	Primary Option Id
+-1133600	-5000100	Name
+-1133503	-1	Attached to
+-1133502	-1	Allowed View Types
+-1133501	-5000119	Origin Level Offset
+-1133500	-5000119	Reference Level
+-1133418	-5000104	Fill Pattern Graphics Overrides
+-1133417	-5000101	Engagement Length
+-1133416	-5000101	Inside Diameter
+-1133415	-5000101	Diameter
+-1133414	-5000130	Connector Type
+-1133413	-5000113	System Type
+-1133412	-5000100	Primary Connector
+-1133411	-5000100	Link Connector Index
+-1133410	-5000113	System Classification
+-1133409	-5000119	Angle
+-1133408	-5000113	System Classification
+-1133406	-5000100	Index
+-1133405	-5000104	Size on screen
+-1133404	-5000101	Height
+-1133403	-5000101	Width
+-1133401	-5000101	Radius
+-1133400	-5000101	Shape
+-1115974	-5000113	Gender Type
+-1115973	-5000113	Connection Type
+-1115958	-5000113	Part Type
+-1115520	-5000103	Modify Ranges of applicability
+-1114824	-5000171	Reports Folder Path
+-1114823	-5000100	Report Style
+-1114822	-5000114	Phase
+-1114821	-5000101	Volume
+-1114820	-5000101	Area
+-1114819	-5000129	Peak Latent Cooling Load
+-1114818	-5000127	Peak Airflow
+-1114817	-5000119	Reference Level
+-1114816	-5000127	Infiltration Airflow
+-1114815	-5000127	Infiltration Airflow per area
+-1114814	-5000127	Outdoor Airflow
+-1114813	-5000127	Outdoor Airflow per person
+-1114812	-5000127	Outdoor Airflow per area
+-1114811	-5000127	Air Changes per Hour
+-1114810	-5000129	Power Load
+-1114809	-5000129	Lighting Load
+-1114808	-5000129	Occupancy Load
+-1114807	-5000129	Power Load per area
+-1114806	-5000129	Lighting Load per area
+-1114805	-5000129	Latent Heat Gain per person
+-1114804	-5000129	Sensible Heat Gain per person
+-1114803	-5000129	Area per person
+-1114802	-5000127	Airflow per area
+-1114801	-5000129	Peak Cooling Load
+-1114800	-5000129	Peak Heating Load
+-1114711	-5000129	Dehumidification Set Point
+-1114710	-5000129	Humidification Set Point
+-1114709	-5000129	Cooling Set Point
+-1114708	-5000129	Heating Set Point
+-1114707	-5000119	Top Offset
+-1114706	-5000119	Level Offset
+-1114705	-5000119	Level
+-1114702	-5000127	Calculated Hydronic Cooling Flow
+-1114701	-5000127	Calculated Hydronic Heating Flow
+-1114700	-5000129	Space Outdoor Air Option
+-1114400	-5000129	Opening Type
+-1114399	-1	Room Calculation Point
+-1114398	-1	Column Distance
+-1114397	-1	Row Distance
+-1114396	-1	Column
+-1114395	-1	Row
+-1114394	-5000168	Bend
+-1114393	-5000168	Horizontal Bend
+-1114392	-5000168	Multi Shape Transition Oval to Round
+-1114391	-5000168	Multi Shape Transition Rect to Oval
+-1114390	-5000168	Tee Down
+-1114389	-5000168	Tee Up
+-1114388	-5000168	Vertical Outside Bend
+-1114387	-5000168	Vertical Inside Bend
+-1114386	-5000220	Export Category
+-1114385	-5000217	Export Complexity
+-1114384	-5000129	Zone
+-1114383	-5000170	Export Default Values
+-1114382	-5000161	Plenum Cooling Load
+-1114381	-5000161	Skylight Cooling Load
+-1114380	-5000161	Partition Cooling Load
+-1114379	-5000161	Door Cooling Load
+-1114378	-5000161	Window Cooling Load
+-1114377	-5000161	Wall Cooling Load
+-1114376	-5000161	Roof Cooling Load
+-1114375	-5000161	Skylight Area
+-1114374	-5000161	Partition Area
+-1114373	-5000161	Floor Area
+-1114372	-5000161	Door Area
+-1114371	-5000161	Window Area
+-1114370	-5000161	Wall Area
+-1114369	-5000161	Roof Area
+-1114368	-5000129	Show a Coordinate System Symbol for each Surface
+-1114367	-5000129	Show Room Bounding Elements Dimmed and Underlay
+-1114366	-5000129	Show Shading Surfaces
+-1114365	-5000129	Show Surfaces Transparent
+-1114364	-5000129	Show Surfaces
+-1114363	-5000129	Show Inner Space Shells
+-1114362	-5000129	Show Analytical Space Shells
+-1114361	-5000129	Show Analytical Building Shell
+-1114360	-5000113	Lining Thickness
+-1114359	-5000113	Insulation Thickness
+-1114358	-5000113	Insulation Thickness
+-1114357	-5000129	Unoccupied Cooling Set Point
+-1114356	-5000129	Closing Time
+-1114355	-5000129	Opening Time
+-1114353	-5000129	Electrical Equipment Radiant
+-1114351	-5000129	Power Schedule
+-1114350	-5000129	Lighting Schedule
+-1114349	-5000129	Occupancy Schedule
+-1114348	-5000129	Infiltration Airflow per area
+-1114347	-5000129	Carpeting
+-1114345	-5000129	Air Volume Calculation Type
+-1114344	-5000129	Coil Bypass
+-1114343	-5000129	Calculated Area per Cooling Load
+-1114342	-5000129	Calculated Area per Heating Load
+-1114341	-5000129	Use Air Changes Per Hour
+-1114340	-5000129	Use Outside Air Per Area
+-1114339	-5000129	Use Outside Air Per Person
+-1114338	-5000129	Use Dehumidification Set Point
+-1114337	-5000129	Use Humidification Set Point
+-1114336	-5000129	Outdoor Air Information
+-1114335	-5000129	Cooling Information
+-1114334	-5000129	Heating Information
+-1114333	-5000217	Sliver Space Tolerance
+-1114332	-5000101	Gross Area
+-1114331	-5000101	Gross Volume
+-1114330	-5000129	Plenum
+-1114329	-5000129	Occupiable
+-1114328	-5000100	Room Number
+-1114327	-5000100	Room Name
+-1114326	-5000114	Phase
+-1114325	-1	Phase Id
+-1114324	-5000171	Project Phase
+-1114323	-5000127	Calculated Supply Airflow per area
+-1114322	-5000129	Calculated Cooling Load per area
+-1114321	-5000129	Calculated Heating Load per area
+-1114320	-5000127	Calculated Supply Airflow per area
+-1114319	-5000129	Calculated Cooling Load per area
+-1114318	-5000129	Calculated Heating Load per area
+-1114317	-5000119	Level
+-1114316	-5000129	Outdoor Air Rate / Air Changes per Hour
+-1114315	-5000129	Outdoor Air per Area
+-1114314	-5000129	Outdoor Air per Person
+-1114313	-5000129	Dehumidification Set Point
+-1114312	-5000129	Humidification Set Point
+-1114311	-5000129	Cooling Air Temperature
+-1114310	-5000129	Heating Air Temperature
+-1114309	-5000129	Cooling Set Point
+-1114308	-5000129	Heating Set Point
+-1114307	-5000127	Calculated Supply Airflow
+-1114306	-5000129	Calculated Cooling Load
+-1114305	-5000129	Calculated Heating Load
+-1114304	-5000129	Service Type
+-1114303	-5000101	Occupied Volume
+-1114302	-5000101	Perimeter
+-1114301	-5000101	Occupied Area
+-1114300	-5000100	Name
+-1114299	-5000129	Update Surfaces
+-1114296	-5000103	Internal Shading Factor
+-1114295	-5000103	Internal Shading Factor
+-1114293	-5000171	Ground Plane
+-1114292	-5000129	Origin (Z)
+-1114291	-5000129	Origin (Y)
+-1114290	-5000129	Origin (X)
+-1114289	-5000129	Azimuth
+-1114288	-5000129	Tilt
+-1114287	-5000129	CADObjectID
+-1114286	-5000129	Adjacent Space Id (2)
+-1114285	-5000129	Adjacent Space Id (1)
+-1114284	-5000129	Electrical Loads
+-1114283	-5000129	People
+-1114282	-5000169	Location
+-1114261	-5000129	Actual Lighting Load per area
+-1114260	-5000129	Actual Power Load per area
+-1114259	-5000129	Heat Load Values
+-1114258	-5000129	Lighting Load Units
+-1114257	-5000129	Power Load Units
+-1114256	-5000129	Design Cooling Load
+-1114255	-5000129	Calculated Cooling Load
+-1114254	-5000129	Design Heating Load
+-1114253	-5000129	Calculated Heating Load
+-1114252	-5000127	Return Airflow
+-1114251	-5000129	Construction Type
+-1114249	-5000221	Schematic Types
+-1114248	-5000217	Building Service
+-1114247	-5000129	Area
+-1114246	-5000129	Surface Type
+-1114245	-5000129	Surface Name
+-1114243	-1	Maintain Annotation Orientation
+-1114242	-5000104	Use Annotation Scale
+-1114241	-5000174	Electrical Data
+-1114240	-5000101	Size
+-1114239	-5000129	Sensible Heat Gain per person
+-1114238	-1	IsCustom
+-1114237	-1	Connector Offset
+-1114236	-1	Lookup Table Name
+-1114230	-5000129	Specified Lighting Load
+-1114229	-5000129	Specified Power Load
+-1114226	-5000129	Actual Lighting Load
+-1114225	-5000129	Actual Power Load
+-1114224	-5000129	Base Lighting Load on
+-1114223	-5000129	Base Power Load on
+-1114222	-5000125	Design Other Load per area
+-1114221	-5000125	Design HVAC Load per area
+-1114220	-5000129	Specified Lighting Load per area
+-1114219	-5000129	Specified Power Load per area
+-1114218	-5000159	Ballast Loss
+-1114217	-5000159	Total Light Loss Factor
+-1114216	-5000124	Coefficient of Utilization
+-1114215	-5000101	Takeoff Fixed Length
+-1114214	-5000101	Takeoff Length Projection
+-1114213	-5000101	Takeoff Length
+-1114212	-5000101	OffsetHeight
+-1114211	-5000101	OffsetWidth
+-1114206	-5000113	Part Type
+-1114197	-5000129	Energy Settings
+-1114196	-5000127	Actual Exhaust Airflow
+-1114195	-5000127	Actual Return Airflow
+-1114194	-5000127	Actual Supply Airflow
+-1114189	-5000129	Latent Heat Gain per person
+-1114188	-5000129	Total Heat Gain per person
+-1114180	-5000127	Calculated Supply Airflow
+-1114178	-5000127	Specified Exhaust Airflow
+-1114177	-5000127	Specified Return Airflow
+-1114176	-5000127	Specified Supply Airflow
+-1114175	-5000129	Area per Person
+-1114174	-5000129	Number of People
+-1114173	-5000129	Occupancy Unit
+-1114172	-5000129	Space Type
+-1114171	-5000129	Condition Type
+-1114169	-5000129	Postal Code
+-1114168	-5000219	Building Type
+-1114167	-5000113	Size Lock
+-1114166	-5000127	Additional Flow
+-1114165	-5000113	Max Width
+-1114150	-5000113	Loss Method Settings
+-1114149	-5000113	Loss Method Settings
+-1114148	-5000168	Cap
+-1114147	-5000113	Loss Method
+-1114146	-5000113	Loss Method
+-1114145	-5000168	Flange
+-1114144	-5000113	Size
+-1114143	-5000113	Size
+-1114142	-5000113	Static Pressure
+-1114141	-5000113	Flex Pipe
+-1114140	-5000113	Pipe Type
+-1114139	-5000113	Flex Duct Type
+-1114138	-5000113	Duct Type
+-1114136	-5000113	Loss Method
+-1114135	-5000113	Flex Duct Type
+-1114134	-5000168	Preferred Junction Type
+-1114133	-5000168	Tap
+-1114132	-5000119	Middle Elevation
+-1114131	-5000168	Union
+-1114129	-5000113	Hydraulic Diameter
+-1114128	-5000127	Reynolds number
+-1114127	-5000113	Equivalent Diameter
+-1114126	-5000168	Multi Shape Transition Rect to Round
+-1114125	-5000113	Section
+-1114124	-5000113	Loss Coefficient
+-1114123	-5000127	Max Flow
+-1114122	-5000127	Min Flow
+-1114121	-5000127	Velocity Pressure
+-1114120	-5000113	Area
+-1114119	-5000113	Max Height
+-1114118	-5000113	Lining Thickness
+-1114117	-5000113	Insulation Thickness
+-1114116	-5000127	Friction
+-1114114	-5000103	Roughness
+-1114113	-5000168	Transition
+-1114112	-5000168	Cross
+-1114111	-5000168	Tee
+-1114110	-5000168	Elbow
+-1114108	-5000127	Pressure Drop
+-1114107	-5000127	Velocity
+-1114106	-5000119	Vertical Justification
+-1114105	-5000119	Horizontal Justification
+-1114104	-5000127	Flow
+-1114103	-5000101	Diameter
+-1114102	-5000101	Height
+-1114101	-5000101	Width
+-1114005	-5000104	Flex Pattern
+-1114003	-5000119	End Middle Elevation
+-1114002	-5000119	Start Middle Elevation
+-1114001	-5000119	End Level
+-1114000	-5000119	Reference Level
+-1060014	-5000216	All non 0 forces at end
+-1060013	-5000216	All non 0 forces at start
+-1060012	-5000216	Member Forces
+-1060011	-5000216	End Mz
+-1060010	-5000216	End My
+-1060009	-5000216	End Mx
+-1060008	-5000216	End Fz
+-1060007	-5000216	End Fy
+-1060006	-5000216	End Fx
+-1060005	-5000216	Start Mz
+-1060004	-5000216	Start My
+-1060003	-5000216	Start Mx
+-1060002	-5000216	Start Fz
+-1060001	-5000216	Start Fy
+-1060000	-5000216	Start Fx
+-1050441	-5000194	Path Length
+-1050440	-5000193	Show Node Numbers
+-1050439	-5000193	Total Number of Nodes
+-1050437	-1	Display Nodes
+-1050436	-1	Display Path
+-1050435	-5000193	Justification
+-1050434	-5000193	Number
+-1050433	-5000193	Flip Direction
+-1050432	-5000193	Measurement Type
+-1050431	-5000193	Maximum Distance
+-1050430	-5000193	Minimum Distance
+-1050429	-5000193	End Indent
+-1050428	-5000193	Beginning Indent
+-1050427	-5000193	Distance
+-1050426	-5000193	Layout
+-1019203	-1	Alignment Label Set End Station
+-1019202	-1	Alignment Label Set Start Station
+-1019201	-1	Alignment Station Label Set Interval
+-1019200	-1	Alignment Station Label Set Offset
+-1019121	-5000101	Bottom Width
+-1019120	-5000101	Top Width
+-1019110	-5000119	Override Type Properties
+-1019107	-5000228	Width Measured At
+-1019106	-5000228	Default Interior Angle
+-1019105	-5000228	Default Exterior Angle
+-1019103	-5000119	Interior Angle
+-1019102	-5000119	Exterior Angle
+-1019101	-5000119	Angle From Vertical
+-1019100	-5000119	Cross-Section
+-1019011	-5000131	IfcOrganization
+-1019010	-5000131	IfcApplicationVersion
+-1019009	-5000131	IfcApplicationName
+-1019008	-5000100	Organization Name
+-1019007	-5000100	Organization Description
+-1019006	-5000100	Building Name
+-1019005	-5000100	Author
+-1019004	-5000131	IfcSite GUID
+-1019003	-5000131	IfcBuilding GUID
+-1019002	-5000131	IfcProject GUID
+-1019001	-5000131	Type IfcGUID
+-1019000	-5000131	IfcGUID
+-1018850	-5000100	Name
+-1018805	-1	Automatic Cutback for Beams and Braces
+-1018804	-5000112	Base Connection
+-1018803	-5000112	Top Connection
+-1018802	-5000112	End Connection
+-1018801	-5000112	Start Connection
+-1018800	-1	Apply to
+-1018505	-5000103	Bar Type
+-1018503	-5000112	Reinforcement Volume
+-1018502	-5000112	Estimated Reinforcement Volume
+-1018501	-5000112	Estimated Total Bar Length
+-1018500	-5000112	Estimated Number of Bars
+-1018362	-5000143	Alternating Bar - Shape
+-1018361	-5000143	Primary Bar - Shape
+-1018360	-1	Offset
+-1018359	-1	Length (Alternating Bar)
+-1018358	-1	Length (Primary Bar)
+-1018357	-1	Top (Alternating Bar)
+-1018356	-1	End Hook Angle Alternating
+-1018355	-1	End Hook Angle Primary
+-1018354	-1	Summary
+-1018353	-1	Bottom (Alternating Bar)
+-1018352	-1	Bottom (Primary Bar)
+-1018351	-1	Start Hook Angle Alternating
+-1018350	-1	Start Hook Angle Primary
+-1018322	-5000103	Additional Offset
+-1018321	-5000143	Alternating Bar - Offset
+-1018320	-5000143	Alternating Bar - End Hook Orientation
+-1018319	-5000143	Primary Bar - End Hook Orientation
+-1018318	-5000143	Alternating Bar - End Hook Orientation
+-1018317	-5000143	Primary Bar - End Hook Orientation
+-1018316	-5000143	Alternating Bar - End Hook Type
+-1018315	-5000143	Primary Bar - End Hook Type
+-1018314	-5000143	Alternating Bar - Hook Orientation
+-1018313	-5000143	Primary Bar - Hook Orientation
+-1018312	-5000143	Alternating Bar - Hook Orientation
+-1018311	-5000143	Primary Bar - Hook Orientation
+-1018310	-5000143	Alternating Bar - Start Hook Type
+-1018309	-5000143	Primary Bar - Start Hook Type
+-1018308	-5000143	Alternating Bar - Length
+-1018307	-5000143	Primary Bar - Length
+-1018306	-5000143	Alternating Bar - Type
+-1018305	-5000143	Primary Bar - Type
+-1018304	-5000143	Alternating Bars
+-1018303	-5000143	Number Of Bars
+-1018302	-5000143	Bar Spacing
+-1018301	-5000143	Face
+-1018300	-5000143	Face
+-1018274	-5000103	Deformation
+-1018273	-5000143	Bottom/Interior Minor Spacing
+-1018272	-5000143	Bottom/Interior Major Spacing
+-1018271	-5000143	Top/Exterior Minor Spacing
+-1018270	-5000143	Top/Exterior Major Spacing
+-1018269	-5000143	Bottom/Interior Minor Number Of Lines
+-1018268	-5000143	Bottom/Interior Major Number Of Lines
+-1018267	-5000143	Top/Exterior Minor Number Of Lines
+-1018266	-5000143	Top/Exterior Major Number Of Lines
+-1018257	-5000143	Bottom/Interior Minor Bar Type
+-1018256	-5000143	Bottom/Interior Major Bar Type
+-1018255	-5000143	Top/Exterior Minor Bar Type
+-1018254	-5000143	Top/Exterior Major Bar Type
+-1018253	-5000143	Bottom/Interior Minor Direction
+-1018252	-5000143	Bottom/Interior Major Direction
+-1018251	-5000143	Top/Exterior Minor Direction
+-1018250	-5000143	Top/Exterior Major Direction
+-1018225	-5000143	Interior Minor Spacing
+-1018224	-5000143	Interior Major Spacing
+-1018223	-5000143	Exterior Minor Spacing
+-1018222	-5000143	Exterior Major Spacing
+-1018221	-5000143	Interior Minor Number Of Lines
+-1018220	-5000143	Interior Major Number Of Lines
+-1018219	-5000143	Exterior Minor Number Of Lines
+-1018218	-5000143	Exterior Major Number Of Lines
+-1018217	-5000143	Interior Minor Hook Type
+-1018216	-5000143	Interior Major Hook Type
+-1018215	-5000143	Exterior Minor Hook Type
+-1018214	-5000143	Exterior Major Hook Type
+-1018213	-5000143	Interior Minor Hook Orientation
+-1018212	-5000143	Interior Major Hook Orientation
+-1018211	-5000143	Exterior Minor Hook Orientation
+-1018210	-5000143	Exterior Major Hook Orientation
+-1018209	-5000143	Interior Minor Bar Type
+-1018208	-5000143	Interior Major Bar Type
+-1018207	-5000143	Exterior Minor Bar Type
+-1018206	-5000143	Exterior Major Bar Type
+-1018205	-5000143	Interior Minor Direction
+-1018204	-5000143	Interior Major Direction
+-1018203	-5000143	Exterior Minor Direction
+-1018200	-5000143	Exterior Major Direction
+-1018124	-5000143	Bottom Minor Spacing
+-1018123	-5000143	Bottom Major Spacing
+-1018122	-5000143	Top Minor Spacing
+-1018121	-5000143	Top Major Spacing
+-1018120	-5000143	Bottom Minor Number Of Lines
+-1018119	-5000143	Bottom Major Number Of Lines
+-1018118	-5000143	Top Minor Number Of Lines
+-1018117	-5000143	Top Major Number Of Lines
+-1018116	-5000143	Bottom Minor Hook Type
+-1018115	-5000143	Bottom Major Hook Type
+-1018114	-5000143	Top Minor Hook Type
+-1018113	-5000143	Top Major Hook Type
+-1018112	-5000143	Bottom Minor Hook Orientation
+-1018111	-5000143	Bottom Major Hook Orientation
+-1018110	-5000143	Top Minor Hook Orientation
+-1018109	-5000143	Top Major Hook Orientation
+-1018108	-5000143	Bottom Minor Bar Type
+-1018107	-5000143	Bottom Major Bar Type
+-1018106	-5000143	Top Minor Bar Type
+-1018105	-5000143	Top Major Bar Type
+-1018104	-5000143	Bottom Minor Direction
+-1018103	-5000143	Bottom Major Direction
+-1018102	-5000143	Top Minor Direction
+-1018100	-5000143	Top Major Direction
+-1018055	-5000104	Hook Angle Top
+-1018054	-5000104	Hook Angle Bottom
+-1018053	-5000104	Hook Angle Right
+-1018052	-5000104	Hook Angle Left
+-1018051	-5000104	Bars In Minor Direction
+-1018050	-5000104	Bars In Major Direction
+-1018027	-5000103	Additional Interior Cover Offset
+-1018026	-5000103	Additional Exterior Cover Offset
+-1018025	-5000103	Additional Bottom Cover Offset
+-1018024	-5000103	Additional Top Cover Offset
+-1018023	-5000143	Top and Bottom Minor Layers Match
+-1018022	-5000143	Top and Bottom Major Layers Match
+-1018021	-5000143	Bottom Major and Minor Layers Match
+-1018020	-5000143	Top Major and Minor Layers Match
+-1018019	-1	Minor, Both Faces (Brief)
+-1018018	-1	Minor, Both Faces
+-1018017	-1	Major, Both Faces (Brief)
+-1018016	-1	Major, Both Faces
+-1018015	-1	Bottom/Interior Minor (Brief)
+-1018014	-1	Bottom/Interior Minor
+-1018013	-1	Bottom/Interior Major (Brief)
+-1018012	-1	Bottom/Interior Major
+-1018011	-1	Top/Exterior Minor (Brief)
+-1018010	-1	Top/Exterior Minor
+-1018009	-1	Top/Exterior Major (Brief)
+-1018008	-1	Top/Exterior Major
+-1018007	-5000103	Rebar Cover Bottom/Interior
+-1018006	-5000103	Rebar Cover Top/Exterior
+-1018005	-5000103	Override Area Reinforcement Settings
+-1018003	-1	Layer Summary (Brief)
+-1018002	-1	Layer Summary
+-1018001	-5000103	Layout Rule
+-1018000	-5000103	Rebar Cover Side/Edge
+-1017739	-5000103	Offset along wire direction
+-1017738	-5000103	Wire distance
+-1017737	-5000103	Wire length
+-1017736	-5000103	Wire type
+-1017734	-5000103	Longitudinal Cut Length
+-1017733	-5000100	Shared family key
+-1017732	-5000103	Cut by Host Cover
+-1017731	-1	Straight Wires Location
+-1017730	-1	Fixed offset
+-1017729	-5000103	Bend Direction
+-1017728	-5000162	Tag Component Reference
+-1017727	-1	D_Right
+-1017726	-1	D_Left
+-1017725	-1	D_Bottom
+-1017724	-1	D_Top
+-1017723	-1	Right
+-1017722	-1	Left
+-1017721	-1	Bottom
+-1017720	-1	Top
+-1017713	-5000100	Tag new members in view
+-1017712	-5000112	Cut Sheet Mass
+-1017711	-5000112	Total Sheet Mass
+-1017710	-5000101	Cut Overall Width
+-1017709	-5000101	Cut Overall Length
+-1017708	-5000103	Additional Cover Offset
+-1017707	-5000101	Minor Lap Splice Length
+-1017706	-5000101	Major Lap Splice Length
+-1017705	-5000103	Location
+-1017704	-5000103	Lap Splice Position
+-1017703	-5000103	Location
+-1017702	-5000103	Location
+-1017701	-5000103	Fabric Sheet
+-1017625	-5000101	Bend Diameter
+-1017624	-5000112	Sheet Mass per Unit Area
+-1017623	-5000112	Minor Reinforcement Area
+-1017622	-5000112	Major Reinforcement Area
+-1017621	-5000112	Sheet Mass
+-1017620	-5000143	Minor Spacing
+-1017619	-5000143	Minor Number of Wires
+-1017618	-5000143	Minor Layout Pattern
+-1017617	-5000143	Minor End Overhang
+-1017616	-5000143	Minor Start Overhang
+-1017615	-5000143	Width
+-1017614	-5000143	Overall Width
+-1017613	-5000143	Major Spacing
+-1017612	-5000143	Major Number of Wires
+-1017611	-5000143	Major Layout Pattern
+-1017610	-5000143	Major End Overhang
+-1017609	-5000143	Major Start Overhang
+-1017608	-5000143	Length
+-1017607	-5000143	Overall Length
+-1017606	-5000103	Default Minor Lap Splice Length
+-1017605	-5000103	Default Major Lap Splice Length
+-1017604	-5000103	Minor Direction Wire Type
+-1017603	-5000103	Major Direction Wire Type
+-1017602	-5000105	Physical Material Asset
+-1017601	-5000101	Nominal Diameter
+-1017065	-5000144	Quantity By Rebar Set
+-1017064	-5000101	Minimum bar length
+-1017063	-5000101	Maximum bar length
+-1017062	-5000103	Maxim Suffix
+-1017061	-5000103	Minim Suffix
+-1017060	-5000103	Rebar Number Suffix
+-1017057	-5000144	Distribution Type
+-1017056	-5000112	Can host rebar
+-1017055	-5000100	Host Category
+-1017054	-5000103	End Tangent Hook Length
+-1017053	-5000103	Start Tangent Hook Length
+-1017052	-1	INTERNAL: Multiplanar End Connector
+-1017051	-1	INTERNAL: Multiplanar Start Connector
+-1017050	-1	INTERNAL: Multiplanar Duplicate
+-1017049	-1	INTERNAL: Multiplanar
+-1017048	-5000103	Out of Plane Bend Diameter
+-1017047	-5000103	Stirrup/Tie Attachment
+-1017046	-5000103	Stirrup/Tie Attachment
+-1017045	-5000103	Base Finishing Turns
+-1017044	-5000103	Top Finishing Turns
+-1017043	-5000103	Height
+-1017042	-5000103	Pitch
+-1017041	-5000101	Standard Hook Bend Diameter
+-1017040	-5000144	Include Last Bar
+-1017039	-5000144	Include First Bar
+-1017038	-5000103	Bend Diameter
+-1017037	-5000103	Bar Diameter
+-1017036	-5000103	End Hook Offset Length
+-1017035	-5000103	End Hook Length
+-1017034	-5000103	Start Hook Offset Length
+-1017033	-5000103	Start Hook Length
+-1017032	-5000103	Schedule Mark
+-1017028	-5000103	Rounding Overrides
+-1017027	-5000103	Rounding Overrides
+-1017026	-5000103	Style
+-1017024	-5000103	Hook At End
+-1017023	-5000103	Hook At Start
+-1017022	-5000103	Style
+-1017021	-5000103	Allowable Rebar Bar Types
+-1017020	-5000101	Maximum Bend Radius
+-1017019	-5000101	Stirrup/Tie Bend Diameter
+-1017018	-5000101	Hook Lengths
+-1017017	-5000101	Style
+-1017016	-5000101	Bar Length
+-1017015	-5000103	Shape
+-1017014	-5000104	View Visibility States
+-1017013	-5000144	Spacing
+-1017012	-5000144	Quantity
+-1017011	-5000144	Layout Rule
+-1017010	-5000101	Standard Bend Diameter
+-1017009	-5000103	Hook Orientation At End
+-1017008	-5000103	Hook At End
+-1017007	-5000103	Hook Orientation At Start
+-1017006	-5000103	Hook At Start
+-1017005	-5000101	Total Bar Length
+-1017004	-5000101	Extension Multiplier
+-1017003	-5000101	Hook Angle
+-1017002	-5000104	Subcategory
+-1017000	-5000101	Bar Diameter
+-1016021	-1	Location line to align
+-1016019	-1	Copy openings
+-1016018	-1	Copy openings/inserts
+-1016017	-1	Copy windows/doors/openings
+-1016016	-1	Parameters
+-1016015	-1	Phases
+-1016011	-1	Reuse Grids with the same name
+-1016010	-1	Reuse Levels with the same name
+-1016009	-1	Split Columns by Levels
+-1016008	-1	Reuse matching Grids
+-1016007	-1	Reuse matching Levels
+-1016006	-1	Offset Level
+-1016005	-1	Add suffix to Level Name
+-1016004	-1	Add prefix to Level Name
+-1016003	-1	Add suffix to Grid Name
+-1016002	-1	Add prefix to Grid Name
+-1015259	-5000100	Name
+-1015256	-1	Factor
+-1015255	-5000100	Name
+-1015254	-5000100	Name
+-1015253	-1	Category
+-1015252	-1	Nature
+-1015251	-1	Case Number
+-1015250	-5000100	Name
+-1015207	-5000104	Area force scale
+-1015206	-5000104	Linear force scale
+-1015205	-5000104	Distance between arrows
+-1015204	-5000104	Moment scale
+-1015203	-5000104	Moment arrowhead (alternate)
+-1015202	-5000104	Moment arrowhead
+-1015201	-5000104	Force scale
+-1015200	-5000104	Force arrowhead
+-1015084	-5000100	Description
+-1015083	-5000100	Comments
+-1015082	-5000128	Nature
+-1015080	-5000128	All non 0 loads
+-1015070	-5000128	Projected Load
+-1015069	-1	Area
+-1015068	-5000211	Fz 3
+-1015067	-5000211	Fy 3
+-1015066	-5000211	Fx 3
+-1015065	-5000211	Fz 2
+-1015064	-5000211	Fy 2
+-1015063	-5000211	Fx 2
+-1015062	-5000211	Fz 1
+-1015061	-5000211	Fy 1
+-1015060	-5000211	Fx 1
+-1015043	-1	Length
+-1015042	-5000128	Projected Load
+-1015041	-5000212	Mz 2
+-1015040	-5000212	My 2
+-1015039	-5000212	Mx 2
+-1015038	-5000212	Mz 1
+-1015037	-5000212	My 1
+-1015036	-5000212	Mx 1
+-1015035	-5000211	Fz 2
+-1015034	-5000211	Fy 2
+-1015033	-5000211	Fx 2
+-1015032	-5000211	Fz 1
+-1015031	-5000211	Fy 1
+-1015030	-5000211	Fx 1
+-1015015	-5000212	Mz
+-1015014	-5000212	My
+-1015013	-5000212	Mx
+-1015012	-5000211	Fz
+-1015011	-5000211	Fy
+-1015010	-5000211	Fx
+-1015006	-1	Is Hosted
+-1015005	-1	Is Reaction
+-1015004	-1	Is created by API
+-1015003	-5000128	Uniform Load
+-1015001	-5000128	Orient to
+-1015000	-5000128	Load Case
+-1014004	-1	Right
+-1014003	-1	Left
+-1014002	-1	Bottom
+-1014001	-1	Top
+-1014000	-1	Span Direction
+-1013451	-5000145	Analytical Model Correct
+-1013450	-5000192	Physical Material Asset
+-1013448	-5000119	Location Mark
+-1013447	-5000145	Code Checking
+-1013446	-5000100	Node Number
+-1013445	-5000100	Foundation Number
+-1013444	-5000100	Surface Number
+-1013443	-5000100	Member Number
+-1013442	-1	Enable cutting in views
+-1013441	-5000112	Can host rebar
+-1013440	-5000112	Rebar Cover
+-1013439	-5000112	Rebar Cover - Bottom Face
+-1013438	-5000112	Rebar Cover - Top Face
+-1013437	-5000112	Rebar Cover - Other Faces
+-1013436	-5000112	Rebar Cover - Interior Face
+-1013435	-5000112	Rebar Cover - Exterior Face
+-1013434	-1	Length
+-1013433	-5000100	Name
+-1013432	-5000120	Clear Spacing
+-1013431	-5000120	Fixed Spacing
+-1013430	-5000120	Maximum Spacing
+-1013429	-1	Wall offset
+-1013427	-5000119	3D
+-1013419	-5000120	Beam Type (No Family Name)
+-1013418	-1	Beam System Tag Direction
+-1013417	-1	Right
+-1013416	-1	Left
+-1013415	-5000120	Num. of Beams With Same Type
+-1013414	-5000119	Lateral Justification
+-1013413	-5000119	z-Direction Justification
+-1013412	-1	Wall offset
+-1013411	-5000120	Beam Type
+-1013410	-5000120	Layout Rule
+-1013409	-5000120	Justification
+-1013408	-5000120	Centerline Spacing
+-1013407	-5000120	Number of Lines
+-1013405	-5000127	Flow
+-1013391	-5000164	Belt Measurement
+-1013390	-5000163	Belt Measurement
+-1013389	-5000164	Use Curve Distance
+-1013388	-5000163	Use Curve Distance
+-1013387	-5000164	Adjust for Mullion Size
+-1013386	-5000163	Adjust for Mullion Size
+-1013385	-5000164	Belt Measurement
+-1013384	-5000163	Belt Measurement
+-1013383	-5000164	Offset
+-1013382	-5000163	Offset
+-1013380	-5000164	Grid Rotation
+-1013379	-5000163	Grid Rotation
+-1013377	-5000164	Number
+-1013376	-5000163	Number
+-1013375	-5000164	Justification
+-1013374	-5000163	Justification
+-1013373	-5000164	Distance
+-1013372	-5000163	Distance
+-1013371	-5000164	Layout
+-1013370	-5000163	Layout
+-1013369	-5000136	Measurement Line
+-1013368	-5000134	Measurement Line
+-1013367	-1	Curtain version
+-1013366	-5000141	Padding
+-1013354	-5000141	Use Curve Distance
+-1013352	-5000141	Number
+-1013351	-5000141	Spacing
+-1013350	-5000141	Layout
+-1013349	-5000136	Use Curve Distance
+-1013348	-5000134	Use Curve Distance
+-1013347	-5000136	Adjust for Mullion Size
+-1013346	-5000134	Adjust for Mullion Size
+-1013345	-5000136	Measurement Line
+-1013344	-5000134	Measurement Line
+-1013343	-5000136	Offset
+-1013342	-5000134	Offset
+-1013340	-5000136	Angle
+-1013339	-5000134	Angle
+-1013337	-5000136	Number
+-1013336	-5000134	Number
+-1013335	-5000136	Justification
+-1013334	-5000134	Justification
+-1013333	-5000136	Spacing
+-1013332	-5000134	Spacing
+-1013331	-5000136	Layout
+-1013330	-5000134	Layout
+-1013319	-5000135	Use Curve Distance
+-1013318	-5000133	Use Curve Distance
+-1013317	-5000135	Adjust for Mullion Size
+-1013316	-5000133	Adjust for Mullion Size
+-1013315	-5000135	Measurement Line
+-1013314	-5000133	Measurement Line
+-1013313	-5000135	Offset
+-1013312	-5000133	Offset
+-1013310	-5000135	Angle
+-1013309	-5000133	Angle
+-1013308	-1	Type Association
+-1013307	-5000135	Number
+-1013306	-5000133	Number
+-1013305	-5000135	Justification
+-1013304	-5000133	Justification
+-1013303	-5000135	Spacing
+-1013302	-5000133	Spacing
+-1013301	-5000135	Layout
+-1013300	-5000133	Layout
+-1013201	-5000100	Design Option
+-1013200	-5000100	Design Option
+-1013103	-5000121	View Range
+-1013002	-5000100	Name
+-1013001	-5000101	Guide Spacing
+-1013000	-1	Work Plane Grid Spacing
+-1012870	-5000103	Abstract Join Strength Order
+-1012843	-5000119	Host
+-1012842	-1	Elevation Mark Use
+-1012841	-1	Show family pre-cut in plan views
+-1012840	-5000119	Default Setback
+-1012839	-5000119	Cuts Wall
+-1012838	-5000119	Cut by Inserts
+-1012837	-5000103	Profile
+-1012836	-5000103	Profile
+-1012835	-5000103	Profile
+-1012834	-1	Shared
+-1012833	-1	Work Plane-Based
+-1012832	-1	Automatically joins geometry to walls
+-1012831	-1	Is parametric
+-1012830	-1	Keep text readable
+-1012829	-5000119	Base Extension Distance
+-1012828	-5000119	Top Extension Distance
+-1012827	-5000119	Vertical Profile Offset
+-1012825	-5000119	Horizontal Profile Offset
+-1012824	-5000105	Material
+-1012823	-5000105	Material
+-1012822	-5000105	Material
+-1012821	-1	Subcategory of Floors
+-1012820	-1	Subcategory of Roofs
+-1012819	-5000103	Profile
+-1012818	-5000100	Subcategory
+-1012815	-5000101	Height
+-1012814	-5000101	Width
+-1012813	-5000101	Lock Proportions
+-1012812	-5000100	Decal Attributes
+-1012811	-1	Cut with Voids When Loaded
+-1012810	-1	Filter Parameter
+-1012809	-5000100	Subcategory of Walls
+-1012808	-1	Always vertical
+-1012807	-1	Rotate with component
+-1012806	-5000101	Volume
+-1012805	-5000101	Area
+-1012804	-5000119	Offset From Wall
+-1012802	-5000119	Offset From Level
+-1012801	-5000119	Level
+-1012800	-5000103	Profile
+-1012706	-1	Rotate text with component
+-1012705	-1	Name
+-1012704	-1	Area Scheme Id
+-1012703	-1	Area Type
+-1012701	-1	Area Type
+-1012622	-1	Relative Base
+-1012621	-1	Elevation Base
+-1012620	-5000100	Subcategory
+-1012619	-1	L/R
+-1012618	-1	Radius
+-1012617	-1	E/W
+-1012616	-1	Bearing
+-1012615	-1	N/S
+-1012614	-1	Distance
+-1012613	-5000123	Units Format
+-1012612	-1	Area Units, Format
+-1012611	-1	Net cut/fill
+-1012610	-5000101	Projected Area
+-1012609	-5000123	Units Format
+-1012608	-5000123	Label primary contours only
+-1012607	-5000100	Subcategory
+-1012606	-5000101	Area
+-1012604	-1	Fill
+-1012603	-1	Cut
+-1012602	-5000101	Perimeter
+-1012601	-5000101	Surface Area
+-1012600	-5000101	Area
+-1012502	-5000119	Height Offset From Level
+-1012501	-5000103	Thickness
+-1012409	-5000100	Saved Path
+-1012408	-5000100	Link Name
+-1012407	-1	Radius
+-1012405	-5000100	Subcategory
+-1012404	-1	Bearing
+-1012403	-1	Distance
+-1012402	-1	Increment
+-1012401	-5000119	Elevation
+-1012400	-5000119	Elevation
+-1012205	-5000100	Name
+-1012203	-5000121	Views Visible
+-1012202	-5000121	Scope Box
+-1012201	-5000121	Scope Box
+-1012200	-1	Rotate With Text
+-1012113	-5000114	Phase
+-1012112	-1	Phase Id
+-1012111	-1	Sequence Number
+-1012110	-1	Name
+-1012109	-1	Family
+-1012106	-1	Family and Type
+-1012103	-5000114	Phase Filter
+-1012102	-5000114	Phase
+-1012101	-5000114	Phase Demolished
+-1012100	-5000114	Phase Created
+-1012098	-5000171	Slab
+-1012062	-5000219	HVAC System
+-1012061	-5000219	Outdoor Air Information
+-1012060	-5000171	Use Energy Data
+-1012059	-5000171	Perimeter Zone Division
+-1012058	-5000171	Perimeter Zone Depth
+-1012057	-5000170	Shade Depth
+-1012056	-5000221	Conceptual Types
+-1012055	-5000170	Skylight Width & Depth
+-1012054	-5000170	Target Percentage Skylights
+-1012053	-5000170	Glazing is Shaded
+-1012052	-5000170	Target Sill Height
+-1012051	-5000170	Target Percentage Glazing
+-1012050	-5000171	Mass Zoning
+-1012047	-5000219	Building Operating Schedule
+-1012046	-5000171	Create Energy Model
+-1012045	-5000171	Values
+-1012044	-5000171	Skylight Width & Depth
+-1012043	-5000171	Target Percentage Skylights
+-1012042	-5000171	Target Sill Height
+-1012041	-5000171	Shade Depth
+-1012040	-5000171	Glazing is Shaded
+-1012039	-5000171	Target Percentage Glazing
+-1012038	-5000171	Underground
+-1012037	-5000101	Mass Opening Area
+-1012036	-5000101	Mass Skylight Area
+-1012035	-5000101	Mass Window Area
+-1012034	-5000101	Mass Roof Area
+-1012033	-5000101	Mass Interior Wall Area
+-1012032	-5000101	Mass Exterior Wall Area
+-1012031	-5000100	Subcategory
+-1012030	-5000171	Conceptual Types
+-1012027	-5000129	Condition Type
+-1012026	-5000129	Space Type
+-1012025	-5000101	Mass Floor Area
+-1012024	-5000105	Graphical Appearance
+-1012023	-5000105	Graphical Appearance
+-1012022	-5000105	Graphical Appearance
+-1012021	-5000101	Mass Zone Volume
+-1012020	-5000100	Mass: Description
+-1012019	-5000100	Mass: Comments
+-1012018	-5000100	Mass: Type Comments
+-1012017	-5000100	Mass: Family and Type
+-1012016	-5000100	Mass: Family
+-1012015	-5000100	Usage
+-1012014	-5000101	Level
+-1012013	-5000100	Mass: Type
+-1012012	-5000101	Floor Volume
+-1012011	-5000101	Exterior Surface Area
+-1012010	-5000101	Floor Area
+-1012009	-5000101	Floor Perimeter
+-1012007	-5000101	Gross Volume
+-1012006	-5000101	Gross Surface Area
+-1012005	-5000101	Mass Floors
+-1012004	-5000101	Gross Floor Area
+-1012000	-5000119	Constrain to Massing
+-1011957	-1	Issued
+-1011956	-1	Numbering
+-1011955	-1	Issued by
+-1011954	-1	Issued to
+-1011953	-1	Revision Date
+-1011952	-1	Revision Description
+-1011951	-1	Revision Number
+-1011950	-1	Revision Sequence
+-1011906	-5000100	Issued by
+-1011904	-5000100	Issued to
+-1011903	-5000100	Revision Date
+-1011902	-1	Revision Description
+-1011901	-5000100	Revision Number
+-1011900	-5000100	Revision
+-1011109	-5000120	Detail Rotation
+-1011107	-5000120	Inside
+-1011106	-5000120	Detail
+-1011105	-5000120	Layout
+-1011104	-5000120	Spacing
+-1011103	-5000101	Number
+-1011101	-5000104	Insulation Bulge to Width Ratio (1/x)
+-1011100	-5000104	Insulation Width
+-1011003	-5000104	Parts Visibility
+-1011002	-5000104	Detail Level
+-1010707	-5000111	Vent Connection
+-1010706	-5000111	Waste Connection
+-1010705	-5000111	CW Connection
+-1010704	-5000111	HW Connection
+-1010703	-5000111	Trap
+-1010702	-5000111	Drain
+-1010701	-5000111	Supply Pipe
+-1010700	-5000111	Supply Fitting
+-1010508	-1	Light Emitter
+-1010507	-5000159	Spot Field Angle
+-1010506	-5000159	Spot Beam Angle
+-1010505	-5000159	Tilt Angle
+-1010503	-5000159	Luminous Flux
+-1010501	-5000130	Lamp
+-1010500	-5000130	Wattage Comments
+-1010401	-5000130	Voltage
+-1010400	-5000130	Wattage
+-1010304	-5000101	Thickness
+-1010303	-1	Host Id
+-1010302	-5000119	Offset
+-1010301	-5000101	Width
+-1010300	-5000101	Height
+-1010109	-5000100	Model
+-1010108	-5000100	Manufacturer
+-1010106	-5000100	Comments
+-1010105	-5000100	Type Comments
+-1010104	-5000100	URL
+-1010103	-5000100	Description
+-1010024	-1	Blue value for RGB color spec. (for Use with XAML Data Template example)
+-1010023	-1	Green value for RGB color spec. (for Use with XAML Data Template example)
+-1010022	-1	Red value for RGB color spec. (for Use with XAML Data Template example)
+-1010021	-1	Y-Radius Value for Ellipse (for Use with XAML Data Template example)
+-1010020	-1	X-Radius Value for Ellipse (for Use with XAML Data Template example)
+-1010018	-1	Group Name for Ribbon Combo Items (for Use with XAML)
+-1010017	-1	Index Into Image File Name Array (for Use with XAML)
+-1010016	-1	Flag to display icon in Ribbon Combo Item
+-1010013	-1	Double
+-1010012	-1	Integer
+-1010011	-1	Boolean
+-1010010	-1	Options
+-1010003	-5000101	Depth
+-1009532	-5000191	End Projection Orthogonal
+-1009531	-5000191	Start Projection Orthogonal
+-1009530	-5000147	Z Rotation
+-1009529	-5000147	Y Rotation
+-1009528	-5000147	X Rotation
+-1009527	-5000146	Z Translation
+-1009526	-5000146	Y Translation
+-1009525	-5000146	X Translation
+-1009524	-5000192	Family Type
+-1009523	-5000191	In-Plane Projection
+-1009522	-5000191	Alignment Method
+-1009521	-5000191	Base y Projection
+-1009520	-5000191	Top y Projection
+-1009519	-5000191	z Projection
+-1009518	-5000191	Alignment Method
+-1009517	-5000191	z Projection
+-1009516	-5000191	Alignment Method
+-1009515	-5000191	Base x Projection
+-1009514	-5000191	Base Extension Method
+-1009513	-5000191	Top x Projection
+-1009512	-5000191	Top Extension Method
+-1009511	-5000191	Top y Projection
+-1009510	-5000191	Top z Projection
+-1009509	-5000191	Top Alignment Method
+-1009508	-5000191	Base y Projection
+-1009507	-5000191	Base z Projection
+-1009506	-5000191	Base Alignment Method
+-1009505	-5000191	End z Projection
+-1009504	-5000191	End y Projection
+-1009503	-5000191	End Alignment Method
+-1009502	-5000191	Start z Projection
+-1009501	-5000191	Start y Projection
+-1009500	-5000191	Start Alignment Method
+-1009000	-1	Locked
+-1008633	-5000103	Post
+-1008632	-5000103	Rail Connections
+-1008631	-5000103	Angled Joins
+-1008630	-5000103	Tangent Joins
+-1008629	-5000103	Landing Height Adjustment
+-1008628	-5000103	Use Landing Height Adjustment
+-1008627	-5000100	Name
+-1008626	-5000103	Baluster Placement
+-1008625	-5000101	Slope Angle
+-1008624	-5000101	Bottom Cut Angle
+-1008623	-5000101	Top Cut Angle
+-1008622	-5000101	Baluster Height
+-1008621	-5000119	Base Offset
+-1008620	-5000119	Base Level
+-1008619	-5000103	Baluster Offset
+-1008618	-1	Baluster Family
+-1008617	-1	Rail Offset
+-1008616	-1	Rail Height
+-1008615	-5000103	Rail Structure (Non-Continuous)
+-1008614	-1	Rail Shape
+-1008612	-1	Baluster Length
+-1008611	-1	Baluster Width
+-1008610	-1	Balusters Per Tread (Stair Railing Only)
+-1008609	-1	Baluster Separation
+-1008608	-1	Baluster Spacing Type (Stair Railing Only)
+-1008605	-1	Baluster Shape
+-1008604	-1	Railing Thickness
+-1008603	-1	Railing Width
+-1008602	-5000103	Railing Height
+-1008310	-5000104	Text Size
+-1008309	-5000104	Text Font
+-1008308	-5000105	Ramp Material
+-1008307	-1	Right Baluster Location
+-1008306	-1	Left Baluster Location
+-1008305	-5000103	Shape
+-1008304	-5000103	Thickness
+-1008303	-5000101	Maximum Incline Length
+-1008301	-5000101	Ramp Max Slope (1/x)
+-1008211	-5000100	New views are dependent on template
+-1008210	-5000100	View Template applied to new views
+-1008209	-1	View Direction
+-1008208	-5000104	Coarse Poche Material
+-1008207	-5000104	Elevation Tag
+-1008206	-5000104	Callout Tag
+-1008205	-5000104	Section Tag
+-1008203	-5000121	Far Clip Settings
+-1008201	-5000104	Corner Radius
+-1008200	-5000104	Callout Head
+-1008005	-5000104	Plan View Symbols End 2 (Default)
+-1008004	-5000104	Plan View Symbols End 1 (Default)
+-1008003	-5000104	Non-Plan View Symbols (Default)
+-1008002	-5000104	Symbol at End 1 Default
+-1008001	-5000104	Symbol at End 2 Default
+-1008000	-5000100	Name
+-1007905	-5000104	Focus Marks Visible
+-1007900	-5000104	Center Mark Visible
+-1007851	-1	Parameter Name
+-1007850	-1	Key Name
+-1007808	-1	Appearance
+-1007807	-1	Appearance On Sheet
+-1007806	-1	Embedded Schedule
+-1007805	-1	Appearance
+-1007804	-1	Formatting
+-1007803	-1	Sorting/Grouping
+-1007801	-1	Filter
+-1007800	-1	Fields
+-1007771	-5000100	Link Status
+-1007770	-5000101	Enable Snaps
+-1007769	-5000100	Page Number
+-1007768	-5000101	Horizontal Scale
+-1007767	-5000101	Vertical Scale
+-1007766	-5000100	Height
+-1007765	-5000100	Width
+-1007764	-5000100	Resolution (dpi)
+-1007763	-5000100	Loaded from file
+-1007762	-5000100	View Name
+-1007761	-5000100	Height (pixels)
+-1007760	-5000100	Width (pixels)
+-1007752	-5000101	Lock Proportions
+-1007751	-5000101	Height
+-1007750	-5000101	Width
+-1007738	-5000101	Roll
+-1007737	-5000101	Thickness
+-1007736	-5000101	Length
+-1007735	-5000101	Width
+-1007734	-5000101	Height
+-1007733	-5000105	Component Description
+-1007732	-5000100	Style Name
+-1007731	-5000100	Structural Type Name
+-1007730	-5000100	Type Name
+-1007728	-1	Phase Mapping
+-1007727	-1	Reference Type
+-1007726	-5000100	File Name
+-1007725	-5000119	Map Levels...
+-1007724	-5000119	Map Levels...
+-1007723	-5000119	Map Levels...
+-1007721	-5000100	Name
+-1007720	-1	Shared Site
+-1007706	-5000101	Instance Scale
+-1007705	-1	Draw Layer
+-1007704	-5000101	Import Units
+-1007703	-5000119	Base Offset
+-1007702	-5000119	Base Level
+-1007701	-5000101	Scale Factor
+-1007700	-5000100	Name
+-1007610	-5000104	Elevation Mark
+-1007609	-5000104	Reference Label Position
+-1007608	-5000121	Associated Datum
+-1007607	-5000104	View Name Position
+-1007605	-5000104	Show View Name
+-1007604	-5000104	Text Position
+-1007603	-5000104	Filled
+-1007602	-5000104	Arrow Angle
+-1007601	-5000104	Shape
+-1007600	-5000101	Width
+-1007504	-5000104	Swatch Height
+-1007503	-5000104	Swatch Width
+-1007502	-5000104	Values Displayed
+-1007419	-1	Guide Grid
+-1007418	-5000100	Current Revision Issued
+-1007417	-5000100	Current Revision Issued By
+-1007416	-5000100	Current Revision Issued To
+-1007415	-5000100	Current Revision Date
+-1007414	-5000100	Current Revision Description
+-1007413	-5000100	Revisions on Sheet
+-1007412	-5000100	Current Revision
+-1007411	-5000100	Sheet Height
+-1007410	-5000100	Sheet Width
+-1007409	-1	File Path
+-1007408	-5000100	Approved By
+-1007407	-5000100	Designed By
+-1007406	-5000100	Appears In Sheet List
+-1007405	-5000100	Checked By
+-1007404	-5000100	Drawn By
+-1007403	-5000100	Date/Time Stamp
+-1007402	-5000104	Scale
+-1007401	-5000100	Sheet Number
+-1007400	-5000100	Sheet Name
+-1007395	-5000103	Join Condition
+-1007394	-5000139	Border 2 Type
+-1007393	-5000139	Border 1 Type
+-1007392	-5000137	Border 2 Type
+-1007391	-5000137	Border 1 Type
+-1007390	-5000139	Interior Type
+-1007389	-5000137	Interior Type
+-1007388	-5000103	Curtain Panel
+-1007387	-5000103	Join Condition
+-1007386	-5000103	Curtain Panel
+-1007385	-5000140	Border 2 Type
+-1007384	-5000140	Border 1 Type
+-1007383	-5000138	Border 2 Type
+-1007382	-5000138	Border 1 Type
+-1007381	-5000140	Interior Type
+-1007380	-5000138	Interior Type
+-1007364	-5000103	Grid Base Orientation
+-1007363	-5000119	Angle
+-1007362	-5000103	Position
+-1007361	-5000103	Profile
+-1007359	-1	Center Width
+-1007358	-1	Depth 2
+-1007357	-1	Depth 1
+-1007356	-1	Depth
+-1007355	-1	Leg 2
+-1007354	-1	Leg 1
+-1007353	-5000103	Corner Mullion
+-1007352	-1	Mullion Family General Shape
+-1007351	-5000119	Offset
+-1007350	-1	Radius
+-1007322	-5000103	Thickness
+-1007321	-5000101	Width on side 2
+-1007320	-5000101	Width on side 1
+-1007304	-5000103	Thickness
+-1007301	-5000101	Width on side 2
+-1007300	-5000101	Width on side 1
+-1007278	-5000104	Show Up arrow in all views
+-1007277	-5000109	Trim Stringers at Top
+-1007276	-5000104	Down arrow
+-1007275	-5000104	Down text
+-1007274	-5000104	Down label
+-1007273	-5000104	Up arrow
+-1007272	-5000104	Up text
+-1007271	-5000104	Up label
+-1007270	-5000104	Text Size
+-1007269	-5000104	Text Font
+-1007268	-5000105	Monolithic Material
+-1007267	-5000109	Landing Carriage Height
+-1007266	-5000103	Landing Overlap
+-1007265	-5000109	Right Stringer
+-1007264	-5000109	Left Stringer
+-1007263	-5000107	Apply Nosing Profile
+-1007262	-5000108	Riser to Tread Connection
+-1007261	-5000108	Riser Thickness
+-1007260	-5000109	Middle Stringers
+-1007259	-5000103	Extend Below Base
+-1007258	-5000108	End with Riser
+-1007257	-5000108	Begin with Riser
+-1007256	-5000103	Underside of Winder
+-1007255	-5000103	Monolithic Stairs
+-1007254	-5000196	Calculation Rules
+-1007253	-5000196	Calculation Rules
+-1007252	-5000196	Calculation Rules
+-1007251	-5000196	Calculation Rules
+-1007250	-5000101	Actual Tread Depth
+-1007249	-1	Tread Multiplier
+-1007248	-1	Riser Multiplier
+-1007247	-5000196	Calculation Rules
+-1007246	-5000101	Actual Number of Risers
+-1007245	-5000104	Break Symbol in Plan
+-1007244	-5000105	Riser Material
+-1007243	-5000108	Riser Type
+-1007242	-5000105	Tread Material
+-1007241	-5000107	Nosing Length
+-1007240	-5000107	Nosing Profile
+-1007239	-5000105	Stringer Material
+-1007238	-5000109	Open Stringer Offset
+-1007237	-5000109	Stringer Carriage Height
+-1007236	-1	Type of Side Stringers
+-1007235	-5000119	Multistory Top Level
+-1007234	-1	Stringer Position
+-1007219	-5000119	Top Offset
+-1007218	-5000119	Base Offset
+-1007212	-1	Riser Angle
+-1007211	-5000107	Tread Thickness
+-1007210	-5000109	Stringer Thickness
+-1007209	-5000109	Stringer Height
+-1007208	-1	Risers Present
+-1007206	-5000101	Actual Riser Height
+-1007205	-5000101	Desired Number of Risers
+-1007204	-5000101	Width
+-1007203	-5000196	Minimum Tread Depth
+-1007202	-5000196	Maximum Riser Height
+-1007201	-5000119	Top Level
+-1007200	-5000119	Base Level
+-1007112	-5000100	Structural
+-1007111	-5000100	Building Story
+-1007110	-5000119	Story Above
+-1007109	-5000119	Elevation Base
+-1007102	-5000119	Elevation
+-1007101	-5000119	Level
+-1007100	-5000104	Symbol
+-1007054	-5000104	Show Dimension Text
+-1007053	-5000104	Dimension Style
+-1007052	-5000104	Group Matching Tag Heads
+-1007051	-5000104	Tag Family
+-1007050	-5000208	Reference Category
+-1007009	-1	Multi Leader Tag
+-1007008	-5000104	Host Count
+-1007007	-5000104	Angle
+-1007006	-5000104	Leader Type
+-1007005	-5000104	Wrap between parameters only
+-1007004	-5000104	Orientation
+-1007003	-5000104	Orientation
+-1007001	-5000104	Sample Text
+-1007000	-5000104	Label
+-1006999	-1	Diameter Symbol Text
+-1006998	-1	Diameter Symbol Location
+-1006997	-1	Radius Symbol Text
+-1006970	-5000104	V/G Overrides Coordination Model
+-1006969	-5000104	V/G Overrides Point Clouds
+-1006968	-5000104	V/G Overrides Worksets
+-1006967	-5000104	V/G Overrides Analytical Model
+-1006966	-5000104	V/G Overrides Design Options
+-1006965	-5000104	V/G Overrides RVT Links
+-1006964	-5000104	V/G Overrides Filters
+-1006963	-5000104	V/G Overrides Import
+-1006962	-5000104	V/G Overrides Annotation
+-1006961	-5000104	V/G Overrides Model
+-1006941	-5000101	Automatic Room Computation Height
+-1006940	-5000101	Computation Height
+-1006939	-5000101	Computation Height
+-1006928	-5000101	Computation Height
+-1006927	-5000119	Base Offset
+-1006926	-5000101	Computation
+-1006925	-5000119	Base Offset
+-1006924	-5000119	Limit Offset
+-1006922	-5000119	Upper Limit
+-1006921	-5000101	Volume
+-1006920	-5000101	Unbounded Height
+-1006917	-5000101	Perimeter
+-1006916	-5000119	Level
+-1006909	-5000100	Occupancy
+-1006907	-5000100	Department
+-1006906	-5000100	Base Finish
+-1006905	-5000100	Ceiling Finish
+-1006904	-5000100	Wall Finish
+-1006903	-5000100	Floor Finish
+-1006902	-5000101	Area
+-1006901	-5000100	Number
+-1006900	-5000100	Name
+-1006861	-5000187	Legend Horizontal Origin Gap
+-1006860	-5000187	Legend Vertical Origin Gap
+-1006859	-5000187	Legend Width
+-1006858	-5000187	Legend Height
+-1006857	-5000104	Analysis Display Settings
+-1006856	-5000187	Overall Legend Text
+-1006855	-5000186	Results Visibility
+-1006854	-5000187	Show Description
+-1006853	-5000187	Show Configuration Name
+-1006852	-5000175	Description
+-1006851	-5000175	Analysis Configuration
+-1006850	-5000175	Data Range
+-1006711	-5000104	End Segments Length
+-1006710	-5000104	End Segment Pattern
+-1006709	-5000104	End Segment Color
+-1006708	-5000104	End Segment Weight
+-1006707	-5000104	Center Segment Pattern
+-1006706	-5000104	Center Segment Color
+-1006705	-5000104	Center Segment Weight
+-1006704	-5000104	Center Segment
+-1006700	-5000104	Symbol
+-1006661	-5000104	Full Step Arrow
+-1006660	-5000104	Start Extension
+-1006645	-5000104	Number Size
+-1006644	-5000104	Tag Type
+-1006643	-5000104	Display Rule
+-1006642	-5000104	Reference
+-1006641	-5000104	Justify
+-1006639	-5000104	Orientation
+-1006638	-5000104	Offset from Reference
+-1006637	-5000104	Justify Offset
+-1006636	-5000123	Orientation
+-1006635	-5000123	Text Type
+-1006634	-5000123	Down Text
+-1006633	-5000123	Show Down Text
+-1006632	-5000123	Up Text
+-1006631	-5000123	Show Up Text
+-1006630	-5000104	Show Arrowhead to Cut Mark
+-1006628	-5000104	Draw for Each Run
+-1006627	-5000104	End at Riser
+-1006626	-5000104	Start from Riser
+-1006625	-5000104	Distance to Cut Mark
+-1006624	-5000104	Line Shape at Landing Corner
+-1006623	-5000104	Arrowhead Type
+-1006622	-5000104	Start Symbol Type
+-1006621	-5000104	Cut Mark Symbol Size
+-1006620	-5000104	Cut Line Type
+-1006619	-5000104	Cut Line Angle
+-1006618	-5000104	Cut Line Extension
+-1006617	-5000104	Cut Line Distance
+-1006616	-5000104	Cut Mark Symbol
+-1006615	-5000104	Broken Section Display Style
+-1006614	-5000104	Hide at scales coarser than
+-1006613	-5000104	Hide at scales coarser than
+-1006612	-5000121	Parent View
+-1006609	-5000104	Show in
+-1006608	-5000104	Section Tail
+-1006604	-1	Tail width
+-1006603	-1	Tail length
+-1006602	-1	Detail Number
+-1006601	-5000100	Sheet Number
+-1006600	-5000104	Section Head
+-1006599	-5000119	Station Value
+-1006598	-5000229	Station Indicator
+-1006597	-5000229	Include Station
+-1006596	-5000104	Leader Line
+-1006595	-5000119	Distance
+-1006594	-5000123	Station Suffix
+-1006593	-5000123	Station Prefix
+-1006526	-5000229	Dimension Suffix
+-1006525	-5000229	Dimension Prefix
+-1006524	-5000104	Tick Mark Centered
+-1006523	-5000104	Interior Tick Mark Display
+-1006522	-5000104	Witness Line Tick Mark
+-1006521	-1	Total Length
+-1006520	-1	Count
+-1006519	-5000230	Alternate Units Suffix
+-1006518	-5000230	Alternate Units Prefix
+-1006517	-1	Equality Witness Display
+-1006516	-5000123	Suppress Spaces
+-1006515	-1	Equality Formula
+-1006514	-5000104	Leader Tick Mark
+-1006513	-1	Equality Text
+-1006512	-1	Equality Text
+-1006511	-5000123	Text Location
+-1006510	-5000104	Show Leader When Text Moves
+-1006509	-5000104	Shoulder Length
+-1006508	-5000104	Leader Type
+-1006507	-1	Dimension To Intersecting Grids
+-1006506	-1	Dimension To Intersecting Walls
+-1006505	-1	Dimension To Opening Type
+-1006504	-5000104	Fixed Rotation
+-1006503	-5000104	Keep Readable
+-1006502	-5000104	Leader Line
+-1006501	-5000104	Leader/Border Offset
+-1006500	-1	Dimension To Openings
+-1006494	-5000104	Offset from Reference
+-1006493	-5000104	Slope Representation
+-1006492	-5000104	Slope Direction
+-1006491	-5000123	Lower Value
+-1006490	-5000123	Single/Upper Value
+-1006489	-5000229	Elevation Indicator as Prefix/Suffix
+-1006488	-5000229	Include Elevation
+-1006487	-5000123	Elevation Suffix
+-1006486	-5000123	Elevation Prefix
+-1006485	-5000123	Bottom Coordinate Suffix
+-1006484	-5000123	Bottom Coordinate Prefix
+-1006483	-5000123	Top Coordinate Suffix
+-1006482	-5000123	Top Coordinate Prefix
+-1006481	-5000123	Lower Value Suffix
+-1006480	-5000123	Lower Value Prefix
+-1006479	-5000123	Single/Upper Value Suffix
+-1006478	-5000123	Single/Upper Value Prefix
+-1006477	-5000104	Baseline Offset
+-1006476	-5000104	Leader Shoulder
+-1006475	-5000229	Bottom Indicator as Prefix/Suffix
+-1006474	-5000229	Top Indicator as Prefix/Suffix
+-1006473	-5000229	Bottom Indicator
+-1006472	-5000229	Top Indicator
+-1006471	-5000123	Text Location
+-1006470	-5000119	Rotate with Component
+-1006469	-5000123	Display Elevations
+-1006468	-5000104	Ordinate Dimension Settings
+-1006467	-5000104	Dimension String Type
+-1006466	-5000104	Leader
+-1006465	-5000104	Flipped Dimension Line Extension
+-1006464	-5000104	Interior Tick Mark
+-1006462	-5000123	Text Offset from Leader
+-1006461	-5000119	Coordinate Base
+-1006460	-5000230	Alternate Units Format
+-1006458	-5000229	Indicator as Prefix / Suffix
+-1006457	-5000229	Bottom Coordinate
+-1006456	-5000230	Alternate Units
+-1006455	-5000229	Top Coordinate
+-1006454	-5000230	Alternate Units Format
+-1006453	-5000123	Text Orientation
+-1006452	-5000229	Elevation Indicator
+-1006451	-5000229	East / West Indicator
+-1006450	-5000229	North / South Indicator
+-1006449	-5000104	Arrow Closed
+-1006448	-5000123	Read Convention
+-1006447	-5000104	Heavy End Pen Weight
+-1006446	-5000104	Dimension Line Snap Distance
+-1006445	-5000104	Centerline Tick Mark
+-1006444	-5000104	Leader Line Weight
+-1006443	-5000104	Leader Arrowhead Line Weight
+-1006442	-5000104	Leader Arrowhead
+-1006441	-5000119	Relative Base
+-1006440	-5000123	Auto Mirror
+-1006439	-5000123	Text Offset from Symbol
+-1006437	-5000119	Elevation Base
+-1006436	-5000104	Symbol
+-1006435	-5000123	Show Opening Height
+-1006434	-5000104	Centerline Pattern
+-1006433	-5000104	Witness Line Length
+-1006432	-5000104	Witness Line Control
+-1006431	-5000104	Dimension Line Extension
+-1006430	-5000104	Centerline Symbol
+-1006429	-5000123	Text Background
+-1006428	-5000229	Units Format
+-1006427	-5000229	Units Format
+-1006426	-5000104	Arrow Width Angle
+-1006425	-5000104	Fill Tick
+-1006420	-1	Heavy End Pen Weight
+-1006414	-5000104	Tick Size
+-1006413	-5000104	Arrow Style
+-1006412	-5000104	Tick Mark Line Weight
+-1006411	-5000123	Text Position
+-1006408	-1	Radius Symbol Location
+-1006407	-1	Center Mark Size
+-1006406	-1	Center Marks
+-1006405	-5000104	Witness Line Gap to Element
+-1006404	-5000104	Witness Line Extension
+-1006401	-5000123	Text Offset
+-1006400	-1	Text Alignment
+-1006336	-5000123	Text Size
+-1006335	-5000123	Size
+-1006334	-5000123	Font
+-1006333	-5000104	Show Title
+-1006332	-5000149	Underline
+-1006331	-5000149	Italic
+-1006330	-5000149	Bold
+-1006329	-5000149	Size
+-1006328	-5000149	Font
+-1006327	-5000123	Width Factor
+-1006326	-5000123	Tab Size
+-1006325	-5000104	Arc Leaders
+-1006323	-5000104	Tick Mark
+-1006322	-5000100	Sheet Issue Date
+-1006321	-1	Project Issue Date
+-1006320	-1	Project Status
+-1006319	-1	Client Name
+-1006318	-1	Project Address
+-1006317	-1	Project Name
+-1006316	-1	Project Number
+-1006315	-5000104	Leader Arrowhead
+-1006314	-5000104	Background
+-1006313	-5000123	Underline
+-1006312	-5000123	Italic
+-1006311	-5000123	Bold
+-1006310	-1	Filled
+-1006309	-5000104	Vertical Align
+-1006308	-5000104	Horizontal Align
+-1006307	-5000104	Text
+-1006305	-5000104	Line Pattern
+-1006304	-5000104	Color
+-1006303	-5000104	Line Weight
+-1006302	-5000104	Color
+-1006301	-5000123	Text Size
+-1006300	-5000123	Text Font
+-1006221	-5000100	Subcategory
+-1006220	-5000100	Subcategory
+-1006212	-5000104	Line Style
+-1006211	-5000100	Subcategory
+-1006210	-5000104	Line Style
+-1006207	-5000100	Subcategory
+-1006206	-5000119	Draw in Foreground
+-1006205	-5000104	Visible
+-1006204	-5000100	Subcategory
+-1006203	-5000100	Subcategory
+-1006202	-5000100	Subcategory
+-1006201	-5000100	Subcategory
+-1006200	-5000100	Subcategory
+-1006100	-1	Stairs Line Type
+-1006016	-5000101	Slope
+-1006015	-1	Steel Cantilever
+-1006014	-1	Concrete Cantilever
+-1006013	-5000119	Number of Full Segments
+-1006011	-5000119	Level at Head
+-1006010	-5000119	Level at Tail
+-1006009	-5000119	Level
+-1006008	-5000119	Offset From Base
+-1006007	-5000119	Defines Slope
+-1006006	-5000119	Defines Constant Height
+-1006005	-5000119	Plate Offset From Base
+-1006001	-5000119	Offset From Roof Base
+-1006000	-5000119	Defines Roof Slope
+-1005567	-5000225	Web Thickness Location
+-1005566	-5000225	Flange Thickness Location
+-1005565	-5000225	Top Web Fillet
+-1005564	-5000225	Sloped Web Angle
+-1005563	-5000225	Sloped Flange Angle
+-1005562	-5000225	Cantilever Height
+-1005561	-5000225	Cantilever Length
+-1005560	-5000101	Bottom Cut Height
+-1005559	-5000101	Bottom Cut Width
+-1005558	-5000101	Top Cut Height
+-1005557	-5000101	Top Cut Width
+-1005556	-5000100	Code Name
+-1005555	-5000100	Family Name Key
+-1005554	-5000100	Section Name Key
+-1005553	-5000225	Top Bend Length
+-1005552	-5000225	Middle Bend Length
+-1005551	-5000225	Bend Width
+-1005550	-5000225	Bottom Flange Length
+-1005549	-5000225	Fold Length
+-1005548	-5000225	Lip Length
+-1005547	-5000101	Bolt Diameter Shorter Flange
+-1005546	-5000101	Bolt Diameter Longer Flange
+-1005545	-5000101	Bolt Spacing Shorter Flange
+-1005544	-5000101	Bolt Spacing 2 Longer Flange
+-1005543	-5000101	Bolt Spacing 1 Longer Flange
+-1005542	-5000101	Bolt Spacing web
+-1005541	-5000101	Bolt Spacing between Rows
+-1005540	-5000101	Bolt Spacing Two Rows
+-1005539	-5000101	Bolt Diameter
+-1005538	-5000101	Bolt Spacing
+-1005537	-5000101	Web Toe of Fillet
+-1005536	-5000101	Flange Toe of Fillet
+-1005535	-5000101	Clear Web Height
+-1005534	-5000225	Bottom Flange Width
+-1005533	-5000225	Bottom Flange Thickness
+-1005532	-5000225	Top Flange Width
+-1005531	-5000225	Top Flange Thickness
+-1005530	-5000225	Outer Fillet
+-1005529	-5000225	Inner Fillet
+-1005528	-5000225	Web Fillet
+-1005527	-5000225	Flange Fillet
+-1005526	-5000225	Web Height
+-1005525	-5000225	Web Thickness
+-1005524	-5000225	Flange Thickness
+-1005523	-5000128	Shear Area weak axis
+-1005522	-5000128	Shear Area strong axis
+-1005521	-5000128	Warping Constant
+-1005520	-5000128	Torsional Modulus
+-1005519	-5000128	Torsional Moment of Inertia
+-1005518	-5000128	Plastic Modulus weak axis
+-1005517	-5000128	Plastic Modulus strong axis
+-1005516	-5000128	Elastic Modulus weak axis
+-1005515	-5000128	Elastic Modulus strong axis
+-1005514	-5000128	Moment of Inertia weak axis
+-1005513	-5000128	Moment of Inertia strong axis
+-1005512	-5000128	Nominal Weight
+-1005511	-5000128	Perimeter
+-1005510	-5000128	Principal Axes Angle
+-1005509	-5000225	Centroid Vertical
+-1005508	-5000225	Centroid Horizontal
+-1005507	-5000128	Section Area
+-1005506	-5000101	Wall Design Thickness
+-1005505	-5000225	Wall Nominal Thickness
+-1005504	-5000225	Diameter
+-1005503	-5000225	Height
+-1005502	-5000225	Width
+-1005501	-5000112	Section Shape
+-1005500	-5000105	Structural Material
+-1005439	-5000192	Define Thermal Properties by
+-1005438	-5000192	Construction Type Id
+-1005437	-5000192	Analytic Construction
+-1005436	-5000192	Roughness
+-1005435	-5000192	Absorptance
+-1005434	-5000192	Thermal Mass
+-1005433	-5000192	Visual Light Transmittance
+-1005432	-5000192	Solar Heat Gain Coefficient
+-1005431	-5000192	Thermal Resistance (R)
+-1005430	-5000192	Heat Transfer Coefficient (U)
+-1005400	-5000104	Design Option Configuration
+-1005335	-5000106	Range: Top Level
+-1005334	-5000162	Sun path size (%)
+-1005333	-5000104	Sun Path
+-1005332	-5000104	Default Analysis Display Style
+-1005331	-1	Elevation Base for Levels
+-1005330	-1	Hidden Levels
+-1005329	-5000121	Total Segments
+-1005328	-5000121	Segments in Viewport
+-1005327	-5000104	Grid Appearance
+-1005326	-5000123	Text Appearance
+-1005325	-5000100	Title
+-1005319	-5000121	Segment Start in Viewport
+-1005318	-5000104	Group Similar Locations
+-1005317	-1	Material Types
+-1005316	-1	Column Locations End
+-1005315	-1	Column Locations Start
+-1005314	-1	Bottom Level
+-1005313	-1	Top Level
+-1005254	-5000104	Rotation on Sheet
+-1005253	-5000104	Show Box
+-1005252	-5000104	Show Extension Line
+-1005251	-5000104	Show Title
+-1005250	-5000104	Title
+-1005231	-5000104	Display Name
+-1005230	-5000104	Display Name
+-1005209	-5000104	Include Off-Grid Columns
+-1005208	-5000104	Off-Grid Units Format
+-1005207	-5000100	Sheet Name
+-1005206	-5000100	Sheet Number
+-1005204	-5000104	View Scale
+-1005203	-5000100	View Name
+-1005201	-5000104	Detail Number
+-1005199	-1	View Template
+-1005198	-5000100	Render Appearance Properties
+-1005197	-1	Symbolic Representation
+-1005196	-1	Render Appearance Source
+-1005195	-5000100	Render Appearance
+-1005194	-1	Plant Trim Height
+-1005193	-5000101	Height
+-1005192	-1	Plant Name
+-1005184	-5000122	Locked Orientation
+-1005183	-5000104	Color Scheme Location
+-1005182	-5000100	Dependency
+-1005181	-5000121	Depth Clipping
+-1005179	-1	Associated Assembly Instance
+-1005178	-5000104	Total Column Locations
+-1005177	-5000106	Underlay Orientation
+-1005176	-5000100	View Template
+-1005175	-5000104	Column Locations per Segment
+-1005173	-5000104	Graphic Display Options
+-1005172	-5000104	Visual Style
+-1005171	-5000100	Referencing Detail
+-1005170	-5000100	Referencing Sheet
+-1005169	-5000122	Camera Position
+-1005168	-5000104	Orientation
+-1005167	-1	Walkthrough Frames
+-1005166	-5000121	Associated Level
+-1005165	-5000104	Visual Style
+-1005164	-5000104	Visibility/Graphics Overrides
+-1005163	-5000104	Discipline
+-1005162	-5000121	View Range
+-1005161	-5000104	Display Model
+-1005160	-1	Show Mass
+-1005159	-1	Top Clip Height
+-1005158	-5000104	Wall Join Display
+-1005157	-1	Viewport
+-1005155	-1	Cut Plane Height
+-1005154	-1	View Depth
+-1005153	-5000106	Range: Base Level
+-1005152	-5000104	View Scale
+-1005151	-5000104	View Scale
+-1005150	-5000104	Scale Value    1:
+-1005149	-5000104	System Color Schemes
+-1005148	-5000104	Color Scheme
+-1005147	-1	None
+-1005137	-5000104	Photographic Exposure
+-1005136	-5000104	Depth Cueing
+-1005135	-5000104	Background
+-1005134	-5000104	Sun and Shadow Intensity
+-1005133	-5000104	Lighting
+-1005132	-5000104	Shadows
+-1005131	-5000104	Model Display
+-1005124	-5000122	Rendering Settings
+-1005123	-5000121	Far Clipping
+-1005122	-5000104	Reference Label
+-1005121	-1	Is a Reference
+-1005120	-5000104	Reference Label
+-1005114	-5000100	Title on Sheet
+-1005113	-5000121	Section Box
+-1005112	-5000100	View Name
+-1005111	-1	Near Clip Active
+-1005110	-5000121	Far Clip Active
+-1005109	-1	Bottom Clip Active
+-1005108	-1	Top Clip Active
+-1005107	-1	Left Clip Active
+-1005106	-1	Right Clip Active
+-1005105	-1	Near Clip Offset
+-1005104	-5000121	Far Clip Offset
+-1005103	-1	Bottom Clip Offset
+-1005102	-1	Top Clip Offset
+-1005101	-1	Left Clip Offset
+-1005100	-1	Right Clip Offset
+-1005094	-5000121	Annotation Crop
+-1005093	-5000121	Show uncropped
+-1005092	-5000121	Crop View
+-1005091	-5000121	Crop Region Visible
+-1005090	-5000121	Crop View
+-1005050	-5000122	Projection Mode
+-1005002	-5000122	Target Elevation
+-1005001	-5000104	Visible In Option
+-1005000	-5000122	Eye Elevation
+-1004518	-1	Is Instance Parameter
+-1004516	-1	Is Reporting
+-1004515	-5000104	Leader
+-1004514	-1	Equality Display
+-1004513	-1	Non-modifiable
+-1004510	-1	Label
+-1004502	-1	Show Label in View
+-1004501	-5000123	Value
+-1004500	-5000123	Value
+-1004016	-1	Is Reference
+-1004015	-5000119	Defines Beam System Slope
+-1004014	-5000119	Radius
+-1004013	-1	Determines Orientation
+-1004012	-5000103	Wall Closure
+-1004011	-5000104	Detail Line
+-1004010	-5000119	Radius
+-1004009	-1	Range
+-1004008	-1	Angle 2
+-1004007	-1	Angle 1
+-1004006	-5000119	Angle
+-1004005	-5000101	Length
+-1004004	-1	Deletable
+-1004003	-1	Is Reference
+-1004002	-1	Defines Origin
+-1004001	-1	Reference
+-1002565	-5000119	Associated Level Offset
+-1002564	-5000119	Associated Level
+-1002563	-5000119	Column Location Mark
+-1002562	-5000119	Top Attachment Cut
+-1002561	-5000119	Base Attachment Cut
+-1002560	-5000119	Base is Attached
+-1002559	-5000119	Top is Attached
+-1002558	-5000103	Offset From Attachment At Base
+-1002557	-5000103	Offset From Attachment At Top
+-1002556	-5000103	Attachment Justification At Base
+-1002555	-5000103	Attachment Justification At Top
+-1002554	-5000105	Shininess
+-1002553	-5000105	Smoothness
+-1002552	-5000105	Glow
+-1002551	-5000105	Transparency
+-1002550	-5000105	Color
+-1002504	-5000100	Seek Item ID
+-1002503	-5000100	OmniClass Title
+-1002502	-5000100	OmniClass Number
+-1002501	-5000100	Assembly Description
+-1002500	-5000100	Assembly Code
+-1002401	-5000119	Height Offset at Head
+-1002400	-5000119	Height Offset at Tail
+-1002302	-1	Has Thickness
+-1002301	-5000103	Thickness
+-1002300	-5000119	Height Offset From Level
+-1002206	-5000103	Thickness
+-1002204	-1	System
+-1002203	-1	Spacing Axis 2
+-1002202	-1	Spacing Axis 1
+-1002201	-1	Pattern
+-1002200	-1	Default Height above level
+-1002125	-5000104	Masking
+-1002124	-5000104	Background Pattern Color
+-1002123	-5000104	Foreground Pattern Color
+-1002122	-5000104	Background Fill Pattern
+-1002121	-5000104	Foreground Fill Pattern
+-1002120	-5000104	Foreground Fill Pattern
+-1002119	-5000103	Structure
+-1002118	-5000103	Structure
+-1002117	-5000103	Structure
+-1002116	-5000103	Structure
+-1002115	-5000104	Fill Pattern
+-1002114	-5000104	Fill Pattern
+-1002113	-1	Object Style Material
+-1002112	-5000103	Wrapping at Inserts
+-1002111	-5000103	Wrapping at Ends
+-1002110	-5000104	Coarse Scale Fill Color
+-1002109	-5000100	Subcategory
+-1002108	-1	Host Id
+-1002107	-5000105	Material
+-1002106	-5000104	Coarse Scale Fill Pattern
+-1002105	-5000104	Fill Pattern
+-1002103	-5000103	Structure
+-1002101	-1	Cut fill pattern
+-1002100	-1	Id
+-1002072	-1	Editable only
+-1002067	-5000100	Edited by
+-1002066	-5000119	Top Offset
+-1002065	-5000119	Base Offset
+-1002064	-5000119	Top Level
+-1002063	-5000119	Base Level
+-1002062	-5000119	Level
+-1002061	-1	Room Id
+-1002060	-1	Room Name
+-1002059	-1	Room Number
+-1002053	-5000100	Workset
+-1002052	-1	Family and Type
+-1002051	-1	Family
+-1002050	-1	Type
+-1002008	-1	Label
+-1002007	-1	Filter
+-1002006	-1	Folders
+-1002003	-1	Family and Type
+-1002002	-1	Family Name
+-1002001	-5000100	Type Name
+-1002000	-1	Type Id
+-1001956	-5000104	Display in Hidden Views
+-1001955	-5000112	Span Direction
+-1001954	-5000112	Structural
+-1001953	-5000101	Perimeter
+-1001952	-5000119	Level
+-1001951	-5000119	Height Offset From Level
+-1001903	-1	Default Height above level
+-1001902	-5000103	Default Thickness
+-1001900	-5000101	Thickness
+-1001834	-5000119	Orientation
+-1001833	-5000154	Parameter along path
+-1001832	-5000154	Profile
+-1001831	-5000156	Angle
+-1001830	-5000156	Profile
+-1001829	-5000156	Profile Is Flipped
+-1001828	-5000156	Vertical Profile Offset
+-1001827	-5000156	Horizontal Profile Offset
+-1001826	-5000155	Angle
+-1001825	-5000155	Profile
+-1001824	-5000155	Profile Is Flipped
+-1001823	-5000155	Vertical Profile Offset
+-1001822	-5000155	Horizontal Profile Offset
+-1001821	-1	Profile Usage
+-1001820	-1	Trajectory Segmentation
+-1001819	-1	Maximum Segment Angle
+-1001818	-1	Model or Symbolic
+-1001817	-5000154	Angle
+-1001816	-5000154	Profile
+-1001815	-5000154	Profile Is Flipped
+-1001814	-5000154	Vertical Profile Offset
+-1001813	-5000154	Horizontal Profile Offset
+-1001812	-5000101	Depth
+-1001809	-5000104	Visibility/Graphics Overrides
+-1001808	-5000104	Visibility/Graphics Overrides
+-1001807	-5000100	Solid/Void
+-1001806	-1	Auto ends
+-1001805	-5000119	Second End
+-1001804	-5000119	First End
+-1001803	-5000119	End Angle
+-1001802	-5000119	Start Angle
+-1001801	-5000119	Extrusion End
+-1001800	-5000119	Extrusion Start
+-1001718	-1	Schedule Type
+-1001717	-1	Category
+-1001716	-5000119	Level Offset
+-1001715	-5000119	Reference Level
+-1001714	-5000119	Picked Faces Location
+-1001713	-5000119	Related to Mass
+-1001711	-5000103	Fascia Depth
+-1001710	-5000103	Rafter Cut
+-1001709	-5000103	Rafter or Truss
+-1001708	-5000119	Base Level
+-1001707	-5000119	Overhang
+-1001706	-1	Wall offset
+-1001705	-5000103	Maximum Ridge Height
+-1001703	-5000119	Cutoff Offset
+-1001702	-5000119	Cutoff Level
+-1001701	-5000119	Base Offset From Level
+-1001658	-5000101	Elevation at Bottom Survey
+-1001657	-5000101	Elevation at Top Survey
+-1001656	-5000101	Core Thickness
+-1001655	-5000101	Elevation at Bottom Core
+-1001654	-5000101	Elevation at Top Core
+-1001653	-5000119	Reference Level Elevation
+-1001652	-5000119	Level Offset
+-1001651	-5000119	Reference Level
+-1001603	-5000160	Curved Edge Condition
+-1001601	-5000101	Thickness
+-1001600	-5000103	Default Thickness
+-1001598	-5000101	Elevation at Top
+-1001597	-5000112	Connection Status
+-1001596	-5000112	Structural
+-1001595	-5000145	Analytical Links
+-1001594	-5000145	Horizontal Projection
+-1001593	-5000145	Horizontal Projection
+-1001592	-5000101	Do Not Break At Inserts
+-1001591	-5000101	Default End Extension Length
+-1001589	-5000145	Approximate curve
+-1001588	-5000145	Maximum discretized offset
+-1001587	-5000145	Use hard-points
+-1001586	-5000119	Cross-Section Rotation
+-1001585	-5000104	Display in Hidden Views
+-1001584	-5000104	Display in Hidden Views
+-1001577	-5000145	Analyze As
+-1001576	-5000145	Analyze As
+-1001575	-5000112	Beam cutback in plan
+-1001574	-5000119	z-Direction Offset Value
+-1001573	-5000119	Orientation
+-1001572	-5000119	End Level Offset
+-1001571	-5000119	Start Level Offset
+-1001570	-5000112	Always export as geometry
+-1001569	-5000101	Length
+-1001568	-5000101	Width
+-1001567	-5000101	Length
+-1001564	-5000119	Eccentricity
+-1001563	-5000112	Structural Usage
+-1001562	-5000101	Width
+-1001561	-5000101	Elevation at Bottom
+-1001560	-5000112	Cap
+-1001559	-5000112	Coping Distance
+-1001558	-5000101	Width
+-1001557	-5000101	Foundation Thickness
+-1001556	-5000101	Bottom Heel Length
+-1001555	-5000101	Heel Length
+-1001554	-5000101	Bottom Toe Length
+-1001553	-5000101	Toe Length
+-1001552	-5000112	Enable Analytical Model
+-1001551	-5000145	Analytical Links
+-1001550	-5000112	Material for Model Behavior
+-1001549	-5000216	Base Mz
+-1001548	-5000216	Base My
+-1001547	-5000216	Base Mx
+-1001546	-5000216	Base Fz
+-1001545	-5000216	Base Fy
+-1001544	-5000216	Base Fx
+-1001543	-5000216	Top Mz
+-1001542	-5000216	Top My
+-1001541	-5000216	Top Mx
+-1001540	-5000216	Top Fz
+-1001539	-5000216	Top Fy
+-1001538	-5000216	Top Fx
+-1001537	-5000216	Base Release
+-1001536	-5000216	Top Release
+-1001535	-5000145	Bottom Vertical Projection
+-1001534	-5000145	Top Vertical Projection
+-1001531	-5000112	Structural Material Type
+-1001530	-5000112	Camber Size
+-1001529	-5000112	Number of studs
+-1001528	-5000216	End Mz
+-1001527	-5000216	End My
+-1001526	-5000216	End Mx
+-1001525	-5000216	End Fz
+-1001524	-5000216	End Fy
+-1001523	-5000216	End Fx
+-1001522	-5000216	Start Mz
+-1001521	-5000216	Start My
+-1001520	-5000216	Start Mx
+-1001519	-5000216	Start Fz
+-1001518	-5000216	Start Fy
+-1001517	-5000216	Start Fx
+-1001516	-5000216	End Release
+-1001515	-5000216	Start Release
+-1001514	-5000145	Bottom Vertical Projection
+-1001513	-5000145	Top Vertical Projection
+-1001512	-5000145	Horizontal Projection
+-1001510	-5000145	Vertical Projection
+-1001508	-5000145	Vertical Projection
+-1001507	-1	Representation Type
+-1001503	-5000112	Stick Symbol Location
+-1001502	-5000112	Beam End Pocket Seat
+-1001501	-5000112	Beam Start Pocket Seat
+-1001405	-5000100	Type Mark
+-1001399	-5000119	Orientation
+-1001398	-5000112	End Attachment Elevation
+-1001397	-5000112	Start Attachment Elevation
+-1001396	-5000112	End Attachment Level Reference
+-1001395	-5000112	Start Attachment Level Reference
+-1001393	-5000112	End attachment ratio
+-1001392	-5000112	Start Attachment Ratio
+-1001391	-5000112	End of Attachment to Reference Element
+-1001390	-5000103	Wall Closure
+-1001389	-5000112	Start of Attachment to Reference Element
+-1001388	-5000112	End Attachment Distance
+-1001387	-5000112	Start Attachment Distance
+-1001386	-5000112	End Attachment Type
+-1001385	-5000112	Start Attachment Type
+-1001384	-5000112	Cut Length
+-1001383	-5000119	Reference Level
+-1001381	-5000112	Structural Usage
+-1001380	-5000119	Work Plane
+-1001375	-5000101	Length
+-1001371	-5000119	Moves With Grids
+-1001370	-5000119	Moves With Nearby Elements
+-1001365	-5000119	Schedule Level
+-1001364	-5000119	Offset from Host
+-1001363	-5000119	Host
+-1001362	-1	Head Height
+-1001361	-5000119	Sill Height
+-1001360	-5000119	Elevation from Level
+-1001358	-5000119	Top Offset
+-1001357	-5000119	Base Offset
+-1001352	-5000119	Level
+-1001351	-5000119	Top Level
+-1001350	-5000119	Base Level
+-1001338	-1	File Path
+-1001337	-1	Category
+-1001336	-1	Family
+-1001335	-1	Usage
+-1001320	-5000119	Default Elevation
+-1001306	-5000119	Length
+-1001305	-5000101	Rough Width
+-1001304	-5000101	Rough Height
+-1001303	-1	Inset
+-1001302	-5000101	Thickness
+-1001301	-5000101	Width
+-1001300	-5000101	Height
+-1001212	-5000100	Exit Access
+-1001211	-5000131	Operation
+-1001210	-5000105	Frame Material
+-1001209	-5000103	Frame Type
+-1001208	-5000105	Finish
+-1001207	-5000103	Construction Type
+-1001206	-5000100	Fire Rating
+-1001205	-5000100	Cost
+-1001203	-5000100	Mark
+-1001140	-5000100	Original Category
+-1001139	-5000100	Construction
+-1001138	-5000114	Phase Demolished By Original
+-1001137	-5000114	Phase Created By Original
+-1001136	-5000101	Length
+-1001135	-5000101	Height
+-1001134	-5000101	Thickness
+-1001133	-5000101	Area
+-1001132	-5000100	Original Type
+-1001131	-5000100	Show Shape Handles
+-1001130	-5000100	Layer Function
+-1001129	-5000101	Volume
+-1001128	-5000100	Material By Original
+-1001127	-5000100	Material
+-1001126	-5000100	Original Family
+-1001125	-5000100	Original Category
+-1001124	-5000100	Categorize as
+-1001123	-5000119	Location Line Offset
+-1001122	-5000119	Location Line
+-1001120	-5000119	Extend into wall (to core)
+-1001119	-5000112	Structural Usage
+-1001118	-5000119	Base is Attached
+-1001117	-5000119	Top is Attached
+-1001109	-5000119	Top Offset
+-1001108	-5000119	Base Offset
+-1001107	-5000119	Base Constraint
+-1001105	-5000119	Unconnected Height
+-1001103	-5000119	Top Constraint
+-1001102	-1	Base height
+-1001009	-5000103	Automatically Embed
+-1001007	-5000119	Room Bounding
+-1001006	-5000103	Function
+-1001002	-1	Default height
+-1001001	-5000101	Height
+-1001000	-5000103	Width

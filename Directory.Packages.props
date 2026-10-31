@@ -1,0 +1,25 @@
+<Project>
+
+  <PropertyGroup>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Runtime dependencies of the library. See docs/dependencies.md for the reasons behind each version. -->
+    <PackageVersion Include="OpenMcdf" Version="3.4.0" />
+    <PackageVersion Include="SharpZipLib" Version="1.4.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Build-time only. -->
+    <PackageVersion Include="Microsoft.SourceLink.GitHub" Version="10.0.403" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Test-only packages, pinned to exact versions (no floating ranges). -->
+    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
+    <PackageVersion Include="xunit" Version="2.9.3" />
+    <PackageVersion Include="xunit.runner.visualstudio" Version="2.8.2" />
+  </ItemGroup>
+
+</Project>

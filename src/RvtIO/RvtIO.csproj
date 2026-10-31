@@ -1,0 +1,42 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <Description>Reads Autodesk Revit projects and families (.rvt, .rfa) without Revit or the Revit API and exports IFC and JSON.</Description>
+    <TargetFrameworks>net8.0;net10.0</TargetFrameworks>
+    <RootNamespace>RvtIO</RootNamespace>
+    <AssemblyName>RvtIO</AssemblyName>
+    <PackageId>RvtIO</PackageId>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <!-- CS1573: partial parameter documentation is intentional. The large generated enums disable CS1591 locally. -->
+    <NoWarn>$(NoWarn);CS1573</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="RvtIO.Tests" />
+    <InternalsVisibleTo Include="RvtIO.Cli" />
+    <InternalsVisibleTo Include="RvtIO.RootProbe" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\r22_schemas.json" />
+    <EmbeddedResource Include="Resources\r22_unit_definitions.json" />
+    <EmbeddedResource Include="Resources\r22_unit_details.json" />
+    <EmbeddedResource Include="Resources\api_parameter_definitions_2022.json" />
+    <EmbeddedResource Include="Resources\english_category_names.tsv" />
+    <EmbeddedResource Include="Resources\revit_ui_names.tsv" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\compact_builtin_parameters.tsv" />
+    <EmbeddedResource Include="Resources\compact_parameter_groups.tsv" />
+    <EmbeddedResource Include="Resources\compact_value_gate.tsv" />
+    <EmbeddedResource Include="Resources\compact_observed_lists.tsv" />
+    <EmbeddedResource Include="Resources\compact_label_overrides.tsv" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="OpenMcdf" />
+    <PackageReference Include="SharpZipLib" />
+  </ItemGroup>
+
+</Project>

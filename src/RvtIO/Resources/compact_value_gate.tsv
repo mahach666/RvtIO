@@ -1,0 +1,1905 @@
+# compact value gate (see CompactValueGate): S id, D id or C class id, then the observations that agree with Revit's output
+# learned from observed projects (keep threshold 3, per class)
+S	-1155219	4
+S	-1154614	403
+S	-1153106	2142
+S	-1152342	164
+S	-1152341	144
+S	-1152340	144
+S	-1152339	81
+S	-1152338	164
+S	-1152337	164
+S	-1152330	56
+S	-1152329	56
+S	-1152328	56
+S	-1152327	56
+S	-1152326	78
+S	-1152322	4
+S	-1152320	60
+S	-1152319	3
+S	-1152314	86
+S	-1152313	116
+S	-1152312	116
+S	-1152311	98
+S	-1152310	98
+S	-1152309	98
+S	-1152308	116
+S	-1152307	42
+S	-1152306	42
+S	-1152305	42
+S	-1152304	42
+S	-1152303	42
+S	-1152302	42
+S	-1152301	42
+S	-1150481	322
+S	-1150468	8495
+S	-1150466	327
+S	-1150465	542
+S	-1150464	542
+S	-1150432	3813
+S	-1150430	7819
+S	-1150336	6
+S	-1150335	6
+S	-1150208	19
+S	-1150139	33
+S	-1150138	33
+S	-1150102	33
+S	-1141008	6596
+S	-1140982	6596
+S	-1140633	22
+S	-1140532	27
+S	-1140531	27
+S	-1140530	27
+S	-1140529	27
+S	-1140528	27
+S	-1140527	27
+S	-1140526	27
+S	-1140525	27
+S	-1140524	27
+S	-1140523	27
+S	-1140522	27
+S	-1140521	27
+S	-1140507	22
+S	-1140506	22
+S	-1140505	27
+S	-1140504	27
+S	-1140503	27
+S	-1140502	27
+S	-1140417	247
+S	-1140416	247
+S	-1140415	54
+S	-1140414	219
+S	-1140413	50
+S	-1140412	50
+S	-1140409	219
+S	-1140408	219
+S	-1140407	219
+S	-1140401	50
+S	-1140332	142
+S	-1140323	267
+S	-1140322	529
+S	-1140321	211
+S	-1140320	269
+S	-1140319	370
+S	-1140318	370
+S	-1140317	237
+S	-1140316	211
+S	-1140315	211
+S	-1140314	237
+S	-1140312	418
+S	-1140311	418
+S	-1140310	418
+S	-1140309	448
+S	-1140308	418
+S	-1140307	418
+S	-1140306	418
+S	-1140305	418
+S	-1140304	418
+S	-1140303	418
+S	-1140302	418
+S	-1140301	418
+S	-1140300	418
+S	-1140282	1891
+S	-1140279	1958
+S	-1140232	197
+S	-1140156	3
+S	-1140150	84
+S	-1140149	84
+S	-1140146	66
+S	-1140145	66
+S	-1140144	66
+S	-1140143	66
+S	-1140139	66
+S	-1140138	84
+S	-1140128	95
+S	-1140110	1100
+S	-1140109	2090
+S	-1140086	84
+S	-1140085	84
+S	-1140084	84
+S	-1140064	26
+S	-1140037	2090
+S	-1114252	188
+S	-1114251	188
+S	-1114216	974
+S	-1114171	188
+S	-1060014	1905
+S	-1060013	1905
+S	-1060011	1905
+S	-1060010	1905
+S	-1060009	1905
+S	-1060008	1905
+S	-1060007	1905
+S	-1060006	1905
+S	-1060005	1905
+S	-1060004	1905
+S	-1060003	1905
+S	-1060002	1905
+S	-1060001	1905
+S	-1060000	1905
+S	-1019008	9
+S	-1019007	9
+S	-1019006	9
+S	-1019005	9
+S	-1017060	133
+S	-1015254	72
+S	-1015250	67
+S	-1015207	10
+S	-1015206	9
+S	-1015205	19
+S	-1015204	15
+S	-1015201	6
+S	-1015084	45
+S	-1015083	45
+S	-1015080	45
+S	-1015070	10
+S	-1015069	5
+S	-1015042	35
+S	-1015003	35
+S	-1015001	72
+S	-1012829	819
+S	-1012828	819
+S	-1012827	5
+S	-1012825	5
+S	-1012622	4
+S	-1012607	5
+S	-1012502	7
+S	-1012201	458
+S	-1012020	14
+S	-1012019	14
+S	-1012018	14
+S	-1012015	14
+S	-1011955	9
+S	-1011954	9
+S	-1010500	45
+S	-1010106	47906
+S	-1008632	21
+S	-1008631	21
+S	-1008630	21
+S	-1008629	20
+S	-1008628	21
+S	-1008621	104
+S	-1008619	20
+S	-1008602	20
+S	-1008308	10
+S	-1008305	10
+S	-1008304	9
+S	-1008303	9
+S	-1008301	9
+S	-1007417	102
+S	-1007416	102
+S	-1007415	102
+S	-1007414	102
+S	-1007412	102
+S	-1007359	4
+S	-1007358	4
+S	-1007357	4
+S	-1007356	4
+S	-1007355	57
+S	-1007354	57
+S	-1007352	56
+S	-1007351	1655
+S	-1007350	6
+S	-1007322	368
+S	-1007321	368
+S	-1007320	368
+S	-1007304	1273
+S	-1007301	1216
+S	-1007300	1216
+S	-1007277	26
+S	-1007268	26
+S	-1007267	25
+S	-1007266	25
+S	-1007265	26
+S	-1007264	26
+S	-1007263	26
+S	-1007262	26
+S	-1007261	25
+S	-1007260	26
+S	-1007259	25
+S	-1007258	26
+S	-1007257	26
+S	-1007256	26
+S	-1007255	26
+S	-1007245	26
+S	-1007244	26
+S	-1007243	26
+S	-1007242	26
+S	-1007241	25
+S	-1007240	26
+S	-1007239	26
+S	-1007238	25
+S	-1007237	25
+S	-1007211	25
+S	-1007210	25
+S	-1007209	25
+S	-1006909	482
+S	-1006907	482
+S	-1006906	482
+S	-1006905	482
+S	-1006904	482
+S	-1006903	482
+S	-1006901	747
+S	-1006900	747
+S	-1006476	3
+S	-1006466	3
+S	-1006447	1340
+S	-1006426	1344
+S	-1006414	1344
+S	-1006326	14085
+S	-1006321	9
+S	-1006320	9
+S	-1006319	9
+S	-1006318	9
+S	-1006317	9
+S	-1006316	9
+S	-1006315	128
+S	-1005541	6
+S	-1005540	6
+S	-1005539	58
+S	-1005538	58
+S	-1005537	58
+S	-1005536	58
+S	-1005535	58
+S	-1005523	79
+S	-1005522	79
+S	-1005510	79
+S	-1005316	10
+S	-1005315	10
+S	-1005120	422
+S	-1002300	268
+S	-1001954	119
+S	-1001817	5
+S	-1001716	3
+S	-1001711	16
+S	-1001710	16
+S	-1001709	3
+S	-1001705	11
+S	-1001703	11
+S	-1001701	11
+S	-1001597	2165
+S	-1001530	265
+S	-1001529	265
+S	-1001405	6229
+S	-1001210	104
+S	-1001209	104
+S	-1001208	943
+S	-1001207	1288
+S	-1001206	679
+S	-1001139	4
+S	-1001108	1026
+C	AbsDuctType	-1140422	35
+C	AbsDuctType	-1010109	35
+C	AbsDuctType	-1010108	35
+C	AbsDuctType	-1010105	35
+C	AbsDuctType	-1010104	35
+C	AbsDuctType	-1010103	35
+C	AbsDuctType	-1002501	35
+C	AbsDuctType	-1002500	35
+C	AbsDuctType	-1002001	24
+C	AbsFlexDuctType	-1140422	18
+C	AbsFlexDuctType	-1010109	18
+C	AbsFlexDuctType	-1010108	18
+C	AbsFlexDuctType	-1010105	18
+C	AbsFlexDuctType	-1010104	18
+C	AbsFlexDuctType	-1010103	18
+C	AbsFlexDuctType	-1002501	18
+C	AbsFlexDuctType	-1002500	18
+C	AbsFlexDuctType	-1002001	18
+C	Alignment	-1013200	8
+C	AllPlanTopologies	-1013200	12
+C	AnalyticalLinkType	-1010105	9
+C	AnalyticalLinkType	-1010103	9
+C	AnalyticalLinkType	-1002001	9
+C	AnalyticalModelBeam	-1013200	370
+C	AnalyticalModelBeam	-1012101	856
+C	AnalyticalModelBeam	-1009503	856
+C	AnalyticalModelBeam	-1009500	856
+C	AnalyticalModelBrace	-1012101	22
+C	AnalyticalModelBrace	-1009503	22
+C	AnalyticalModelBrace	-1009500	22
+C	AnalyticalModelColumn	-1013200	30
+C	AnalyticalModelColumn	-1012101	1027
+C	AnalyticalModelColumn	-1009509	1027
+C	AnalyticalModelColumn	-1009506	1027
+C	AnalyticalModelIsolatedFoundation	-1013200	15
+C	AnalyticalModelIsolatedFoundation	-1012101	115
+C	AnalyticalModelSlab	-1013200	5
+C	AnalyticalModelSlab	-1012101	16
+C	AnalyticalModelWall	-1013200	9
+C	AnalyticalModelWall	-1012101	38
+C	AnalyticalModelWallFoundation	-1013200	4
+C	AnalyticalModelWallFoundation	-1012101	4
+C	AppearanceAssetElem	-1013200	129
+C	AreaLoad	-1015005	10
+C	AreaLoad	-1013200	5
+C	AreaLoad	-1012101	10
+C	AreaMeasureElem	-1012705	18
+C	AreaSchemePlanTopologies	-1013200	6
+C	AreaTypeElem	-1013200	8
+C	BaseRailing	-1012101	114
+C	BaseRailing	-1002052	104
+C	BaseRailing	-1002051	114
+C	BaseRailing	-1002050	104
+C	BaseRailing	-1002000	104
+C	BaseRailing	-1001203	114
+C	BaseRailingSym	-1002002	114
+C	BaseRailingSym	-1002001	114
+C	BasicWallType	-1140422	124
+C	BasicWallType	-1010109	124
+C	BasicWallType	-1010108	124
+C	BasicWallType	-1010105	124
+C	BasicWallType	-1010104	124
+C	BasicWallType	-1010103	124
+C	BasicWallType	-1002500	124
+C	BasicWallType	-1001006	124
+C	BoundaryConditions	-1140500	27
+C	BoundaryConditions	-1013200	20
+C	BrowserOrganization	-1002001	79
+C	BuildingPad	-1012101	7
+C	BuildingPad	-1002062	7
+C	BuildingPad	-1002052	7
+C	BuildingPad	-1002051	7
+C	BuildingPad	-1002050	7
+C	BuildingPad	-1002000	7
+C	BuildingPad	-1001952	7
+C	BuildingPad	-1001203	7
+C	BuildingPad	-1001007	7
+C	BuildingPadType	-1140422	9
+C	BuildingPadType	-1010109	9
+C	BuildingPadType	-1010108	9
+C	BuildingPadType	-1010105	9
+C	BuildingPadType	-1010104	9
+C	BuildingPadType	-1010103	9
+C	BuildingPadType	-1002501	9
+C	BuildingPadType	-1002500	9
+C	CableTray	-1140122	17
+C	CableTray	-1140121	17
+C	CableTray	-1140112	17
+C	CableTray	-1114240	17
+C	CableTray	-1114132	17
+C	CableTray	-1114106	17
+C	CableTray	-1114105	17
+C	CableTray	-1114003	17
+C	CableTray	-1114002	17
+C	CableTray	-1114000	17
+C	CableTray	-1012101	17
+C	CableTray	-1004005	17
+C	CableTray	-1002052	17
+C	CableTray	-1002051	17
+C	CableTray	-1002050	17
+C	CableTray	-1002000	17
+C	CableTray	-1001203	17
+C	CalloutTag	-1008201	79
+C	CalloutTag	-1008200	88
+C	CalloutTag	-1002001	88
+C	CategoryElem	-1013200	608
+C	Ceiling	-1012101	268
+C	Ceiling	-1002062	268
+C	Ceiling	-1002052	268
+C	Ceiling	-1002051	268
+C	Ceiling	-1002050	268
+C	Ceiling	-1002000	268
+C	Ceiling	-1001952	268
+C	Ceiling	-1001203	268
+C	ColorFillSchema	-1013200	9
+C	ColorFillSymbol	-1006313	12
+C	ColorFillSymbol	-1006312	12
+C	ColorFillSymbol	-1006311	12
+C	ColorFillSymbol	-1002001	12
+C	ComponentRepeaterSlotSpecialType	-1002001	18
+C	CompoundCeilingType	-1140422	27
+C	CompoundCeilingType	-1010109	27
+C	CompoundCeilingType	-1010108	27
+C	CompoundCeilingType	-1010105	27
+C	CompoundCeilingType	-1010104	27
+C	CompoundCeilingType	-1010103	27
+C	CompoundCeilingType	-1005436	9
+C	CompoundCeilingType	-1002500	27
+C	CompoundCeilingType	-1002107	9
+C	CompoundCeilingType	-1002001	9
+C	ConceptualConstructionType	-1002001	324
+C	ConceptualSurfaceType	-1013200	10
+C	ConduitFittingCenterLine	-1012101	28
+C	ConduitFittingCenterLine	-1002108	28
+C	ConduitFittingCenterLine	-1001370	28
+C	ConduitFittingCenterLine	-1001352	28
+C	ConduitRun	-1012101	16
+C	ConduitStandardType	-1002001	48
+C	ConstructionSet	-1002001	4
+C	ConstructionSetProject	-1002001	9
+C	ContFooting	-1013200	4
+C	ContFooting	-1012101	4
+C	ContFooting	-1001552	4
+C	ContFooting	-1001203	4
+C	ContFootingType	-1140422	13
+C	ContFootingType	-1010109	13
+C	ContFootingType	-1010108	13
+C	ContFootingType	-1010105	13
+C	ContFootingType	-1010104	13
+C	ContFootingType	-1010103	13
+C	ContFootingType	-1005500	13
+C	ContFootingType	-1002500	13
+C	ContFootingType	-1002001	13
+C	ContinuousRailSymbol	-1002002	20
+C	ContourSpacingElem	-1013200	3
+C	CorniceAttr	-1140422	9
+C	CorniceAttr	-1012840	8
+C	CorniceAttr	-1012839	9
+C	CorniceAttr	-1012838	9
+C	CorniceAttr	-1010109	9
+C	CorniceAttr	-1010108	9
+C	CorniceAttr	-1010105	9
+C	CorniceAttr	-1010104	9
+C	CorniceAttr	-1010103	9
+C	CorniceAttr	-1002501	9
+C	CorniceAttr	-1002500	9
+C	CorniceAttr	-1002107	9
+C	CoverType	-1013434	18
+C	CoverType	-1013433	20
+C	CoverType	-1002001	20
+C	CurtaSystemAttr	-1140422	9
+C	CurtaSystemAttr	-1010109	9
+C	CurtaSystemAttr	-1010108	9
+C	CurtaSystemAttr	-1010105	9
+C	CurtaSystemAttr	-1010104	9
+C	CurtaSystemAttr	-1010103	9
+C	CurtaSystemAttr	-1002501	9
+C	CurtaSystemAttr	-1002500	9
+C	CurtainGridLine	-1012101	1782
+C	CurtainRoofAttributes	-1140422	9
+C	CurtainRoofAttributes	-1010109	9
+C	CurtainRoofAttributes	-1010108	9
+C	CurtainRoofAttributes	-1010105	9
+C	CurtainRoofAttributes	-1010104	9
+C	CurtainRoofAttributes	-1010103	9
+C	CurtainRoofAttributes	-1002501	9
+C	CurtainRoofAttributes	-1002500	9
+C	CutMarkType	-1140422	15
+C	CutMarkType	-1010109	15
+C	CutMarkType	-1010108	15
+C	CutMarkType	-1010105	15
+C	CutMarkType	-1010104	15
+C	CutMarkType	-1010103	15
+C	CutMarkType	-1002501	15
+C	CutMarkType	-1002500	15
+C	CutMarkType	-1002001	15
+C	DBDrawing	-1013200	51
+C	DBView3d	-1012202	71
+C	DBView3d	-1011002	103
+C	DBView3d	-1006602	62
+C	DBView3d	-1006601	71
+C	DBView3d	-1005254	9
+C	DBView3d	-1005199	99
+C	DBView3d	-1005176	67
+C	DBView3d	-1005163	103
+C	DBView3d	-1005150	71
+C	DBView3d	-1005147	71
+C	DBView3d	-1005114	71
+C	DBView3d	-1005112	71
+C	DBViewAnonDrafting	-1011002	19
+C	DBViewAnonDrafting	-1006602	7
+C	DBViewAnonDrafting	-1005254	10
+C	DBViewAnonDrafting	-1005199	19
+C	DBViewAnonDrafting	-1005176	17
+C	DBViewAnonDrafting	-1005163	19
+C	DBViewAnonDrafting	-1005150	19
+C	DBViewAnonDrafting	-1005114	17
+C	DBViewAnonDrafting	-1005112	17
+C	DBViewDrafting	-1007408	51
+C	DBViewDrafting	-1007407	51
+C	DBViewDrafting	-1007405	51
+C	DBViewDrafting	-1007404	51
+C	DBViewDrafting	-1007401	51
+C	DBViewDrafting	-1007400	51
+C	DBViewDrafting	-1006322	51
+C	DBViewDrafting	-1005199	51
+C	DBViewLegend	-1011002	15
+C	DBViewLegend	-1005199	15
+C	DBViewLegend	-1005176	15
+C	DBViewLegend	-1005150	15
+C	DBViewLegend	-1005114	15
+C	DBViewLegend	-1005112	15
+C	DBViewPlan	-1150170	31
+C	DBViewPlan	-1012202	168
+C	DBViewPlan	-1011003	248
+C	DBViewPlan	-1011002	250
+C	DBViewPlan	-1006602	152
+C	DBViewPlan	-1006601	170
+C	DBViewPlan	-1005335	170
+C	DBViewPlan	-1005333	243
+C	DBViewPlan	-1005254	18
+C	DBViewPlan	-1005199	250
+C	DBViewPlan	-1005177	250
+C	DBViewPlan	-1005176	170
+C	DBViewPlan	-1005163	248
+C	DBViewPlan	-1005161	250
+C	DBViewPlan	-1005153	170
+C	DBViewPlan	-1005150	250
+C	DBViewPlan	-1005114	170
+C	DBViewPlan	-1005112	170
+C	DBViewProject	-1006602	9
+C	DBViewProject	-1006601	9
+C	DBViewProject	-1005199	9
+C	DBViewProject	-1005150	9
+C	DBViewProject	-1005147	9
+C	DBViewProject	-1005114	9
+C	DBViewProject	-1005112	9
+C	DBViewRendering	-1006602	4
+C	DBViewRendering	-1006601	14
+C	DBViewRendering	-1005254	10
+C	DBViewRendering	-1005199	14
+C	DBViewRendering	-1005176	14
+C	DBViewRendering	-1005150	14
+C	DBViewRendering	-1005114	14
+C	DBViewRendering	-1005112	14
+C	DBViewSchedule	-1006602	46
+C	DBViewSchedule	-1006601	46
+C	DBViewSchedule	-1005199	95
+C	DBViewSchedule	-1005176	95
+C	DBViewSection	-1012202	150
+C	DBViewSection	-1011003	221
+C	DBViewSection	-1011002	221
+C	DBViewSection	-1006602	94
+C	DBViewSection	-1005254	56
+C	DBViewSection	-1005199	219
+C	DBViewSection	-1005176	148
+C	DBViewSection	-1005163	221
+C	DBViewSection	-1005161	221
+C	DBViewSection	-1005150	221
+C	DBViewSection	-1005114	150
+C	DBViewSection	-1005112	150
+C	DBViewType	-1008211	560
+C	DBViewType	-1008210	704
+C	DBViewType	-1008209	10
+C	DBViewType	-1008206	8
+C	DBViewType	-1002001	848
+C	DBViewTypeAreaPlan	-1008211	6
+C	DBViewTypeAreaPlan	-1008210	6
+C	DBViewTypeAreaPlan	-1008206	6
+C	DBViewTypeAreaPlan	-1002001	6
+C	DPart	-1152344	45
+C	DPart	-1152335	45
+C	DPart	-1013200	45
+C	DPart	-1012101	45
+C	DPart	-1001203	45
+C	DPart	-1001140	45
+C	DPart	-1001138	45
+C	DPart	-1001137	45
+C	DPart	-1001132	45
+C	DPart	-1001128	45
+C	DPart	-1001127	45
+C	DPart	-1001126	45
+C	DecalType	-1140422	3
+C	DecalType	-1010109	3
+C	DecalType	-1010108	3
+C	DecalType	-1010105	3
+C	DecalType	-1010104	3
+C	DecalType	-1010103	3
+C	DecalType	-1002501	3
+C	DecalType	-1002500	3
+C	DecalType	-1002001	3
+C	DesignOption	-1013200	3
+C	DimensionStyle	-1006525	109
+C	DimensionStyle	-1006523	35
+C	DimensionStyle	-1006519	109
+C	DimensionStyle	-1006518	109
+C	DimensionStyle	-1006517	34
+C	DimensionStyle	-1006516	109
+C	DimensionStyle	-1006512	24
+C	DimensionStyle	-1006510	109
+C	DimensionStyle	-1006508	109
+C	DimensionStyle	-1006467	25
+C	DimensionStyle	-1006465	123
+C	DimensionStyle	-1006456	109
+C	DimensionStyle	-1006446	33
+C	DimensionStyle	-1006445	35
+C	DimensionStyle	-1006433	35
+C	DimensionStyle	-1006431	123
+C	DimensionStyle	-1006407	88
+C	DimensionStyle	-1006406	74
+C	DimensionStyle	-1006405	35
+C	DimensionStyle	-1006404	35
+C	DimensionStyle	-1006401	123
+C	DimensionStyle	-1006327	123
+C	DimensionStyle	-1006323	84
+C	DivisionRule	-1013339	136
+C	EdgeSlabAttr	-1140422	9
+C	EdgeSlabAttr	-1010109	9
+C	EdgeSlabAttr	-1010108	9
+C	EdgeSlabAttr	-1010105	9
+C	EdgeSlabAttr	-1010104	9
+C	EdgeSlabAttr	-1010103	9
+C	EdgeSlabAttr	-1002501	9
+C	EdgeSlabAttr	-1002500	9
+C	EdgeSlabAttr	-1002107	9
+C	EdgeSlabAttr	-1002001	9
+C	ElectricalDemandFactorDefinition	-1013200	21
+C	ElectricalLoadClassification	-1013200	18
+C	ElementGroup	-1133501	279
+C	ElementGroup	-1133500	303
+C	ExtrusionElem	-1006205	13
+C	ExtrusionElem	-1001801	15
+C	ExtrusionElem	-1001800	15
+C	FaceRoof	-1012101	3
+C	FaceRoof	-1002052	3
+C	FaceRoof	-1002051	3
+C	FaceRoof	-1002050	3
+C	FaceRoof	-1002000	3
+C	FaceRoof	-1001203	3
+C	FaceRoof	-1001007	3
+C	FamilyInstance	-1155100	48
+C	FamilyInstance	-1152365	508
+C	FamilyInstance	-1152364	878
+C	FamilyInstance	-1152363	508
+C	FamilyInstance	-1152362	878
+C	FamilyInstance	-1152361	878
+C	FamilyInstance	-1152358	508
+C	FamilyInstance	-1152357	508
+C	FamilyInstance	-1150623	12
+C	FamilyInstance	-1150435	1871
+C	FamilyInstance	-1150434	2895
+C	FamilyInstance	-1150215	341
+C	FamilyInstance	-1150214	332
+C	FamilyInstance	-1150171	1027
+C	FamilyInstance	-1140712	8
+C	FamilyInstance	-1140700	8
+C	FamilyInstance	-1140334	40
+C	FamilyInstance	-1140325	2259
+C	FamilyInstance	-1140213	12
+C	FamilyInstance	-1140142	56
+C	FamilyInstance	-1140140	56
+C	FamilyInstance	-1140129	37
+C	FamilyInstance	-1140116	24
+C	FamilyInstance	-1140115	13
+C	FamilyInstance	-1140114	14
+C	FamilyInstance	-1140113	14
+C	FamilyInstance	-1140112	14
+C	FamilyInstance	-1140111	14
+C	FamilyInstance	-1140087	8
+C	FamilyInstance	-1140083	82
+C	FamilyInstance	-1140082	48
+C	FamilyInstance	-1140081	74
+C	FamilyInstance	-1140078	84
+C	FamilyInstance	-1140040	4
+C	FamilyInstance	-1114242	2937
+C	FamilyInstance	-1114240	3527
+C	FamilyInstance	-1114238	480
+C	FamilyInstance	-1114215	592
+C	FamilyInstance	-1114214	592
+C	FamilyInstance	-1114213	592
+C	FamilyInstance	-1114212	901
+C	FamilyInstance	-1114211	901
+C	FamilyInstance	-1018804	58
+C	FamilyInstance	-1018803	58
+C	FamilyInstance	-1018802	389
+C	FamilyInstance	-1018801	389
+C	FamilyInstance	-1018502	50
+C	FamilyInstance	-1018360	4
+C	FamilyInstance	-1018359	4
+C	FamilyInstance	-1018358	4
+C	FamilyInstance	-1018357	4
+C	FamilyInstance	-1018356	4
+C	FamilyInstance	-1018355	4
+C	FamilyInstance	-1018353	4
+C	FamilyInstance	-1018352	4
+C	FamilyInstance	-1018351	4
+C	FamilyInstance	-1018350	4
+C	FamilyInstance	-1018304	4
+C	FamilyInstance	-1014004	4
+C	FamilyInstance	-1014003	4
+C	FamilyInstance	-1014002	4
+C	FamilyInstance	-1014001	5
+C	FamilyInstance	-1013417	77
+C	FamilyInstance	-1013416	77
+C	FamilyInstance	-1013405	618
+C	FamilyInstance	-1012806	18126
+C	FamilyInstance	-1012805	18106
+C	FamilyInstance	-1012101	29123
+C	FamilyInstance	-1012100	55984
+C	FamilyInstance	-1012007	20
+C	FamilyInstance	-1012006	20
+C	FamilyInstance	-1010303	6666
+C	FamilyInstance	-1008625	246
+C	FamilyInstance	-1008624	246
+C	FamilyInstance	-1008623	246
+C	FamilyInstance	-1008622	246
+C	FamilyInstance	-1002559	294
+C	FamilyInstance	-1002557	294
+C	FamilyInstance	-1002555	294
+C	FamilyInstance	-1002108	29372
+C	FamilyInstance	-1002066	1005
+C	FamilyInstance	-1002065	1005
+C	FamilyInstance	-1002064	1035
+C	FamilyInstance	-1002062	73644
+C	FamilyInstance	-1002052	29708
+C	FamilyInstance	-1002051	29708
+C	FamilyInstance	-1002050	29708
+C	FamilyInstance	-1002000	29708
+C	FamilyInstance	-1001951	338
+C	FamilyInstance	-1001658	338
+C	FamilyInstance	-1001653	439
+C	FamilyInstance	-1001586	482
+C	FamilyInstance	-1001573	411
+C	FamilyInstance	-1001572	414
+C	FamilyInstance	-1001571	414
+C	FamilyInstance	-1001552	2020
+C	FamilyInstance	-1001503	367
+C	FamilyInstance	-1001383	806
+C	FamilyInstance	-1001380	342
+C	FamilyInstance	-1001371	1405
+C	FamilyInstance	-1001370	3506
+C	FamilyInstance	-1001364	5390
+C	FamilyInstance	-1001362	587
+C	FamilyInstance	-1001361	587
+C	FamilyInstance	-1001358	1005
+C	FamilyInstance	-1001357	1005
+C	FamilyInstance	-1001352	5411
+C	FamilyInstance	-1001351	1035
+C	FamilyInstance	-1001350	1035
+C	FamilyInstance	-1001306	10
+C	FamilyInstance	-1001305	30
+C	FamilyInstance	-1001304	30
+C	FamilyInstance	-1001203	29495
+C	FamilyInstance	-1001007	977
+C	FamilySymbol	-1154647	1308
+C	FamilySymbol	-1153100	3
+C	FamilySymbol	-1152166	13
+C	FamilySymbol	-1150130	21
+C	FamilySymbol	-1150128	6
+C	FamilySymbol	-1150127	6
+C	FamilySymbol	-1150126	11
+C	FamilySymbol	-1150118	8
+C	FamilySymbol	-1150117	33
+C	FamilySymbol	-1150115	19
+C	FamilySymbol	-1150114	19
+C	FamilySymbol	-1150113	19
+C	FamilySymbol	-1150112	19
+C	FamilySymbol	-1150110	19
+C	FamilySymbol	-1150109	19
+C	FamilySymbol	-1150108	33
+C	FamilySymbol	-1150107	33
+C	FamilySymbol	-1150106	33
+C	FamilySymbol	-1150105	33
+C	FamilySymbol	-1150104	33
+C	FamilySymbol	-1150103	33
+C	FamilySymbol	-1140766	4
+C	FamilySymbol	-1140764	4
+C	FamilySymbol	-1140763	4
+C	FamilySymbol	-1140762	4
+C	FamilySymbol	-1140761	4
+C	FamilySymbol	-1140746	4
+C	FamilySymbol	-1140744	4
+C	FamilySymbol	-1140743	4
+C	FamilySymbol	-1140742	4
+C	FamilySymbol	-1140741	4
+C	FamilySymbol	-1140736	4
+C	FamilySymbol	-1140734	4
+C	FamilySymbol	-1140732	4
+C	FamilySymbol	-1140731	4
+C	FamilySymbol	-1140726	4
+C	FamilySymbol	-1140724	4
+C	FamilySymbol	-1140722	4
+C	FamilySymbol	-1140721	4
+C	FamilySymbol	-1140713	4
+C	FamilySymbol	-1140711	4
+C	FamilySymbol	-1140422	2773
+C	FamilySymbol	-1140266	23
+C	FamilySymbol	-1140265	23
+C	FamilySymbol	-1140264	23
+C	FamilySymbol	-1140263	23
+C	FamilySymbol	-1140262	23
+C	FamilySymbol	-1140261	23
+C	FamilySymbol	-1140260	23
+C	FamilySymbol	-1140252	18
+C	FamilySymbol	-1140251	16
+C	FamilySymbol	-1140250	16
+C	FamilySymbol	-1140234	191
+C	FamilySymbol	-1140233	157
+C	FamilySymbol	-1140034	12
+C	FamilySymbol	-1114218	19
+C	FamilySymbol	-1114217	33
+C	FamilySymbol	-1114123	36
+C	FamilySymbol	-1114122	36
+C	FamilySymbol	-1014004	6
+C	FamilySymbol	-1014003	6
+C	FamilySymbol	-1014002	6
+C	FamilySymbol	-1014001	6
+C	FamilySymbol	-1010505	12
+C	FamilySymbol	-1010503	33
+C	FamilySymbol	-1010109	2773
+C	FamilySymbol	-1010108	2773
+C	FamilySymbol	-1010105	2773
+C	FamilySymbol	-1010104	2773
+C	FamilySymbol	-1010103	2773
+C	FamilySymbol	-1010003	9
+C	FamilySymbol	-1008633	85
+C	FamilySymbol	-1006404	11
+C	FamilySymbol	-1005554	79
+C	FamilySymbol	-1005528	33
+C	FamilySymbol	-1005525	33
+C	FamilySymbol	-1005524	33
+C	FamilySymbol	-1005521	33
+C	FamilySymbol	-1005520	14
+C	FamilySymbol	-1005519	47
+C	FamilySymbol	-1005518	47
+C	FamilySymbol	-1005517	47
+C	FamilySymbol	-1005516	47
+C	FamilySymbol	-1005515	47
+C	FamilySymbol	-1005514	47
+C	FamilySymbol	-1005513	47
+C	FamilySymbol	-1005512	47
+C	FamilySymbol	-1005511	20
+C	FamilySymbol	-1005509	47
+C	FamilySymbol	-1005508	47
+C	FamilySymbol	-1005507	47
+C	FamilySymbol	-1005506	14
+C	FamilySymbol	-1005505	14
+C	FamilySymbol	-1005504	12
+C	FamilySymbol	-1005503	35
+C	FamilySymbol	-1005502	35
+C	FamilySymbol	-1005439	311
+C	FamilySymbol	-1005438	12
+C	FamilySymbol	-1005437	36
+C	FamilySymbol	-1005433	12
+C	FamilySymbol	-1005432	12
+C	FamilySymbol	-1005430	12
+C	FamilySymbol	-1005193	208
+C	FamilySymbol	-1002500	2773
+C	FamilySymbol	-1002110	13
+C	FamilySymbol	-1002106	13
+C	FamilySymbol	-1002001	1384
+C	FamilySymbol	-1001569	8
+C	FamilySymbol	-1001568	8
+C	FamilySymbol	-1001557	28
+C	FamilySymbol	-1001390	271
+C	FamilySymbol	-1001320	132
+C	FamilySymbol	-1001301	281
+C	FamilySymbol	-1001300	284
+C	FamilySymbol	-1001006	280
+C	FasciaAttr	-1140422	9
+C	FasciaAttr	-1010109	9
+C	FasciaAttr	-1010108	9
+C	FasciaAttr	-1010105	9
+C	FasciaAttr	-1010104	9
+C	FasciaAttr	-1010103	9
+C	FasciaAttr	-1002501	9
+C	FasciaAttr	-1002500	9
+C	FasciaAttr	-1002107	9
+C	FasciaAttr	-1002001	9
+C	FillPatternElem	-1013200	116
+C	FilledRegion	-1001203	99
+C	FlexCenterLine	-1012101	226
+C	FloorAttributes	-1140422	86
+C	FloorAttributes	-1010109	86
+C	FloorAttributes	-1010108	86
+C	FloorAttributes	-1010105	86
+C	FloorAttributes	-1010104	86
+C	FloorAttributes	-1010103	86
+C	FloorAttributes	-1002500	86
+C	FloorAttributes	-1001006	74
+C	FontElem	-1013200	247
+C	FormElem	-1006205	4
+C	GCSViewport	-1005199	8
+C	GCSViewport	-1005176	8
+C	GCSViewport	-1005150	8
+C	GStyleElem	-1013200	2031
+C	GeoSite	-1002002	18
+C	GeoSite	-1002001	18
+C	Grid	-1013200	16
+C	Grid	-1008000	185
+C	GutterAttr	-1140422	9
+C	GutterAttr	-1010109	9
+C	GutterAttr	-1010108	9
+C	GutterAttr	-1010105	9
+C	GutterAttr	-1010104	9
+C	GutterAttr	-1010103	9
+C	GutterAttr	-1002501	9
+C	GutterAttr	-1002500	9
+C	GutterAttr	-1002107	9
+C	GutterAttr	-1002001	9
+C	HVACLoadBuildingTypeElem	-1154687	297
+C	HVACLoadBuildingTypeElem	-1154671	264
+C	HVACLoadBuildingTypeElem	-1154668	264
+C	HVACLoadBuildingTypeElem	-1154665	264
+C	HVACLoadBuildingTypeElem	-1150188	264
+C	HVACLoadBuildingTypeElem	-1114357	264
+C	HVACLoadBuildingTypeElem	-1114356	297
+C	HVACLoadBuildingTypeElem	-1114355	297
+C	HVACLoadBuildingTypeElem	-1114351	561
+C	HVACLoadBuildingTypeElem	-1114350	561
+C	HVACLoadBuildingTypeElem	-1114349	561
+C	HVACLoadBuildingTypeElem	-1114348	264
+C	HVACLoadBuildingTypeElem	-1114239	264
+C	HVACLoadBuildingTypeElem	-1114220	264
+C	HVACLoadBuildingTypeElem	-1114219	264
+C	HVACLoadBuildingTypeElem	-1114189	264
+C	HVACLoadBuildingTypeElem	-1114175	264
+C	HVACLoadSpaceTypeElem	-1154687	1125
+C	HVACLoadSpaceTypeElem	-1154671	1000
+C	HVACLoadSpaceTypeElem	-1154668	1000
+C	HVACLoadSpaceTypeElem	-1154665	1000
+C	HVACLoadSpaceTypeElem	-1150188	1000
+C	HVACLoadSpaceTypeElem	-1114351	2125
+C	HVACLoadSpaceTypeElem	-1114350	2125
+C	HVACLoadSpaceTypeElem	-1114349	2125
+C	HVACLoadSpaceTypeElem	-1114348	1000
+C	HVACLoadSpaceTypeElem	-1114239	1000
+C	HVACLoadSpaceTypeElem	-1114220	1000
+C	HVACLoadSpaceTypeElem	-1114219	1000
+C	HVACLoadSpaceTypeElem	-1114189	1000
+C	HVACLoadSpaceTypeElem	-1114175	1000
+C	HandRailType	-1150361	9
+C	HandRailType	-1150350	8
+C	HandRailType	-1150348	8
+C	HandRailType	-1150343	9
+C	HandRailType	-1150339	9
+C	HandRailType	-1150338	8
+C	HandRailType	-1150337	9
+C	HandRailType	-1140422	9
+C	HandRailType	-1010109	9
+C	HandRailType	-1010108	9
+C	HandRailType	-1010105	9
+C	HandRailType	-1010104	9
+C	HandRailType	-1010103	9
+C	HandRailType	-1002501	9
+C	HandRailType	-1002500	9
+C	HandRailType	-1002001	9
+C	Hub	-1013200	122
+C	ImageSymbol	-1002001	64
+C	InteriorElevArrow	-1012202	49
+C	InteriorElevArrow	-1011003	49
+C	InteriorElevArrow	-1005333	48
+C	InteriorElevArrow	-1005254	12
+C	JoistSystem	-1013200	16
+C	JoistSystem	-1012101	32
+C	JoistSystem	-1001203	32
+C	JoistSystemAttr	-1140422	9
+C	JoistSystemAttr	-1010109	9
+C	JoistSystemAttr	-1010108	9
+C	JoistSystemAttr	-1010105	9
+C	JoistSystemAttr	-1010104	9
+C	JoistSystemAttr	-1010103	9
+C	JoistSystemAttr	-1002501	9
+C	JoistSystemAttr	-1002500	9
+C	JoistSystemAttr	-1002001	9
+C	KeynoteTag	-1002052	18
+C	KeynoteTag	-1002051	18
+C	KeynoteTag	-1002050	18
+C	KeynoteTag	-1002000	18
+C	LeaderStyle	-1006449	1405
+C	LeaderStyle	-1006425	1405
+C	LeaderStyle	-1006413	1405
+C	LegendComponent	-1013200	95
+C	Level	-1013200	9
+C	Level	-1008000	53
+C	Level	-1007112	9
+C	Level	-1007111	51
+C	Level	-1007102	44
+C	Level	-1006939	42
+C	LineLoad	-1015005	35
+C	LineLoad	-1013200	35
+C	LineLoad	-1012101	35
+C	LinePatternElem	-1013200	150
+C	LinearDimString	-1004510	4432
+C	LinearDimString	-1004500	3699
+C	LoadCaseElem	-1013200	8
+C	LoadNatureElem	-1013200	8
+C	MEPAnalyticalConnectionElementType	-1010105	9
+C	MEPAnalyticalConnectionElementType	-1010103	9
+C	MEPAnalyticalConnectionElementType	-1002001	9
+C	MEPSystemZoneType	-1002001	9
+C	MassLevelData	-1012101	14
+C	MassLevelData	-1001203	14
+C	MasterImportSymbol	-1002001	6
+C	MechanicalEquipmentSetType	-1010105	9
+C	MechanicalEquipmentSetType	-1010103	9
+C	MechanicalEquipmentSetType	-1002001	9
+C	ModelClipBox	-1013200	12
+C	MultiReferenceAnnotationType	-1002001	6
+C	NestedFamSymRefElem	-1001203	6
+C	NewCurtainWallType	-1140422	17
+C	NewCurtainWallType	-1013302	13
+C	NewCurtainWallType	-1013300	14
+C	NewCurtainWallType	-1010109	17
+C	NewCurtainWallType	-1010108	17
+C	NewCurtainWallType	-1010105	17
+C	NewCurtainWallType	-1010104	17
+C	NewCurtainWallType	-1010103	17
+C	NewCurtainWallType	-1007395	17
+C	NewCurtainWallType	-1007389	17
+C	NewCurtainWallType	-1007388	17
+C	NewCurtainWallType	-1002500	17
+C	NewCurtainWallType	-1001006	17
+C	NumberingSchema	-1013200	3
+C	PanelScheduleTemplate	-1013200	5
+C	ParamBinding	-1013200	209
+C	ParamElemElectricalLoadClassification	-1013200	108
+C	ParamElemExternal	-1013200	466
+C	ParamElemFamily	-1013200	120
+C	ParamElemProject	-1013200	8
+C	ParameterFilterElement	-1013200	7
+C	PartMaker	-1013200	8
+C	PenWidthTableElem	-1013200	9
+C	PhaseFilterElem	-1013200	7
+C	PipeFittingCenterLine	-1012101	1024
+C	PipeFittingCenterLine	-1002108	1024
+C	PipeFittingCenterLine	-1001352	1024
+C	PipeSegment	-1013200	15
+C	PostedWarningElem	-1013200	40
+C	PrintSettings	-1013200	3
+C	ProfileRoof	-1012101	17
+C	ProfileRoof	-1002052	20
+C	ProfileRoof	-1002051	20
+C	ProfileRoof	-1002050	20
+C	ProfileRoof	-1002000	20
+C	ProfileRoof	-1001713	20
+C	ProfileRoof	-1001708	20
+C	ProfileRoof	-1001203	20
+C	ProfileRoof	-1001007	20
+C	ProjectPhase	-1012110	19
+C	ProjectRevision	-1011957	9
+C	ProjectRevision	-1011953	9
+C	ProjectRevision	-1011952	9
+C	ProjectRevision	-1011951	9
+C	ProjectRevision	-1011950	9
+C	Property	-1001203	5
+C	PropertyAttr	-1140422	10
+C	PropertyAttr	-1010109	10
+C	PropertyAttr	-1010108	10
+C	PropertyAttr	-1010105	10
+C	PropertyAttr	-1010104	10
+C	PropertyAttr	-1010103	10
+C	PropertyAttr	-1002501	10
+C	PropertyAttr	-1002500	10
+C	PropertyAttr	-1002001	10
+C	PropertyLineSegment	-1001203	24
+C	RadialDim	-1004515	218
+C	RadialDim	-1004510	218
+C	RadialDim	-1004500	218
+C	RampAttributes	-1140422	10
+C	RampAttributes	-1010109	10
+C	RampAttributes	-1010108	10
+C	RampAttributes	-1010105	10
+C	RampAttributes	-1010104	10
+C	RampAttributes	-1010103	10
+C	RampAttributes	-1002500	10
+C	RampAttributes	-1002001	10
+C	RampAttributes	-1001006	10
+C	RbsCableTrayType	-1140422	36
+C	RbsCableTrayType	-1114393	36
+C	RbsCableTrayType	-1114388	36
+C	RbsCableTrayType	-1114387	36
+C	RbsCableTrayType	-1114131	36
+C	RbsCableTrayType	-1114113	36
+C	RbsCableTrayType	-1114112	21
+C	RbsCableTrayType	-1114111	21
+C	RbsCableTrayType	-1010109	36
+C	RbsCableTrayType	-1010108	36
+C	RbsCableTrayType	-1010105	36
+C	RbsCableTrayType	-1010104	36
+C	RbsCableTrayType	-1010103	36
+C	RbsCableTrayType	-1002501	36
+C	RbsCableTrayType	-1002500	36
+C	RbsConduitCurve	-1140127	39
+C	RbsConduitCurve	-1140126	39
+C	RbsConduitCurve	-1140123	39
+C	RbsConduitCurve	-1114240	39
+C	RbsConduitCurve	-1114132	39
+C	RbsConduitCurve	-1114106	39
+C	RbsConduitCurve	-1114105	39
+C	RbsConduitCurve	-1114003	39
+C	RbsConduitCurve	-1114002	39
+C	RbsConduitCurve	-1114000	39
+C	RbsConduitCurve	-1012101	39
+C	RbsConduitCurve	-1004005	39
+C	RbsConduitCurve	-1001203	39
+C	RbsConduitType	-1140422	34
+C	RbsConduitType	-1114131	34
+C	RbsConduitType	-1114113	34
+C	RbsConduitType	-1114112	34
+C	RbsConduitType	-1114111	34
+C	RbsConduitType	-1010109	34
+C	RbsConduitType	-1010108	34
+C	RbsConduitType	-1010105	34
+C	RbsConduitType	-1010104	34
+C	RbsConduitType	-1010103	34
+C	RbsConduitType	-1002501	34
+C	RbsConduitType	-1002500	34
+C	RbsConduitType	-1002001	34
+C	RbsDbViewSystemNavigator	-1012103	9
+C	RbsDbViewSystemNavigator	-1006602	9
+C	RbsDbViewSystemNavigator	-1006601	9
+C	RbsDbViewSystemNavigator	-1005199	9
+C	RbsDbViewSystemNavigator	-1005150	9
+C	RbsDbViewSystemNavigator	-1005147	9
+C	RbsDbViewSystemNavigator	-1005114	9
+C	RbsDbViewSystemNavigator	-1005112	9
+C	RbsDistributionSysType	-1140059	13
+C	RbsDistributionSysType	-1002001	13
+C	RbsFlexDuctCurve	-1150435	226
+C	RbsFlexDuctCurve	-1150434	226
+C	RbsFlexDuctCurve	-1150433	226
+C	RbsFlexDuctCurve	-1150431	226
+C	RbsFlexDuctCurve	-1114167	226
+C	RbsFlexDuctCurve	-1114166	226
+C	RbsFlexDuctCurve	-1114128	226
+C	RbsFlexDuctCurve	-1114124	226
+C	RbsFlexDuctCurve	-1114121	226
+C	RbsFlexDuctCurve	-1114116	226
+C	RbsFlexDuctCurve	-1114108	226
+C	RbsFlexDuctCurve	-1114107	226
+C	RbsFlexDuctCurve	-1114103	226
+C	RbsFlexDuctCurve	-1114005	226
+C	RbsFlexDuctCurve	-1114002	226
+C	RbsFlexDuctCurve	-1114000	226
+C	RbsFlexDuctCurve	-1013405	226
+C	RbsFlexDuctCurve	-1012101	226
+C	RbsFlexDuctCurve	-1001203	226
+C	RbsFlexPipeType	-1140422	9
+C	RbsFlexPipeType	-1010109	9
+C	RbsFlexPipeType	-1010108	9
+C	RbsFlexPipeType	-1010105	9
+C	RbsFlexPipeType	-1010104	9
+C	RbsFlexPipeType	-1010103	9
+C	RbsFlexPipeType	-1002501	9
+C	RbsFlexPipeType	-1002500	9
+C	RbsFluidType	-1002001	144
+C	RbsHvacSystem	-1140324	90
+C	RbsHvacSystemType	-1140325	27
+C	RbsHvacSystemType	-1010105	27
+C	RbsHvacSystemType	-1010104	27
+C	RbsHvacSystemType	-1010103	27
+C	RbsHvacSystemType	-1002107	27
+C	RbsHvacSystemType	-1002001	27
+C	RbsPipeConnectionType	-1002001	72
+C	RbsPipeMaterialType	-1140204	40
+C	RbsPipeMaterialType	-1002001	45
+C	RbsPipeScheduleType	-1002001	92
+C	RbsPipeType	-1140422	13
+C	RbsPipeType	-1010109	13
+C	RbsPipeType	-1010108	13
+C	RbsPipeType	-1010105	13
+C	RbsPipeType	-1010104	13
+C	RbsPipeType	-1010103	13
+C	RbsPipeType	-1002501	13
+C	RbsPipeType	-1002500	13
+C	RbsPipingSystem	-1140324	12
+C	RbsPipingSystemType	-1150410	115
+C	RbsPipingSystemType	-1140335	115
+C	RbsPipingSystemType	-1140328	22
+C	RbsPipingSystemType	-1140325	115
+C	RbsPipingSystemType	-1140217	44
+C	RbsPipingSystemType	-1010105	115
+C	RbsPipingSystemType	-1010104	115
+C	RbsPipingSystemType	-1010103	115
+C	RbsPipingSystemType	-1002107	115
+C	RbsPipingSystemType	-1002001	115
+C	RbsVoltageType	-1140058	16
+C	RbsVoltageType	-1140057	16
+C	RbsVoltageType	-1140056	16
+C	RbsVoltageType	-1002001	17
+C	RbsWireInsulationType	-1002001	186
+C	RbsWireMaterialType	-1002001	38
+C	RbsWireTemperatureRatingType	-1002001	23
+C	RbsWireType	-1140422	11
+C	RbsWireType	-1140091	11
+C	RbsWireType	-1140090	11
+C	RbsWireType	-1140028	33
+C	RbsWireType	-1140026	33
+C	RbsWireType	-1140024	10
+C	RbsWireType	-1140023	11
+C	RbsWireType	-1010109	11
+C	RbsWireType	-1010108	11
+C	RbsWireType	-1010105	11
+C	RbsWireType	-1010104	11
+C	RbsWireType	-1010103	11
+C	RbsWireType	-1002501	11
+C	RbsWireType	-1002500	11
+C	RbsWireType	-1002001	11
+C	Rebar	-1017032	133
+C	Rebar	-1013200	122
+C	Rebar	-1012101	133
+C	Rebar	-1001203	133
+C	RebarBarType	-1140422	13
+C	RebarBarType	-1018274	13
+C	RebarBarType	-1010109	13
+C	RebarBarType	-1010108	13
+C	RebarBarType	-1010105	13
+C	RebarBarType	-1010104	13
+C	RebarBarType	-1010103	13
+C	RebarBarType	-1002501	13
+C	RebarBarType	-1002500	13
+C	RebarHookType	-1002001	10
+C	RebarInSystem	-1017032	224
+C	RebarInSystem	-1013200	224
+C	RebarInSystem	-1012101	224
+C	RebarInSystem	-1001203	224
+C	RebarShape	-1140422	46
+C	RebarShape	-1010109	46
+C	RebarShape	-1010108	46
+C	RebarShape	-1010105	46
+C	RebarShape	-1010104	46
+C	RebarShape	-1010103	46
+C	RebarShape	-1002501	46
+C	RebarShape	-1002500	46
+C	RebarSystem	-1013200	44
+C	RebarSystem	-1012101	45
+C	RebarSystem	-1001203	45
+C	RefPlane	-1013200	21
+C	RefPlane	-1008000	185
+C	RefTableElem	-1007850	12
+C	ReferenceViewerAttributes	-1002001	9
+C	RegenSplitterElem	-1013200	68
+C	RepeatingDetailAttributes	-1002001	12
+C	RevealAttr	-1012840	8
+C	RevealAttr	-1002001	9
+C	RevisionCloudAttr	-1002001	9
+C	RoofAttributes	-1140422	39
+C	RoofAttributes	-1010109	39
+C	RoofAttributes	-1010108	39
+C	RoofAttributes	-1010105	39
+C	RoofAttributes	-1010104	39
+C	RoofAttributes	-1010103	39
+C	RoofAttributes	-1002500	39
+C	RoofSoffitType	-1140422	9
+C	RoofSoffitType	-1010109	9
+C	RoofSoffitType	-1010108	9
+C	RoofSoffitType	-1010105	9
+C	RoofSoffitType	-1010104	9
+C	RoofSoffitType	-1010103	9
+C	RoofSoffitType	-1002501	9
+C	RoofSoffitType	-1002500	9
+C	RoofSoffitType	-1002001	9
+C	RoomElem	-1150188	464
+C	RoomElem	-1140035	176
+C	RoomElem	-1140033	176
+C	RoomElem	-1114330	188
+C	RoomElem	-1114258	344
+C	RoomElem	-1114256	176
+C	RoomElem	-1114254	176
+C	RoomElem	-1114230	176
+C	RoomElem	-1114229	174
+C	RoomElem	-1114226	640
+C	RoomElem	-1114225	640
+C	RoomElem	-1114224	670
+C	RoomElem	-1114223	670
+C	RoomElem	-1114222	176
+C	RoomElem	-1114220	464
+C	RoomElem	-1114219	466
+C	RoomElem	-1114196	176
+C	RoomElem	-1114195	176
+C	RoomElem	-1114194	176
+C	RoomElem	-1114176	176
+C	RoomElem	-1114174	332
+C	RoomElem	-1114172	14
+C	RoomElem	-1013200	31
+C	RoomElem	-1007101	537
+C	RoomElem	-1006928	536
+C	RoomElem	-1006925	640
+C	RoomElem	-1006924	640
+C	RoomElem	-1006920	640
+C	RoomElem	-1006902	264
+C	RoomTag	-1002052	558
+C	RoomTag	-1002051	558
+C	RoomTag	-1002050	558
+C	RoomTag	-1002000	558
+C	SWallRectOpening	-1012101	9
+C	SWallRectOpening	-1012100	17
+C	SWallRectOpening	-1001107	9
+C	SWallRectOpening	-1001103	9
+C	Section	-1012202	103
+C	Section	-1011003	103
+C	Section	-1005254	49
+C	Section	-1005176	106
+C	ShaftOpening	-1012101	12
+C	ShaftOpening	-1001109	12
+C	ShaftOpening	-1001107	12
+C	ShaftOpening	-1001105	12
+C	ShaftOpening	-1001103	12
+C	SiteSurface	-1012101	14
+C	SiteSurface	-1002107	16
+C	SiteSurface	-1001203	16
+C	SketchGrid	-1013200	33
+C	SlaveImportSymbol	-1002001	6
+C	SpanDirectionSymbol	-1002052	4
+C	SpanDirectionSymbol	-1002051	4
+C	SpanDirectionSymbol	-1002050	4
+C	SpanDirectionSymbol	-1002000	4
+C	SpotElevationStyle	-1006327	15
+C	Stairs	-1012101	26
+C	Stairs	-1007275	26
+C	Stairs	-1007272	26
+C	Stairs	-1007219	26
+C	Stairs	-1007218	26
+C	Stairs	-1007204	26
+C	Stairs	-1001203	26
+C	StairsAttributes	-1140422	26
+C	StairsAttributes	-1010109	26
+C	StairsAttributes	-1010108	26
+C	StairsAttributes	-1010105	26
+C	StairsAttributes	-1010104	26
+C	StairsAttributes	-1010103	26
+C	StairsAttributes	-1007203	25
+C	StairsAttributes	-1007202	25
+C	StairsAttributes	-1002500	26
+C	StairsAttributes	-1002001	26
+C	StairsAttributes	-1001006	26
+C	StairsElement	-1012101	12
+C	StairsElement	-1007219	11
+C	StairsElement	-1007201	12
+C	StairsElement	-1007200	12
+C	StairsElement	-1001203	12
+C	StairsLanding	-1012101	7
+C	StairsLanding	-1002052	5
+C	StairsLanding	-1002051	5
+C	StairsLanding	-1002050	5
+C	StairsLanding	-1002000	5
+C	StairsLanding	-1001203	7
+C	StairsLandingType	-1151604	23
+C	StairsLandingType	-1140422	23
+C	StairsLandingType	-1010109	23
+C	StairsLandingType	-1010108	23
+C	StairsLandingType	-1010105	23
+C	StairsLandingType	-1010104	23
+C	StairsLandingType	-1010103	23
+C	StairsLandingType	-1002501	23
+C	StairsLandingType	-1002500	23
+C	StairsPathElement	-1006636	51
+C	StairsPathElement	-1006634	21
+C	StairsPathElement	-1006633	21
+C	StairsPathElement	-1006632	51
+C	StairsPathElement	-1006631	51
+C	StairsPathType	-1006661	18
+C	StairsPathType	-1006660	16
+C	StairsPathType	-1006630	18
+C	StairsPathType	-1006625	16
+C	StairsPathType	-1002001	18
+C	StairsRailingAttr	-1140422	21
+C	StairsRailingAttr	-1010109	21
+C	StairsRailingAttr	-1010108	21
+C	StairsRailingAttr	-1010105	21
+C	StairsRailingAttr	-1010104	21
+C	StairsRailingAttr	-1010103	21
+C	StairsRailingAttr	-1002500	21
+C	StairsRun	-1012101	17
+C	StairsRun	-1002052	10
+C	StairsRun	-1002051	10
+C	StairsRun	-1002050	10
+C	StairsRun	-1002000	10
+C	StairsRun	-1001203	17
+C	StairsRunType	-1152177	31
+C	StairsRunType	-1152176	31
+C	StairsRunType	-1152161	31
+C	StairsRunType	-1152154	28
+C	StairsRunType	-1152151	31
+C	StairsRunType	-1140422	31
+C	StairsRunType	-1010109	31
+C	StairsRunType	-1010108	31
+C	StairsRunType	-1010105	31
+C	StairsRunType	-1010104	31
+C	StairsRunType	-1010103	31
+C	StairsRunType	-1002501	31
+C	StairsRunType	-1002500	31
+C	StairsSupport	-1151708	38
+C	StairsSupport	-1151706	38
+C	StairsSupport	-1151705	38
+C	StairsSupport	-1012101	38
+C	StairsSupport	-1002052	38
+C	StairsSupport	-1002051	38
+C	StairsSupport	-1002050	38
+C	StairsSupport	-1002000	38
+C	StairsSupport	-1001203	38
+C	StairsSupportType	-1151811	20
+C	StairsSupportType	-1151810	38
+C	StairsSupportType	-1151809	38
+C	StairsSupportType	-1151807	38
+C	StairsSupportType	-1151806	38
+C	StairsSupportType	-1140422	40
+C	StairsSupportType	-1010109	40
+C	StairsSupportType	-1010108	40
+C	StairsSupportType	-1010105	40
+C	StairsSupportType	-1010104	40
+C	StairsSupportType	-1010103	40
+C	StairsSupportType	-1002501	40
+C	StairsSupportType	-1002500	40
+C	StairsSym	-1002002	26
+C	StairsSym	-1002001	26
+C	StairsTriserSymbol	-1002002	24
+C	StairsType	-1151236	37
+C	StairsType	-1151235	37
+C	StairsType	-1151234	138
+C	StairsType	-1151232	40
+C	StairsType	-1151231	40
+C	StairsType	-1151216	37
+C	StairsType	-1151208	40
+C	StairsType	-1151207	40
+C	StairsType	-1140422	40
+C	StairsType	-1010109	40
+C	StairsType	-1010108	40
+C	StairsType	-1010105	40
+C	StairsType	-1010104	40
+C	StairsType	-1010103	40
+C	StairsType	-1007203	37
+C	StairsType	-1007202	37
+C	StairsType	-1002501	40
+C	StairsType	-1002500	40
+C	StairsType	-1002001	40
+C	StairsType	-1001006	40
+C	StructConnectionType	-1002002	5
+C	StructConnectionType	-1002001	45
+C	SunAndShadowSettings	-1013200	33
+C	SunAndShadowSettings	-1005334	695
+C	SweepElem	-1006205	5
+C	SweepHost	-1012101	5
+C	SweepHost	-1001203	5
+C	SysMullionFamSym	-1140422	1656
+C	SysMullionFamSym	-1010109	1656
+C	SysMullionFamSym	-1010108	1656
+C	SysMullionFamSym	-1010105	1656
+C	SysMullionFamSym	-1010104	1656
+C	SysMullionFamSym	-1010103	1656
+C	SysMullionFamSym	-1007363	1655
+C	SysMullionFamSym	-1005556	1656
+C	SysMullionFamSym	-1002501	1656
+C	SysMullionFamSym	-1002500	1656
+C	SysMullionFamSym	-1002107	1656
+C	SysMullionFamSym	-1002001	1617
+C	SysPanelFamSym	-1140422	943
+C	SysPanelFamSym	-1010304	941
+C	SysPanelFamSym	-1010302	941
+C	SysPanelFamSym	-1010109	943
+C	SysPanelFamSym	-1010108	943
+C	SysPanelFamSym	-1010105	943
+C	SysPanelFamSym	-1010104	943
+C	SysPanelFamSym	-1010103	943
+C	SysPanelFamSym	-1005556	943
+C	SysPanelFamSym	-1005439	909
+C	SysPanelFamSym	-1002501	943
+C	SysPanelFamSym	-1002500	943
+C	SysPanelFamSym	-1002107	943
+C	SysPanelFamSym	-1002001	924
+C	TagNoteAttributes	-1006327	1320
+C	Text3dAttrSymbol	-1140422	9
+C	Text3dAttrSymbol	-1010109	9
+C	Text3dAttrSymbol	-1010108	9
+C	Text3dAttrSymbol	-1010105	9
+C	Text3dAttrSymbol	-1010104	9
+C	Text3dAttrSymbol	-1010103	9
+C	Text3dAttrSymbol	-1006312	9
+C	Text3dAttrSymbol	-1006311	9
+C	Text3dAttrSymbol	-1002501	9
+C	Text3dAttrSymbol	-1002500	9
+C	Text3dAttrSymbol	-1002001	9
+C	TextNote	-1150231	1111
+C	TextNote	-1150230	1111
+C	TextNote	-1006325	1111
+C	TextNote	-1002052	12616
+C	TextNote	-1002051	12616
+C	TextNote	-1002050	12616
+C	TextNote	-1002000	12616
+C	TextNoteAttributes	-1006327	1494
+C	TopRail	-1012101	20
+C	TopRail	-1001203	20
+C	TopRailType	-1150361	9
+C	TopRailType	-1150350	8
+C	TopRailType	-1150348	8
+C	TopRailType	-1150343	9
+C	TopRailType	-1150339	9
+C	TopRailType	-1150338	8
+C	TopRailType	-1150337	9
+C	TopRailType	-1140422	9
+C	TopRailType	-1010109	9
+C	TopRailType	-1010108	9
+C	TopRailType	-1010105	9
+C	TopRailType	-1010104	9
+C	TopRailType	-1010103	9
+C	TopRailType	-1002501	9
+C	TopRailType	-1002500	9
+C	TopRailType	-1002001	9
+C	Viewer	-1012202	151
+C	Viewer	-1011003	151
+C	Viewer	-1005333	150
+C	Viewer	-1005254	26
+C	Viewer	-1005176	256
+C	Viewer3d	-1012202	71
+C	Viewer3d	-1005254	9
+C	Viewer3d	-1005094	10
+C	Viewport	-1005201	206
+C	Viewport	-1005150	116
+C	ViewportAttributes	-1005252	28
+C	ViewportAttributes	-1005251	28
+C	ViewportAttributes	-1005250	28
+C	ViewportAttributes	-1002001	28
+C	WallSweep	-1012804	49
+C	WallSweep	-1012802	36
+C	WallSweep	-1012801	36
+C	WallSweep	-1012101	24
+C	WallSweep	-1001203	24
+C	ZoneElement	-1114344	112
+C	ZoneElement	-1114341	113
+C	ZoneElement	-1114338	113
+C	ZoneElement	-1114326	21
+C	ZoneElement	-1114325	21
+C	ZoneElement	-1114317	113
+C	ZoneElement	-1114313	112
+C	ZoneElement	-1114311	112
+C	ZoneElement	-1114310	112
+C	ZoneElement	-1114309	112
+C	ZoneElement	-1114308	112
+C	ZoneElement	-1114304	113
+O	CurveElem
+O	DuctFittingCenterLine
+O	Family
+O	FilledRegionAttributes
+O	Floor
+O	IndependentTag
+O	MaterialElem
+O	PropertySetElement
+O	RbsDuctCurve
+O	RbsElectricalSystem
+O	RbsPipeCurve
+O	RbsWireCurve
+O	ReferencePoint
+O	SWall
+O	SegmentCenterLine
+Q	CurveElem	-1010106	12
+Q	CurveElem	-1006205	1240
+Q	CurveElem	-1001203	12
+Q	DuctFittingCenterLine	-1150432	2345
+Q	DuctFittingCenterLine	-1150430	2345
+Q	DuctFittingCenterLine	-1141008	2345
+Q	DuctFittingCenterLine	-1140982	2345
+Q	DuctFittingCenterLine	-1140205	2345
+Q	DuctFittingCenterLine	-1010106	2345
+Q	Family	-1005501	720
+Q	FilledRegionAttributes	-1010109	3596
+Q	FilledRegionAttributes	-1010108	3596
+Q	FilledRegionAttributes	-1010105	3596
+Q	FilledRegionAttributes	-1010104	3596
+Q	FilledRegionAttributes	-1010103	3596
+Q	FilledRegionAttributes	-1005554	5940
+Q	FilledRegionAttributes	-1002501	3596
+Q	FilledRegionAttributes	-1002500	3596
+Q	FilledRegionAttributes	-1002125	5940
+Q	FilledRegionAttributes	-1002124	5940
+Q	FilledRegionAttributes	-1002123	5940
+Q	FilledRegionAttributes	-1002122	5940
+Q	FilledRegionAttributes	-1002120	5940
+Q	FilledRegionAttributes	-1001405	3596
+Q	FilledRegionAttributes	-1001205	3596
+Q	Floor	-1010106	1903
+Q	Floor	-1001951	1689
+Q	Floor	-1001203	1903
+Q	MaterialElem	-1010109	2033
+Q	MaterialElem	-1010106	2033
+Q	MaterialElem	-1010103	2032
+Q	MaterialElem	-1001205	1556
+Q	MaterialElem	-1001203	2033
+Q	PropertySetElement	-1150466	377
+Q	PropertySetElement	-1150465	377
+Q	PropertySetElement	-1150464	377
+Q	RbsDuctCurve	-1150432	8668
+Q	RbsDuctCurve	-1150430	8668
+Q	RbsDuctCurve	-1141008	8668
+Q	RbsDuctCurve	-1140982	8668
+Q	RbsDuctCurve	-1010106	8668
+Q	RbsDuctCurve	-1001203	8668
+Q	RbsElectricalSystem	-1140156	2044
+Q	RbsElectricalSystem	-1010106	2044
+Q	RbsPipeCurve	-1141008	15277
+Q	RbsPipeCurve	-1140982	15277
+Q	RbsPipeCurve	-1010106	15277
+Q	RbsPipeCurve	-1001203	15277
+Q	RbsWireCurve	-1140109	8796
+Q	RbsWireCurve	-1140037	8796
+Q	RbsWireCurve	-1010106	8796
+Q	RbsWireCurve	-1001203	8796
+Q	ReferencePoint	-1010106	11609
+Q	ReferencePoint	-1001597	11609
+Q	SWall	-1010106	4967
+Q	SWall	-1001203	4967
+Q	SegmentCenterLine	-1150432	2757
+Q	SegmentCenterLine	-1140128	688
+Q	SegmentCenterLine	-1010106	18722
+C	CurveElem	-1012101	631
+C	CurveElem	-1012100	399
+C	CurveElem	-1004011	52746
+C	CurveElem	-1004005	139248
+C	CurveElem	-1002052	8
+C	CurveElem	-1002051	8
+C	CurveElem	-1002050	8
+C	CurveElem	-1002000	8
+C	CurveElem	-1001370	230
+C	DuctFittingCenterLine	-1012101	2345
+C	DuctFittingCenterLine	-1012100	2173
+C	DuctFittingCenterLine	-1002108	172
+C	DuctFittingCenterLine	-1001370	172
+C	Family	-1012841	89
+C	Family	-1012834	2408
+C	Family	-1012833	2095
+C	Family	-1012811	2408
+C	Family	-1012808	2146
+C	Family	-1012807	5
+C	Family	-1005197	89
+C	Family	-1001570	14
+C	Family	-1001550	244
+C	Floor	-1002052	1903
+C	Floor	-1002051	1903
+C	Floor	-1002050	1903
+C	Floor	-1002000	1903
+C	MaterialElem	-1140355	5151
+C	MaterialElem	-1002554	5176
+C	MaterialElem	-1002552	5176
+C	MaterialElem	-1002550	5176
+C	RbsDuctCurve	-1150435	8668
+C	RbsDuctCurve	-1150434	8668
+C	RbsDuctCurve	-1150433	8391
+C	RbsDuctCurve	-1150431	8391
+C	RbsDuctCurve	-1140325	1729
+C	RbsDuctCurve	-1140324	1140
+C	RbsDuctCurve	-1114240	8668
+C	RbsDuctCurve	-1114167	8668
+C	RbsDuctCurve	-1114166	8391
+C	RbsDuctCurve	-1114128	8391
+C	RbsDuctCurve	-1114127	8391
+C	RbsDuctCurve	-1114121	8391
+C	RbsDuctCurve	-1114120	1452
+C	RbsDuctCurve	-1114116	8391
+C	RbsDuctCurve	-1114107	8391
+C	RbsDuctCurve	-1114106	8668
+C	RbsDuctCurve	-1114105	8668
+C	RbsDuctCurve	-1013405	8391
+C	RbsDuctCurve	-1012101	8668
+C	RbsDuctCurve	-1012100	6939
+C	RbsDuctCurve	-1002052	7183
+C	RbsDuctCurve	-1002051	7183
+C	RbsDuctCurve	-1002050	7183
+C	RbsDuctCurve	-1002000	7183
+C	RbsPipeCurve	-1150468	3366
+C	RbsPipeCurve	-1150434	15277
+C	RbsPipeCurve	-1140325	3366
+C	RbsPipeCurve	-1140324	3366
+C	RbsPipeCurve	-1140279	3366
+C	RbsPipeCurve	-1140277	11911
+C	RbsPipeCurve	-1140237	979
+C	RbsPipeCurve	-1140225	12890
+C	RbsPipeCurve	-1140211	12890
+C	RbsPipeCurve	-1140210	12890
+C	RbsPipeCurve	-1140208	12890
+C	RbsPipeCurve	-1140205	12890
+C	RbsPipeCurve	-1140204	12278
+C	RbsPipeCurve	-1140202	3366
+C	RbsPipeCurve	-1114120	979
+C	RbsPipeCurve	-1114106	15277
+C	RbsPipeCurve	-1114105	15277
+C	RbsPipeCurve	-1012101	15277
+C	RbsPipeCurve	-1012100	11911
+C	RbsPipeCurve	-1002052	15277
+C	RbsPipeCurve	-1002051	15277
+C	RbsPipeCurve	-1002050	15277
+C	RbsPipeCurve	-1002000	15277
+C	RbsWireCurve	-1140106	8796
+C	RbsWireCurve	-1140097	8796
+C	RbsWireCurve	-1002052	6706
+C	RbsWireCurve	-1002051	6706
+C	RbsWireCurve	-1002050	6706
+C	RbsWireCurve	-1002000	6706
+C	ReferencePoint	-1013446	5258
+C	SWall	-1002052	4968
+C	SWall	-1002051	4968
+C	SWall	-1002050	4968
+C	SWall	-1002000	4968
+C	SWall	-1001596	4968
+C	SWall	-1001119	4968
+C	SWall	-1001107	4968
+C	SWall	-1001103	4968
+C	SegmentCenterLine	-1012101	18722
+C	SegmentCenterLine	-1012100	15073
+E	AnalyticalLinkType	-1010105	11
+E	AnalyticalLinkType	-1010103	11
+E	ComponentRepeaterSlotSpecialType	-1002001	22
+E	ConceptualConstructionType	-1002001	396
+E	ContinuousRailSymbol	-1002002	20
+E	CorniceAttr	-1140422	11
+E	CorniceAttr	-1010109	11
+E	CorniceAttr	-1010108	11
+E	CorniceAttr	-1010105	11
+E	CorniceAttr	-1010104	11
+E	CorniceAttr	-1010103	11
+E	CorniceAttr	-1002501	11
+E	CorniceAttr	-1002500	11
+E	CutMarkType	-1140422	15
+E	CutMarkType	-1010109	15
+E	CutMarkType	-1010108	15
+E	CutMarkType	-1010105	15
+E	CutMarkType	-1010104	15
+E	CutMarkType	-1010103	15
+E	CutMarkType	-1002501	15
+E	CutMarkType	-1002500	15
+E	FamilyInstance	-1001203	11561
+E	FamilySymbol	-1140422	1817
+E	FamilySymbol	-1140252	33
+E	FamilySymbol	-1140251	35
+E	FamilySymbol	-1140250	35
+E	FamilySymbol	-1010109	1804
+E	FamilySymbol	-1010108	1586
+E	FamilySymbol	-1010105	1447
+E	FamilySymbol	-1010104	1501
+E	FamilySymbol	-1010103	1585
+E	FamilySymbol	-1002500	1234
+E	GeoSite	-1002001	22
+E	HandRailType	-1140422	11
+E	HandRailType	-1010109	11
+E	HandRailType	-1010108	11
+E	HandRailType	-1010105	11
+E	HandRailType	-1010104	11
+E	HandRailType	-1010103	11
+E	HandRailType	-1002501	11
+E	HandRailType	-1002500	11
+E	JoistSystemAttr	-1140422	12
+E	JoistSystemAttr	-1010109	12
+E	JoistSystemAttr	-1010108	12
+E	JoistSystemAttr	-1010105	12
+E	JoistSystemAttr	-1010104	12
+E	JoistSystemAttr	-1010103	11
+E	JoistSystemAttr	-1002501	12
+E	JoistSystemAttr	-1002500	12
+E	MEPAnalyticalConnectionElementType	-1010105	11
+E	MEPAnalyticalConnectionElementType	-1010103	11
+E	MechanicalEquipmentSetType	-1010105	11
+E	MechanicalEquipmentSetType	-1010103	11
+E	PropertyAttr	-1140422	13
+E	PropertyAttr	-1010109	13
+E	PropertyAttr	-1010108	13
+E	PropertyAttr	-1010105	13
+E	PropertyAttr	-1010104	13
+E	PropertyAttr	-1010103	13
+E	PropertyAttr	-1002501	13
+E	PropertyAttr	-1002500	13
+E	RbsHvacSystemType	-1010105	33
+E	RbsHvacSystemType	-1010104	33
+E	RbsHvacSystemType	-1010103	33
+E	RbsWireType	-1140422	13
+E	RbsWireType	-1010109	13
+E	RbsWireType	-1010108	13
+E	RbsWireType	-1010105	13
+E	RbsWireType	-1010104	13
+E	RbsWireType	-1010103	13
+E	RbsWireType	-1002501	13
+E	RbsWireType	-1002500	13
+E	StairsAttributes	-1140422	14
+E	StairsAttributes	-1010109	14
+E	StairsAttributes	-1010108	14
+E	StairsAttributes	-1010105	14
+E	StairsAttributes	-1010104	14
+E	StairsAttributes	-1010103	14
+E	StairsAttributes	-1002500	9
+E	StairsRunType	-1140422	28
+E	StairsRunType	-1010109	28
+E	StairsRunType	-1010108	28
+E	StairsRunType	-1010105	28
+E	StairsRunType	-1010104	28
+E	StairsRunType	-1010103	28
+E	StairsRunType	-1002501	28
+E	StairsRunType	-1002500	28
+E	StairsSym	-1002001	13
+E	StairsTriserSymbol	-1002002	38
+E	StairsType	-1140422	36
+E	StairsType	-1010109	36
+E	StairsType	-1010108	36
+E	StairsType	-1010105	36
+E	StairsType	-1010104	36
+E	StairsType	-1010103	36
+E	StairsType	-1002501	13
+E	StairsType	-1002500	13
+E	StructConnectionType	-1002002	83
+E	SysMullionFamSym	-1140422	642
+E	SysMullionFamSym	-1010109	642
+E	SysMullionFamSym	-1010108	642
+E	SysMullionFamSym	-1010105	642
+E	SysMullionFamSym	-1010104	642
+E	SysMullionFamSym	-1010103	642
+E	SysMullionFamSym	-1002501	642
+E	SysMullionFamSym	-1002500	642
+E	SysPanelFamSym	-1140422	481
+E	SysPanelFamSym	-1010109	481
+E	SysPanelFamSym	-1010108	481
+E	SysPanelFamSym	-1010105	481
+E	SysPanelFamSym	-1010104	481
+E	SysPanelFamSym	-1010103	481
+E	SysPanelFamSym	-1002501	481
+E	SysPanelFamSym	-1002500	481
+E	Text3dAttrSymbol	-1140422	11
+E	Text3dAttrSymbol	-1010109	11
+E	Text3dAttrSymbol	-1010108	11
+E	Text3dAttrSymbol	-1010105	11
+E	Text3dAttrSymbol	-1010104	11
+E	Text3dAttrSymbol	-1010103	11
+E	Text3dAttrSymbol	-1002501	11
+E	Text3dAttrSymbol	-1002500	11
+E	TopRailType	-1140422	11
+E	TopRailType	-1010109	11
+E	TopRailType	-1010108	11
+E	TopRailType	-1010105	11
+E	TopRailType	-1010104	11
+E	TopRailType	-1010103	11
+E	TopRailType	-1002501	11
+E	TopRailType	-1002500	11
+# X class id wrong: an admitted pair whose written value was wrong in every observation of the files it was checked on; applied to files of the Revit 2022 layout only
+# V lines: V class id category shape formula observations; the formula over the solids of a
+# family instance of a wide layout that gives the text for the header category and the shape of the solids (CompactSolidQuantities)
+V	FamilyInstance	-1001375	-2001300	any	empty	1593
+V	FamilyInstance	-1012805	-2008049	many	half	680
+V	FamilyInstance	-1012805	-2005110	any	empty	1647
+V	FamilyInstance	-1012805	-2003100	any	empty	196
+V	FamilyInstance	-1012805	-2002000	any	empty	2209
+V	FamilyInstance	-1012805	-2001350	many	half	148
+V	FamilyInstance	-1012805	-2001180	one	half	258
+V	FamilyInstance	-1012805	-2001060	many	maxface	506
+V	FamilyInstance	-1012805	-2001040	one	half	255
+V	FamilyInstance	-1012805	-2000700	any	empty	416
+V	FamilyInstance	-1012805	-2000280	any	empty	548
+V	FamilyInstance	-1012805	-2000171	solid	half	37756
+V	FamilyInstance	-1012805	-2000150	any	empty	3264
+V	FamilyInstance	-1012805	-2000127	solid	half	693
+V	FamilyInstance	-1012806	-2008087	solid	volume	582
+V	FamilyInstance	-1012806	-2005110	any	empty	1647
+V	FamilyInstance	-1012806	-2003100	any	empty	196
+V	FamilyInstance	-1012806	-2002000	any	empty	2209
+V	FamilyInstance	-1012806	-2001350	many	volume	148
+V	FamilyInstance	-1012806	-2001330	solid	volume	575
+V	FamilyInstance	-1012806	-2001320	solid	volume	3179
+V	FamilyInstance	-1012806	-2001300	one	volume	403
+V	FamilyInstance	-1012806	-2001180	one	volume	258
+V	FamilyInstance	-1012806	-2001060	solid	volume	3096
+V	FamilyInstance	-1012806	-2001040	one	volume	255
+V	FamilyInstance	-1012806	-2001000	many	volume	56
+V	FamilyInstance	-1012806	-2000700	any	empty	416
+V	FamilyInstance	-1012806	-2000280	any	empty	548
+V	FamilyInstance	-1012806	-2000171	solid	volume	37756
+V	FamilyInstance	-1012806	-2000151	many	volume	193
+V	FamilyInstance	-1012806	-2000150	any	empty	3264
+V	FamilyInstance	-1012806	-2000127	solid	volume	693
+V	FamilyInstance	-1012806	-2000100	solid	volume	134
+X	TagNoteAttributes	-1006326	475
+X	TextNoteAttributes	-1006442	267
+X	TextNoteAttributes	-1006326	267
+X	TextNoteAttributes	-1006315	267
+X	FamilyInstance	-1140532	7
+X	FamilyInstance	-1140531	7
+X	FamilyInstance	-1140530	7
+X	FamilyInstance	-1140529	7
+X	FamilyInstance	-1140528	7
+X	FamilyInstance	-1140527	7
+X	FamilyInstance	-1140526	7
+X	FamilyInstance	-1140525	7
+X	FamilyInstance	-1140524	7
+X	FamilyInstance	-1140523	7
+X	FamilyInstance	-1140522	7
+X	FamilyInstance	-1140521	7
+X	RbsWireType	-1140028	5
+X	RbsWireType	-1140026	2
+Q	MaterialElem	-1140422	11697
+Q	MaterialElem	-1010108	11811
+Q	MaterialElem	-1010104	11817

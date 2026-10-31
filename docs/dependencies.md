@@ -1,0 +1,53 @@
+# Dependencies
+
+All package versions live in `Directory.Packages.props` (central package management); project files carry no versions.
+Build settings shared by every project live in `Directory.Build.props`; the SDK is pinned in `global.json`
+(`10.0.100`, `rollForward: latestFeature`, no prereleases).
+
+## Runtime packages (library)
+
+| Package | Version | Used for |
+|---|---|---|
+| OpenMcdf | 3.4.0 | Reading the compound file container of `.rvt` / `.rfa` files. |
+| SharpZipLib | 1.4.2 | Raw deflate (`Inflater`, `InflaterInputStream`) and `Adler32` for the chunk streams. |
+
+### Decisions
+
+- **OpenMcdf 3.1.0 -> 3.4.0.** 3.1.0 is affected by GHSA-jxpf-xq2m-q525 (fixed in 3.1.3) and GHSA-5qwm-7pvp-w988
+  (fixed in 3.1.4): both are unbounded loops on a crafted directory tree with a cycle. The library opens untrusted
+  files and enumerates and opens streams, so the code path is reachable and a patched release is required.
+  3.4.0 is the newest release on nuget.org; the exported IFC and JSON are byte-identical to the previous version
+ .
+- **SharpCompress removed.** It was referenced by the library but no source file uses it (no `SharpCompress`
+  namespace appears anywhere in `src`, `tests` or `tools`). Dropping it also removes GHSA-6c8g-7p36-r338 (a
+  directory traversal in archive extraction, fixed in 0.48.0), which was not reachable in any case.
+- **SharpZipLib stays at 1.4.2.** It is the newest release, has no known advisory, and is used directly
+  (`ChunkDecompressor`, `OwnPartitionParts`, one CLI diagnostic command, tests). Replacing it with
+  `System.IO.Compression` was not done: it would risk behavior changes on corrupt or truncated streams
+  (the inflater is driven with `noHeader: true` and explicit partial-read handling) for no security gain.
+
+## Test packages
+
+Pinned to exact versions (previously `17.*`, `2.*`, `2.*`): Microsoft.NET.Test.Sdk 17.14.1, xunit 2.9.3,
+xunit.runner.visualstudio 2.8.2. These are the versions the floating ranges resolved to. Newer majors exist
+(Test.Sdk 18.x, runner 4.x); moving to them is a separate change. The tests project also references OpenMcdf directly (it opens containers itself).
+
+## Auditing
+
+`NuGetAudit` is on with `NuGetAuditMode=all` (direct and transitive) and `NuGetAuditLevel=low`, so every known
+advisory is reported as an NU1901-NU1904 warning at restore. Warnings are not promoted to errors.
+Check manually:
+
+    dotnet list package --vulnerable --include-transitive
+    dotnet list package --outdated
+
+Result at the time of writing: no vulnerable packages in any project; the only outdated entries are the pinned
+test packages mentioned above.
+
+## Build settings
+
+`Directory.Build.props` sets `LangVersion` 14.0, `Nullable` enable, `ImplicitUsings` enable, `Deterministic` true,
+`EmbedUntrackedSources` true, `PublishRepositoryUrl` true, `VersionPrefix` 0.1.0, snapshot symbol packages (`snupkg`),
+and `ContinuousIntegrationBuild` true when `CI`, `GITHUB_ACTIONS` or `TF_BUILD` is set. `Microsoft.SourceLink.GitHub`
+is a build-time dependency only (`PrivateAssets` all). `tests/Directory.Build.props` imports it and turns
+`GenerateDocumentationFile` off. The library, the CLI and the tests target `net8.0` and `net10.0`.

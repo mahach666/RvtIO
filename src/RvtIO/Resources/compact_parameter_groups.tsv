@@ -1,0 +1,123 @@
+# Generated from Autodesk Revit 2022 sources; do not edit.
+# sources: the table of the native builtin parameter definitions, the Revit 2022 en-US GeneratedRes.dll (sha256 39dd0b16c9b1e72c204e1efa207e230782de192b984371e89d77dd3fd2989ca7), RevitAPI.dll enum BuiltInParameterGroup (sha256 a60011776a7b4994235150ea3ff14929626db97c115ff59ac7524153bb98b48b)
+# BuiltInParameterGroup value, English group label
+-5000231	Electrical Analysis
+-5000230	Alternate Units
+-5000229	Primary Units
+-5000228	Cross Section Properties
+-5000227	Route Analysis
+-5000226	Geolocation
+-5000225	Structural Section Geometry
+-5000221	Material Thermal Properties
+-5000220	Room/Space Data
+-5000219	Building Data
+-5000218	Set
+-5000217	Advanced
+-5000216	Releases / Member Forces
+-5000214	Secondary End
+-5000213	Primary End
+-5000212	Moments
+-5000211	Forces
+-5000210	Fabrication Product Data
+-5000208	Reference
+-5000207	Geometric Position
+-5000206	Division Geometry
+-5000205	Segments and Fittings
+-5000204	Extension (End/Top)
+-5000203	Extension (Beginning/Bottom)
+-5000202	Winders
+-5000201	Supports
+-5000200	End Connection
+-5000199	Handrail 2
+-5000198	Terminations
+-5000197	Threads/Risers
+-5000196	Calculation Rules
+-5000195	Dimensions     (linear units or % of thickness)
+-5000194	Length
+-5000193	Nodes
+-5000192	Analytical Properties
+-5000191	Analytical Alignment
+-5000190	Rise / Drop
+-5000189	Lining
+-5000188	Insulation
+-5000187	Overall Legend
+-5000186	Visibility
+-5000185	Supports
+-5000184	V Grid
+-5000183	U Grid
+-5000182	Posts
+-5000181	Pattern Remainder
+-5000180	Pattern Repeat
+-5000179	Segment Pattern (default)
+-5000178	Handrail 1
+-5000177	Top Rail
+-5000176	Energy Model - Building Services
+-5000175	Data
+-5000174	Electrical - Circuiting
+-5000173	General
+-5000172	Adaptive Component
+-5000171	Energy Analytical Model
+-5000170	Detailed Model
+-5000169	Essential
+-5000168	Fittings
+-5000167	Conceptual Energy Data
+-5000166	Area
+-5000165	Model Properties
+-5000164	V Grid
+-5000163	U Grid
+-5000162	Display
+-5000161	Analysis Results
+-5000160	Slab Shape Edit
+-5000159	Photometrics
+-5000158	Pattern Application
+-5000157	Green Building Properties
+-5000156	Profile 2
+-5000155	Profile 1
+-5000154	Profile
+-5000153	Bottom Chords
+-5000152	Top Chords
+-5000151	Diagonal Webs
+-5000150	Vertical Webs
+-5000149	Title Text
+-5000148	Fire Protection
+-5000147	Rotation about
+-5000146	Translation in
+-5000145	Analytical Model
+-5000144	Rebar Set
+-5000143	Layers
+-5000141	Grid
+-5000140	Grid 2 Mullions
+-5000139	Horizontal Mullions
+-5000138	Grid 1 Mullions
+-5000137	Vertical Mullions
+-5000136	Grid 2
+-5000135	Horizontal Grid
+-5000134	Grid 1
+-5000133	Vertical Grid
+-5000131	IFC Parameters
+-5000130	Electrical
+-5000129	Energy Analysis
+-5000128	Structural Analysis
+-5000127	Mechanical - Flow
+-5000126	Mechanical - Loads
+-5000125	Electrical - Loads
+-5000124	Electrical - Lighting
+-5000123	Text
+-5000122	Camera
+-5000121	Extents
+-5000120	Pattern
+-5000119	Constraints
+-5000114	Phasing
+-5000113	Mechanical
+-5000112	Structural
+-5000111	Plumbing
+-5000110	Electrical Engineering
+-5000109	Stringers
+-5000108	Risers
+-5000107	Treads
+-5000106	Underlay
+-5000105	Materials and Finishes
+-5000104	Graphics
+-5000103	Construction
+-5000101	Dimensions
+-5000100	Identity Data

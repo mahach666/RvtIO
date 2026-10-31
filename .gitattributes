@@ -1,0 +1,15 @@
+# Source and text files are stored and checked out with LF.
+* text=auto eol=lf
+
+# Fixtures and images are never normalised.
+*.rvt binary
+*.rfa binary
+*.rws binary
+*.gz binary
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.nupkg binary
+*.snupkg binary

@@ -1,0 +1,40 @@
+namespace RvtIO.BuiltIns;
+
+/// <summary>Classifications of MEP systems and connectors.</summary>
+public enum MEPSystemClassification
+{
+#pragma warning disable CS1591 // the enumerators carry the names of the Revit API; documenting each would only repeat the name
+    UndefinedSystemClassification = 0,
+    SupplyAir = 1,
+    ReturnAir = 2,
+    ExhaustAir = 3,
+    OtherAir = 4,
+    DataCircuit = 5,
+    PowerCircuit = 6,
+    SupplyHydronic = 7,
+    ReturnHydronic = 8,
+    Telephone = 9,
+    Security = 10,
+    FireAlarm = 11,
+    NurseCall = 12,
+    Controls = 13,
+    Communication = 14,
+    CondensateDrain = 15,
+    Sanitary = 16,
+    Vent = 17,
+    Storm = 18,
+    DomesticHotWater = 19,
+    DomesticColdWater = 20,
+    Recirculation = 21,
+    OtherPipe = 22,
+    FireProtectWet = 23,
+    FireProtectDry = 24,
+    FireProtectPreaction = 25,
+    FireProtectOther = 26,
+    SwitchTopology = 27,
+    Fitting = 28,
+    Global = 29,
+    PowerBalanced = 30,
+    PowerUnBalanced = 31,
+    CableTrayConduit = 32,
+}

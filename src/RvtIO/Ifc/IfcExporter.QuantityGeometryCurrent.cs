@@ -1,0 +1,335 @@
+using RvtIO.Model;
+
+namespace RvtIO.Ifc;
+
+/// <summary>The solid measures (volume, face areas) taken from the Revit solids of an
+/// element, and the extrusion data found on a solid (two parallel faces of equal area, every other face parallel to their
+/// normal), taken here from the decoded BRep shells in feet.</summary>
+public partial class IfcExporter
+{
+    private const double SquareFeetToSquareMetres = FeetToMetres * FeetToMetres;
+    private const double CubicFeetToCubicMetres = FeetToMetres * FeetToMetres * FeetToMetres;
+
+    /// <summary>One decoded shell: its faces, its volume (the divergence theorem over its planar faces) and the sum of
+    /// its face areas (holes subtracted), in feet.</summary>
+    internal sealed record ShellInfo(IReadOnlyList<GeoFace> Faces, bool Closed, double Volume, double Area);
+
+    /// <summary>The prism a shell is, in feet: Depth is the distance of the two end faces, ProfileArea the net area of an
+    /// end face, OuterPerimeter the length of its outer loop and ExtentX/ExtentY the world extents of the loop that is measured
+    /// (they describe the profile only for a vertical prism): the first loop of the lower end face as the Face serializes its loops,
+    /// which is a hole when the Face lists one first.</summary>
+    internal readonly record struct ShellPrism(
+        double Depth, double ProfileArea, double OuterPerimeter, double ExtentX, double ExtentY, bool Vertical,
+        double InnerPerimeter = 0);
+
+    /// <summary>The total surface area (feet squared) of the solids of a geometry: the sum over its shells, the holes of the faces
+    /// subtracted.</summary>
+    internal static double SurfaceAreaCurrent(GeometryData? geometry) => ShellsOfCurrent(geometry).Sum(shell => shell.Area);
+
+    private static double[] RingNormal(IReadOnlyList<double[]> ring)
+    {
+        double nx = 0, ny = 0, nz = 0;
+        for (int i = 0; i < ring.Count; i++)
+        {
+            var a = ring[i];
+            var b = ring[(i + 1) % ring.Count];
+            nx += (a[1] - b[1]) * (a[2] + b[2]);
+            ny += (a[2] - b[2]) * (a[0] + b[0]);
+            nz += (a[0] - b[0]) * (a[1] + b[1]);
+        }
+        return [nx, ny, nz];
+    }
+
+    /// <summary>Area of the polygon of a (planar) ring.</summary>
+    private static double RingArea(IReadOnlyList<double[]> ring)
+    {
+        if (ring.Count < 3) return 0;
+        var n = RingNormal(ring);
+        return 0.5 * Math.Sqrt(n[0] * n[0] + n[1] * n[1] + n[2] * n[2]);
+    }
+
+    private static double RingPerimeter(IReadOnlyList<double[]> ring)
+    {
+        double length = 0;
+        for (int i = 0; i < ring.Count; i++)
+        {
+            var a = ring[i];
+            var b = ring[(i + 1) % ring.Count];
+            length += Math.Sqrt((b[0] - a[0]) * (b[0] - a[0]) + (b[1] - a[1]) * (b[1] - a[1]) + (b[2] - a[2]) * (b[2] - a[2]));
+        }
+        return length;
+    }
+
+    /// <summary>Face area with its inner loops subtracted; null when the face has no outer loop.</summary>
+    internal static double? NetFaceArea(GeoFace face)
+    {
+        if (face.OuterVertices is not { Count: >= 3 } outer) return null;
+        double area = RingArea(outer);
+        if (face.InnerVertices != null)
+            foreach (var hole in face.InnerVertices) area -= RingArea(hole);
+        return area;
+    }
+
+    /// <summary>Unit normal of the outer loop by its winding; null for a degenerate loop.</summary>
+    private static double[]? FaceUnitNormal(GeoFace face)
+    {
+        if (face.OuterVertices is not { Count: >= 3 } outer) return null;
+        var n = RingNormal(outer);
+        double length = Math.Sqrt(n[0] * n[0] + n[1] * n[1] + n[2] * n[2]);
+        return length < 1e-12 ? null : [n[0] / length, n[1] / length, n[2] / length];
+    }
+
+    /// <summary>The shells of an element geometry (all faces as one shell when none are listed).</summary>
+    internal static List<ShellInfo> ShellsOfCurrent(GeometryData? geometry)
+    {
+        var result = new List<ShellInfo>();
+        if (geometry?.Faces is not { Count: > 0 } faces) return result;
+        IEnumerable<(List<GeoFace> Faces, bool Closed)> shells = geometry.BrepSolids is { Count: > 0 } solids
+            ? solids.Select(solid => (solid.FaceIndices.Where(i => (uint)i < (uint)faces.Count).Select(i => faces[i]).ToList(), solid.IsClosed))
+            : [(faces, false)];
+        foreach (var (shellFaces, closed) in shells)
+        {
+            double volume = 0, area = 0;
+            // The signed volume needs every face wound the same way (outward); a closed shell that orients exactly is summed oriented.
+            IReadOnlyList<GeoFace> computationFaces = shellFaces;
+            if (closed && shellFaces.Count >= 4
+                && TryOrientExactFacetedShell(shellFaces, Enumerable.Range(0, shellFaces.Count).ToList(), out var orientedShell, triangulateNonPlanarFaces: false))
+                computationFaces = orientedShell;
+            foreach (var face in computationFaces)
+            {
+                if (NetFaceArea(face) is not { } net || FaceUnitNormal(face) is not { } normal) continue;
+                area += net;
+                var p = face.OuterVertices![0];
+                volume += (p[0] * normal[0] + p[1] * normal[1] + p[2] * normal[2]) * net / 3;
+            }
+            result.Add(new ShellInfo(shellFaces, closed, Math.Abs(volume), area));
+        }
+        return result;
+    }
+
+    /// <summary>The net areas of the faces: one face per serialized Face handle, whereas the parser cuts a face
+    /// into several regions (<see cref="GeoFace.SourceFace"/>); the regions of one face count as one.</summary>
+    private static IEnumerable<double> FaceAreasCurrent(IEnumerable<GeoFace> faces)
+    {
+        var bySource = new Dictionary<(uint Face, int Node), double>();
+        foreach (var face in faces)
+        {
+            double area = NetFaceArea(face) ?? 0;
+            if (face.SourceFace == 0)
+                yield return area;
+            else
+            {
+                var key = (face.SourceFace, face.GeometryNode);
+                bySource[key] = bySource.GetValueOrDefault(key) + area;
+            }
+        }
+        foreach (double area in bySource.Values) yield return area;
+    }
+
+    /// <summary>The area of the largest planar face that stands vertically, summed over the shells of a wall
+    /// (largest face of normal.z = 0 of each solid), in feet.</summary>
+    internal static double LargestVerticalFaceAreaCurrent(IEnumerable<ShellInfo> shells) =>
+        shells.Sum(shell => FaceAreasCurrent(shell.Faces.Where(face => !face.CurvedSurface && FaceUnitNormal(face) is { } n && Math.Abs(n[2]) < 1e-9))
+            .DefaultIfEmpty(0).Max());
+
+    /// <summary>The prism of a shell: two planar faces of equal net area (within 1e-4 ft2) facing each other on
+    /// different planes, with every other face parallel to their common normal. Null for any other shape, a curved face
+    /// included.</summary>
+    internal static ShellPrism? FindPrismCurrent(ShellInfo shell, bool verticalOnly = false)
+    {
+        var faces = shell.Faces;
+        int count = faces.Count;
+        if (count < 4 || faces.Any(face => face.CurvedSurface)) return null;
+        var normals = new double[count][];
+        var areas = new double[count];
+        for (int i = 0; i < count; i++)
+        {
+            if (FaceUnitNormal(faces[i]) is not { } n || NetFaceArea(faces[i]) is not { } a) return null;
+            normals[i] = n;
+            areas[i] = a;
+        }
+        ShellPrism? best = null;
+        for (int i = 0; i < count; i++)
+        {
+            for (int j = i + 1; j < count; j++)
+            {
+                var a = normals[i];
+                var b = normals[j];
+                if (a[0] * b[0] + a[1] * b[1] + a[2] * b[2] > -1 + 1e-9 || Math.Abs(areas[i] - areas[j]) > 1e-4) continue;
+                bool vertical = Math.Abs(a[2]) > 1 - 1e-9;
+                if (verticalOnly && !vertical) continue;
+                bool others = true;
+                for (int k = 0; k < count && others; k++)
+                    if (k != i && k != j)
+                        others = Math.Abs(normals[k][0] * a[0] + normals[k][1] * a[1] + normals[k][2] * a[2]) < 1e-6;
+                if (!others) continue;
+                var pi = faces[i].OuterVertices![0];
+                var pj = faces[j].OuterVertices![0];
+                double depth = Math.Abs((pj[0] - pi[0]) * a[0] + (pj[1] - pi[1]) * a[1] + (pj[2] - pi[2]) * a[2]);
+                // A box is a prism along each of its three axes; its long axis is the one a bar is extruded along.
+                if (depth < 1e-9 || best is { } known && known.Depth >= depth) continue;
+                var outer = faces[i].OuterVertices!;
+                var lower = vertical && MeanHeightCurrent(faces[j]) < MeanHeightCurrent(faces[i]) ? faces[j] : faces[i];
+                var measured = lower.FirstSourceLoop ?? lower.OuterVertices!;
+                best = new ShellPrism(depth, areas[i], RingPerimeter(outer),
+                    measured.Max(p => p[0]) - measured.Min(p => p[0]), measured.Max(p => p[1]) - measured.Min(p => p[1]), vertical,
+                    faces[i].InnerVertices?.Sum(RingPerimeter) ?? 0);
+            }
+        }
+        return best;
+    }
+
+    /// <summary>Mean height of a face and the height range of a set of faces, in feet. The windings of decoded faces do not say
+    /// which side is outside, so "top" and "bottom" are told by the height of a face against the middle of the range.</summary>
+    private static double MeanHeightCurrent(GeoFace face) => face.OuterVertices!.Average(point => point[2]);
+
+    private static double? MiddleHeightCurrent(IEnumerable<GeoFace> faces)
+    {
+        var heights = faces.Where(face => face.OuterVertices is { Count: > 0 }).SelectMany(face => face.OuterVertices!).Select(point => point[2]).ToList();
+        return heights.Count == 0 ? null : (heights.Min() + heights.Max()) / 2;
+    }
+
+    /// <summary>The area of the planar faces that are not vertical and lie above the middle of the height of their shell (the top
+    /// surface of a floor, sloped or not), in feet: the area of the surface of the solid, which is what Revit calls the computed host
+    /// area of a floor. An arc of the outline is a run of chords here (the edges of the facets of a vertical cylinder); the circular
+    /// segment over each chord is added where the arc bulges out of the face and taken off where it bulges into it
+    /// (<see cref="ArcSegmentCorrectionCurrent"/>).</summary>
+    internal static double TopSurfaceAreaCurrent(IEnumerable<ShellInfo> shells)
+    {
+        var all = shells as IReadOnlyList<ShellInfo> ?? shells.ToList();
+        var arcs = VerticalCylinderChordsCurrent(all.SelectMany(shell => shell.Faces));
+        return all.Sum(shell => MiddleHeightCurrent(shell.Faces) is not { } middle ? 0 : shell.Faces
+            .Where(face => !face.CurvedSurface && FaceUnitNormal(face) is { } n && Math.Abs(n[2]) > 1e-9 && MeanHeightCurrent(face) >= middle)
+            .Sum(face => (NetFaceArea(face) ?? 0) + ArcSegmentCorrectionCurrent(face, arcs) / Math.Abs(FaceUnitNormal(face)![2])));
+    }
+
+    private static (long, long, long, long) ChordKeyCurrent(double[] a, double[] b)
+    {
+        static long Cell(double value) => (long)Math.Round(value * 1e9);
+        var (p, q) = (Cell(a[0]), Cell(a[1])).CompareTo((Cell(b[0]), Cell(b[1]))) <= 0 ? (a, b) : (b, a);
+        return (Cell(p[0]), Cell(p[1]), Cell(q[0]), Cell(q[1]));
+    }
+
+    /// <summary>The chords (plan edges, by their end points) of the facets of vertical cylinders in a set of faces, with the centre
+    /// and the radius of the circle (feet): the axis has to be vertical, the facet has to come with the serialized analytic
+    /// cylinder.</summary>
+    private static Dictionary<(long, long, long, long), (double Cx, double Cy, double R)> VerticalCylinderChordsCurrent(IEnumerable<GeoFace> faces)
+    {
+        var chords = new Dictionary<(long, long, long, long), (double, double, double)>();
+        foreach (var face in faces)
+        {
+            if (!face.CurvedSurface || face.AnalyticCylinderOrigin is not { Length: >= 3 } origin || face.AnalyticCylinderAxis is not { Length: >= 3 } axis
+                || !(face.AnalyticCylinderRadius > 0) || Math.Abs(Math.Abs(axis[2]) - 1) > 1e-9 || face.OuterVertices is not { Count: >= 4 } ring)
+                continue;
+            for (int i = 0; i < ring.Count; i++)
+            {
+                var a = ring[i];
+                var b = ring[(i + 1) % ring.Count];
+                if (Math.Abs(a[0] - b[0]) + Math.Abs(a[1] - b[1]) > 1e-9)
+                    chords[ChordKeyCurrent(a, b)] = (origin[0], origin[1], face.AnalyticCylinderRadius);
+            }
+        }
+        return chords;
+    }
+
+    /// <summary>What the arcs add to the plan area of a face: for every edge of its rings that is the chord of a vertical cylinder, the
+    /// circular segment over it, added where the arc bulges away from the face and taken off where it bulges into it; the segments
+    /// of the holes count the other way round. Divided by the cosine of the slope it is the correction of the area of the face.</summary>
+    private static double ArcSegmentCorrectionCurrent(GeoFace face, Dictionary<(long, long, long, long), (double Cx, double Cy, double R)> arcs)
+    {
+        if (arcs.Count == 0) return 0;
+        double Ring(IReadOnlyList<double[]> ring)
+        {
+            double shoelace = 0, segments = 0;
+            for (int i = 0; i < ring.Count; i++)
+            {
+                var a = ring[i];
+                var b = ring[(i + 1) % ring.Count];
+                shoelace += a[0] * b[1] - b[0] * a[1];
+                if (!arcs.TryGetValue(ChordKeyCurrent(a, b), out var circle)) continue;
+                double dx = b[0] - a[0], dy = b[1] - a[1], chord = Math.Sqrt(dx * dx + dy * dy);
+                if (!(chord < 2 * circle.R)) continue;
+                double angle = 2 * Math.Asin(chord / (2 * circle.R));
+                double segment = circle.R * circle.R / 2 * (angle - Math.Sin(angle));
+                // the arc bulges away from the centre: to the right of the chord when the middle of the chord is on the right of the centre
+                double rightward = ((a[0] + b[0]) / 2 - circle.Cx) * dy - ((a[1] + b[1]) / 2 - circle.Cy) * dx;
+                segments += rightward > 0 ? segment : -segment;
+            }
+            // a segment on the right of a counter-clockwise ring lies outside it, on the right of a clockwise ring inside it
+            return shoelace >= 0 ? segments : -segments;
+        }
+        double correction = Ring(face.OuterVertices!);
+        foreach (var hole in face.InnerVertices ?? []) correction -= Ring(hole);
+        return correction;
+    }
+
+    /// <summary>The plan area of a room solid, in feet: the area of its horizontal faces above the middle of its height or of
+    /// those below it, whichever is larger (a stepped floor or ceiling splits one of the two).</summary>
+    internal static double? RoomPlanAreaCurrent(GeometryData boundary)
+    {
+        if (MiddleHeightCurrent(boundary.Faces) is not { } middle) return null;
+        var horizontal = boundary.Faces.Where(face => !face.CurvedSurface && face.OuterVertices is { Count: >= 3 }
+            && FaceUnitNormal(face) is { } n && Math.Abs(n[2]) > 1 - 1e-9 && NetFaceArea(face) is not null).ToList();
+        if (horizontal.Count == 0) return null;
+        return Math.Max(
+            horizontal.Where(face => MeanHeightCurrent(face) > middle).Sum(face => NetFaceArea(face)!.Value),
+            horizontal.Where(face => MeanHeightCurrent(face) < middle).Sum(face => NetFaceArea(face)!.Value));
+    }
+
+    /// <summary>The outer perimeter (metres) of the end face found for a room solid along the Z axis, null when the room is not
+    /// an extrusion.
+    /// Only the planar faces count (a curved wall is no obstacle). The calculation needs two horizontal faces facing each other
+    /// with the same area (1e-4 ft2), and no other planar face that is neither vertical nor horizontal, or vertical with a hole.
+    /// Shortcut: a room with more than two horizontal faces (a stepped floor or ceiling) is taken as no extrusion, since
+    /// coplanar pairs are joined only with an export option.</summary>
+    internal static double? RoomExtrusionPerimeterMetresCurrent(GeometryData boundary)
+    {
+        var planar = new List<(GeoFace Face, double[] Normal, double Area)>();
+        foreach (var face in boundary.Faces)
+            if (!face.CurvedSurface && FaceUnitNormal(face) is { } normal && NetFaceArea(face) is { } area)
+                planar.Add((face, normal, area));
+        var horizontal = planar.Where(item => Math.Abs(item.Normal[2]) > 1 - 1e-9).ToList();
+        if (horizontal.Count != 2 || Math.Abs(MeanHeightCurrent(horizontal[0].Face) - MeanHeightCurrent(horizontal[1].Face)) < 1e-9
+            || Math.Abs(horizontal[0].Area - horizontal[1].Area) > 1e-4)
+            return null;
+        bool framesKnown = horizontal.All(item => item.Face.PlaneXAxis is { Length: 3 } && item.Face.PlaneYAxis is { Length: 3 });
+        foreach (var (face, normal, _) in planar)
+        {
+            bool perpendicular = Math.Abs(normal[2]) < 1e-9, parallel = Math.Abs(normal[2]) > 1 - 1e-9;
+            if (perpendicular && face.InnerVertices is { Count: > 0 } || !perpendicular && !parallel) return null;
+            // Shortcut (frames of the end planes unknown): the calculation also compares the extents of the two end faces, taken
+            // from the parametric envelopes of their planes, with the extents of the solid; for a room turned against the model
+            // axes that agrees only when the axes of the plane happen to be the model axes.
+            if (!framesKnown && perpendicular && Math.Min(Math.Abs(normal[0]), Math.Abs(normal[1])) > 1e-6) return null;
+        }
+        // With the frames of the end planes the whole calculation applies: its end faces add only two corners of their (u, v) envelopes to
+        // the extents that must span the solid, which a plane turned against the model axes fails.
+        if (framesKnown && !WallExtrusion.TryFindVerticalExtrusion(boundary.Faces, out _)) return null;
+        var bottom = horizontal[0].Face.OuterVertices![0][2] <= horizontal[1].Face.OuterVertices![0][2]
+            ? horizontal[0].Face : horizontal[1].Face;
+        // The exact length of the loop: an arc of the outline (the chords of the facets
+        // of a vertical cylinder) counts as the arc, not as its chords.
+        var ring = bottom.OuterVertices!;
+        return (RingPerimeter(ring) + ArcLengthOverChordsCurrent(ring, VerticalCylinderChordsCurrent(boundary.Faces))) * FeetToMetres;
+    }
+
+    /// <summary>What the arcs add to the perimeter of a ring: for every edge that is the chord of a vertical cylinder, the arc over it less the chord.</summary>
+    private static double ArcLengthOverChordsCurrent(IReadOnlyList<double[]> ring, Dictionary<(long, long, long, long), (double Cx, double Cy, double R)> arcs)
+    {
+        double extra = 0;
+        for (int i = 0; i < ring.Count; i++)
+        {
+            var (a, b) = (ring[i], ring[(i + 1) % ring.Count]);
+            if (!arcs.TryGetValue(ChordKeyCurrent(a, b), out var circle)) continue;
+            double chord = Math.Sqrt((b[0] - a[0]) * (b[0] - a[0]) + (b[1] - a[1]) * (b[1] - a[1]));
+            if (chord < 2 * circle.R) extra += circle.R * 2 * Math.Asin(chord / (2 * circle.R)) - chord;
+        }
+        return extra;
+    }
+
+    /// <summary>The area of the largest planar face that lies horizontally, summed over the shells (the top face of a wall
+    /// or slab), in feet.</summary>
+    internal static double LargestHorizontalFaceAreaCurrent(IEnumerable<ShellInfo> shells) =>
+        shells.Sum(shell => FaceAreasCurrent(shell.Faces.Where(face => !face.CurvedSurface && FaceUnitNormal(face) is { } n && Math.Abs(n[2]) > 1 - 1e-9))
+            .DefaultIfEmpty(0).Max());
+}

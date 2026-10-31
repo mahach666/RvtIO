@@ -1,0 +1,7 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/RvtIO/RvtIO.csproj" />
+    <Project Path="src/RvtIO.Cli/RvtIO.Cli.csproj" />
+  </Folder>
+  <Project Path="tests/RvtIO.Tests/RvtIO.Tests.csproj" />
+</Solution>

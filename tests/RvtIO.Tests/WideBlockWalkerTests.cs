@@ -1,0 +1,192 @@
+using System.Text;
+using RvtIO.Parsing;
+using Xunit;
+
+namespace RvtIO.Tests;
+
+/// <summary>The schema-driven field walk of an element block with 64-bit ids (<see cref="WideBlockWalker"/>): hand-made blocks in the
+/// grammar of Revit 2025 files, then Test_2025.rvt against the current profile (names and walk coverage).</summary>
+public class WideBlockWalkerTests
+{
+    private const int IdentifierId = 1, ElementIdId = 2, StoreId = 3, BaseId = 4, DerivedId = 5;
+
+    private static SchemaField Field(string name, byte type, byte mods = 0, int? reference = null, int? fixedCount = null) =>
+        new(name, type, mods, 0, fixedCount, reference, null, null);
+
+    private static SchemaDocument Schema() => new()
+    {
+        Classes =
+        [
+            new(IdentifierId, "Identifier", 0, 2, [Field("m_id64", 11)], []),
+            new(ElementIdId, "ElementId", 0, 1, [Field("m_id", 14, 0, IdentifierId)], []),
+            new(StoreId, "Store", 0, 1, [Field("m_value", 4)], []),
+            new(BaseId, "Base", 0, 1,
+                [Field("m_pStore", 14, 1), Field("m_id", 14, 0, ElementIdId), Field("m_flag", 1)], []),
+            new(DerivedId, "Derived", BaseId, 1,
+                [Field("m_name", 8, 96), Field("m_point", 7, 16, null, 3), Field("m_ids", 14, 80, ElementIdId),
+                 Field("m_back", 14, 3), Field("m_short", 3)], []),
+        ],
+    };
+
+    private static byte[] Block(ushort classId, Action<BinaryWriter> body)
+    {
+        var stream = new MemoryStream();
+        var w = new BinaryWriter(stream, Encoding.Unicode);
+        w.Write(classId);
+        body(w);
+        return stream.ToArray();
+    }
+
+    private static void Text(BinaryWriter w, string s) { w.Write((uint)s.Length); w.Write(Encoding.Unicode.GetBytes(s)); }
+
+    private static byte[] DerivedBlock(bool withStore, bool unknownTag = false) => Block(DerivedId, w =>
+    {
+        if (withStore) { w.Write(0xFFFFFFFFu); w.Write((ushort)(unknownTag ? 999 : StoreId)); } else w.Write(0u);   // m_pStore
+        w.Write(4711L);                                                     // m_id (64 bits)
+        w.Write((byte)1);                                                   // m_flag
+        Text(w, "Wall");                                                    // m_name
+        w.Write(1.5); w.Write(2.5); w.Write(3.5);                           // m_point
+        w.Write(2u); w.Write(10L); w.Write(-1L);                            // m_ids
+        w.Write(1u);                                                        // m_back
+        w.Write((short)7);                                                  // m_short (2 bytes)
+        if (withStore) w.Write(42);                                         // the queued Store
+    });
+
+    private static WideBlockWalker Walker(IEnumerable<string>? records = null) =>
+        new(Schema(), (declaring, field) => declaring.Name + "." + field.Name, records ?? []);
+
+    [Fact]
+    public void Walk_ConsumesAllFieldKindsToTheLastByte()
+    {
+        var block = DerivedBlock(withStore: true);
+        var walk = Walker().Run(block, 0, block.Length, DerivedId);
+        Assert.True(walk.Exact, walk.Error);
+        Assert.Equal([StoreId], walk.Queue);
+        var captures = walk.Captures.ToDictionary(c => c.Key);
+        Assert.Equal(4711, captures["Base.m_id"].Integer);
+        Assert.Equal(1, captures["Base.m_flag"].Integer);
+        Assert.Equal("Wall", captures["Derived.m_name"].Text);
+        Assert.Equal(2.5, captures["Derived.m_point@1"].Real);
+        Assert.Equal(2, captures["Derived.m_ids#"].Integer);
+        Assert.Equal(StoreId, captures["Base.m_pStore"].Integer);
+        Assert.Equal(7, captures["Derived.m_short"].Integer);
+        Assert.Equal(42, captures["Store.m_value"].Integer);
+    }
+
+    [Fact]
+    public void Walk_NullPointerQueuesNothing()
+    {
+        var block = DerivedBlock(withStore: false);
+        var walk = Walker().Run(block, 0, block.Length, DerivedId);
+        Assert.True(walk.Exact, walk.Error);
+        Assert.Empty(walk.Queue);
+        Assert.Equal(0, walk.Captures.Single(c => c.Key == "Base.m_pStore").Integer);
+    }
+
+    [Theory]
+    [InlineData(0xFFFFFFFFu, 0)]       // an empty array: the host type is zero
+    [InlineData(0u, 0)]
+    [InlineData(2u, 7)]                // the first entry
+    public void Walk_FamilyHostType_IsTheFirstEntryOrZeroForAnEmptyArray(uint count, int first)
+    {
+        const int familyId = 6;
+        var schema = new SchemaDocument { Classes = [new(familyId, "Family", 0, 1, [Field("m_refTypeIds", 4, 80)], [])] };
+        var block = Block(familyId, w =>
+        {
+            w.Write(count);
+            for (uint i = 0; i < (count == 0xFFFFFFFFu ? 0 : count); i++) w.Write(i == 0 ? 7 : 9);
+        });
+        var walk = new WideBlockWalker(schema, (declaring, field) => declaring.Name + "." + field.Name, []).Run(block, 0, block.Length, familyId);
+        Assert.True(walk.Exact, walk.Error);
+        Assert.Equal(first, walk.Captures.Single(c => c.Key == "Family.m_refTypeIds@0").Integer);
+    }
+
+    [Fact]
+    public void Walk_ShortBlockFailsInsteadOfGuessing()
+    {
+        var block = DerivedBlock(withStore: true);
+        var walk = Walker().Run(block, 0, block.Length - 2, DerivedId);
+        Assert.False(walk.Exact);
+        Assert.NotNull(walk.Error);
+        Assert.True(walk.RootRead);       // the root fields were complete, the queued object was not
+    }
+
+    [Fact]
+    public void Walk_ClassTagOutsideTheSchemaFails()
+    {
+        var block = DerivedBlock(withStore: true, unknownTag: true);
+        var walk = Walker().Run(block, 0, block.Length, DerivedId);
+        Assert.False(walk.Exact);
+        Assert.Contains("class tag 999", walk.Error);
+        Assert.False(walk.RootRead);
+    }
+
+    [Fact]
+    public void Walk_RecordClassesAreReturnedInStoredOrder()
+    {
+        var block = DerivedBlock(withStore: true);
+        var walk = Walker(["Store"]).Run(block, 0, block.Length, DerivedId);
+        var record = Assert.Single(walk.Records);
+        Assert.Equal(StoreId, record.ClassId);
+        Assert.Equal(0, record.QueueIndex);
+        Assert.Equal(42L, record.Values["m_value"]);
+    }
+
+
+    private sealed class Test2025Fixture
+    {
+        public Test2025Fixture()
+        {
+            var reader = new RvtFileReader();
+            Info = reader.Read(TestFileFixture.FindTestFile("Test_2025.rvt"));
+            State = reader.LastParsingState!;
+        }
+
+        public Model.RevitFileInfo Info { get; }
+        public Internal.ParsingState State { get; }
+    }
+
+    private static readonly Lazy<Test2025Fixture> Real = new(() => new Test2025Fixture());
+
+    /// <summary>The current profile element names (MeshProbe elems, column elemName) of elements of Test_2025.rvt, one per kind of name owner.</summary>
+    [SkippableTheory]
+    [InlineData(311u, "Level 1")]
+    [InlineData(694u, "Ceiling")]
+    [InlineData(23u, "Default")]
+    [InlineData(24u, "Default Wall")]
+    [InlineData(1049u, "M_Section Head - Filled")]
+    [InlineData(1141u, "Metric Callout")]
+    [InlineData(1647u, "Overhead Lines")]
+    [InlineData(1951u, "Plan Swing")]
+    [InlineData(397u, "Exterior - Brick on Mtl. Stud")]
+    [InlineData(54538u, "Exterior - Block on Mtl. Stud")]
+    [InlineData(195169u, "1")]
+    [InlineData(195239u, "2")]
+    public void Test2025_OwnNamesEqualReference(uint id, string name)
+    {
+        Assert.Equal(name, Real.Value.State.WideNames[id]);
+    }
+
+    [SkippableFact]
+    public void Test2025_EveryElementTableRowHasADecodedRootBlock()
+    {
+        var state = Real.Value.State;
+        // 8,342 of 8,342 root blocks consumed to the last byte; the element table has 8,342 rows
+        Assert.Equal(state.ElemTable.Count, state.NativeParams.Count);
+        // the stores of a material or property set element sit behind objects of the element (a second set of stores), not in the leading
+        // run of the queue: 215 of 8,342 elements
+        Assert.InRange(state.NativeParams.Values.Count(np => !np.RootParameterStoresComplete), 1, state.NativeParams.Count / 20);
+        Assert.True(state.NativeParams.Values.All(np => np.TailWalkComplete));
+        Assert.All(state.NativeParams, pair => Assert.Equal((int)pair.Key, pair.Value.Fields["m_id"]));
+    }
+
+    [SkippableFact]
+    public void Test2025_DocumentUnitsAreReadFromTheFile()
+    {
+        var state = Real.Value.State;
+        Assert.NotNull(state.OwnDocumentUnitOptions);
+        Assert.Equal(136, state.OwnDocumentUnitOptions!.Value.Options.Length);
+        Assert.NotNull(state.OwnDocumentUnitConversions);
+        Assert.NotNull(Real.Value.Info.SerializedFormatSettings);
+    }
+}

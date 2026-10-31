@@ -1,0 +1,8 @@
+[Bb]in/
+[Oo]bj/
+TestResults/
+.vs/
+*.user
+*.suo
+*.nupkg
+*.snupkg

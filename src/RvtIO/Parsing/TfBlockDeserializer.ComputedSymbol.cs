@@ -1,0 +1,102 @@
+namespace RvtIO.Parsing;
+
+internal static partial class TfBlockDeserializer
+{
+    internal sealed record ComputedFamilySymbol(int SymbolId, int QueueIndex, int Start, int End)
+    {
+        public double[]? Transform { get; init; }
+        public uint? SubInstanceCount { get; init; }
+        public int? HostId { get; init; }
+        public int? InsertOrientation { get; init; }
+    }
+
+    /// <summary>FamilyInstance's own Instance.m_pInstanceInfo -> InstInfoBase.m_symbolId.
+    /// getOriginalSymbol_ delegates to FamilyInstance.getComputedSymbol, which reads this member, not
+    /// FamilyInstance.m_masterSymbolId. Only the complete root and the owned deferred prefix through InstanceInfo
+    /// are covered; its finite raw Trf is kept with that symbol. Later objects, placement normalization and
+    /// DoorWindowInfo.FlippedSymbol are not covered.</summary>
+    internal static ComputedFamilySymbol? ExtractComputedFamilySymbol(
+        byte[] data, int start, uint size, ushort classId)
+    {
+        if (classId != 1794 || start < 0 || start > data.Length - 16 || size < 4
+            || size > int.MaxValue || (long)start + 16 + size > data.Length
+            || BitConverter.ToUInt32(data, start + 8) != size
+            || BitConverter.ToUInt16(data, start + 12) != classId
+            || BitConverter.ToUInt32(data, start + 12 + (int)size) != size)
+            return null;
+        var rootFields = SerializationFields(classId);
+        var infoFields = SerializationFields(2238);
+        var transformFields = SerializationFields(78);
+        if (rootFields == null
+            || !HasExactSchemaField(rootFields, 37, "m_id", 14, 0, 20)
+            || !HasExactSchemaField(rootFields, 37, "m_docAccess", 14, 0, null)
+            || !HasExactSchemaField(rootFields, 1796, "m_pInstanceInfo", 14, 2, null)
+            || infoFields is not { Count: 3 }
+            || !HasExactSchemaField(infoFields, 2237, "m_Trf", 14, 0, 78)
+            || !HasExactSchemaField(infoFields, 2237, "m_symbolId", 14, 0, 20)
+            || !HasExactSchemaField(infoFields, 2238, "m_cda", 14, 0, 413)
+            || infoFields[0].Name != "m_Trf" || infoFields[1].Name != "m_symbolId"
+            || infoFields[2].Name != "m_cda" || transformFields is not { Count: 2 }
+            || transformFields[0] is not { Declaring: 78, Name: "m_3x3", Type: 13, Mods: 16, Cnt: 3, Ref: null }
+            || transformFields[1] is not { Declaring: 78, Name: "m_or", Type: 7, Mods: 16, Cnt: 3, Ref: 77 })
+            return null;
+        var cursor = new Cursor { D = data, Pos = start + 14,
+            End = start + 12 + (int)size, RootClassId = classId };
+        var queue = new List<(ushort Cls, uint Id)>();
+        int owner = 0, target = -1;
+        uint? subInstanceCount = null;
+        int? hostId = null, insertOrientation = null;
+        try
+        {
+            foreach (var field in rootFields)
+            {
+                if (field.Declaring == 37 && field.Name == "m_id") owner = ReadI32(cursor);
+                else if (field.Declaring == 37 && field.Name == "m_docAccess")
+                {
+                    if (ReadU32(cursor) != 1) return null;
+                }
+                else if (field.Declaring == 1796 && field.Name == "m_pInstanceInfo")
+                {
+                    int pointerStart = cursor.Pos, before = queue.Count;
+                    ReadPtr(cursor, queue);
+                    if (BitConverter.ToUInt32(data, pointerStart) != uint.MaxValue
+                        || queue.Count != before + 1 || queue[before].Cls != 2238)
+                        return null;
+                    target = before;
+                }
+                else if (field is { Declaring: 1795, Name: "m_hostId", Type: 14, Mods: 0, Ref: 20, Cnt: null })
+                    hostId = ReadI32(cursor);
+                else if (field is { Declaring: 1794, Name: "m_insertOrientation", Type: 4, Mods: 0, Ref: null, Cnt: null })
+                    insertOrientation = ReadI32(cursor);
+                else
+                {
+                    if (field is { Declaring: 1794, Name: "m_subInstTable", Type: 14, Mods: 80, Ref: 19, Cnt: null }
+                        && cursor.Pos <= cursor.End - 4)
+                        subInstanceCount = BitConverter.ToUInt32(data, cursor.Pos);
+                    ReadField(cursor, field, queue, 0, null);
+                }
+            }
+            if (owner <= 0 || owner != BitConverter.ToInt32(data, start) || target < 0)
+                return null;
+            for (int index = 0; index < target; index++)
+                ReadDeferredObject(cursor, queue[index].Cls, queue);
+            int infoStart = cursor.Pos - start;
+            ReadField(cursor, infoFields[0], queue, 1, null);
+            double[]? transform = null;
+            if (cursor.Pos - start - infoStart == 96)
+            {
+                var values = new double[12];
+                for (int index = 0; index < values.Length; index++)
+                    values[index] = BitConverter.ToDouble(data, start + infoStart + index * 8);
+                if (values.All(double.IsFinite)) transform = values;
+            }
+            int symbol = ReadI32(cursor);
+            ReadField(cursor, infoFields[2], queue, 1, null);
+            return symbol > 0 && symbol != owner
+                ? new ComputedFamilySymbol(symbol, target, infoStart, cursor.Pos - start)
+                    { Transform = transform, SubInstanceCount = subInstanceCount,
+                        HostId = hostId, InsertOrientation = insertOrientation } : null;
+        }
+        catch (DecodeFail) { return null; }
+    }
+}

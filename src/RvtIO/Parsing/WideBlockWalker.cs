@@ -1,0 +1,430 @@
+using System.Collections.Concurrent;
+using System.Text;
+
+namespace RvtIO.Parsing;
+
+/// <summary>
+/// Field walk of an element block of a file whose element ids are 64 bits wide (Revit 2025 and later), driven only by
+/// the class schema the file carries about itself (<see cref="SchemaDocument"/>), by class and field NAME.
+///
+/// A block payload is the class id (u16) followed by the fields of the class chain, base class first, in schema order:
+/// the "root" fields, and then one object per pointer the root (and every object) queued, in queue order. Field grammar:
+///   container (mods high nibble): 0 single, 1 fixed array of Fixed items, 5 u32 count (0xFFFFFFFF = empty) and items, 6 text
+///   scalar by type: 1,2 = 1 byte; 3 = 2; 4,5,6 = 4; 7,10,11 = 8; 8 = u32 length and UTF-16 text; 9 = 16 (GUID);
+///     13 = array of Args[0].Fixed items of Args[0].Type; 14 by the low mods nibble:
+///       3 back reference: u32;  1, 2, 4 owned pointer: u32 handle, and when it is not 0 a u16 class tag, the object follows later;
+///       0 with a class reference: the class's fields inline (an ElementId is Identifier.m_id64, 8 bytes); 0 without: u32 handle,
+///       and when it is 0xFFFFFFFF a u16 class tag (queued)
+/// The block is consumed exactly when the position after the last queued object equals the end of the payload. The walk
+/// stops without a value at a class tag the schema does not declare and at data it cannot interpret (ES entity blobs, the
+/// layout of which depends on a schema stored elsewhere in the file); what was read until then is kept.
+/// </summary>
+internal sealed class WideBlockWalker
+{
+    internal readonly record struct Capture(string Key, CaptureKind Kind, long Integer, double Real, string? Text, bool AtRoot, int QueueIndex,
+        string DeclaringClass, string Field);
+
+    internal enum CaptureKind { Integer, Real, Text, PointerClass }
+
+    internal sealed class Walk
+    {
+        public bool RootRead;
+        public bool Exact;
+        public string? Error;
+        public int Position;
+        public readonly List<int> Queue = [];
+        public readonly List<Capture> Captures = [];
+        /// <summary>Per queued object (same index as <see cref="Queue"/>) the first position of its fields, -1 when not reached.</summary>
+        public readonly List<int> QueueStart = [];
+        /// <summary>The values of the objects of the requested record classes, in stored order (inline items of arrays and queued objects).</summary>
+        public readonly List<(int ClassId, int QueueIndex, Dictionary<string, object?> Values)> Records = [];
+        /// <summary>Per queued object the length of the queue after its fields were read (the entries it queued are the ones before).</summary>
+        public readonly List<int> QueueEnd = [];
+        public readonly List<int> QueueCountAtStart = [];
+    }
+
+    /// <summary>Key of a record that names the field ("Declaring.field") of the root object it was read inline from; absent for a queued object.</summary>
+    internal const string RootFieldKey = "@rootField";
+
+    private sealed class Fail(string message) : Exception(message);
+
+    /// <summary>The capture key prefix of a counted array whose every item is captured (as key@index).</summary>
+    internal const string AllItemsKeyPrefix = "all:";
+
+    private readonly Dictionary<int, SchemaClass> _classes;
+    private readonly ConcurrentDictionary<int, (SchemaClass Declaring, SchemaField Field)[]> _chains = new();
+    private readonly Func<SchemaClass, SchemaField, string?> _keyOf;
+    private readonly HashSet<int> _recordClasses;
+    private readonly ConcurrentDictionary<(int, string), string?> _keys = new();
+    private readonly bool[] _isIdentifier;
+    private readonly int _idWidth;
+
+    /// <param name="keyOf">The capture key of a scalar field (null: not captured); a fixed array adds "@index".</param>
+    /// <param name="recordClassNames">Classes whose objects are returned as <see cref="Walk.Records"/>.</param>
+    internal WideBlockWalker(SchemaDocument schema, Func<SchemaClass, SchemaField, string?> keyOf, IEnumerable<string> recordClassNames)
+    {
+        _classes = schema.Classes.GroupBy(c => c.Id).ToDictionary(g => g.Key, g => g.First());
+        _keyOf = keyOf;
+        var names = recordClassNames.ToHashSet(StringComparer.Ordinal);
+        _recordClasses = _classes.Values.Where(c => names.Contains(c.Name)).Select(c => c.Id).ToHashSet();
+        int max = _classes.Keys.Max();
+        _isIdentifier = new bool[max + 1];
+        foreach (var c in _classes.Values) _isIdentifier[c.Id] = c.Name == "ElementId";
+        // Identifier.m_id is 4 bytes up to Revit 2023 and Identifier.m_id64 8 bytes from Revit 2024
+        _idWidth = _classes.Values.FirstOrDefault(c => c.Name == "Identifier") is { Fields: [{ Type: 4 or 11 } idField] }
+            ? idField.Type == 4 ? 4 : 8 : 8;
+    }
+
+    internal SchemaClass? Class(int id) => _classes.GetValueOrDefault(id);
+
+    private (SchemaClass Declaring, SchemaField Field)[] Chain(int classId) => _chains.GetOrAdd(classId, id =>
+    {
+        var order = new List<SchemaClass>();
+        for (int guard = 0; id != 0 && guard < 64; guard++)
+        {
+            if (!_classes.TryGetValue(id, out var c)) throw new Fail("class " + id + " has no schema");
+            order.Add(c);
+            id = c.Base;
+        }
+        order.Reverse();
+        return order.SelectMany(c => c.Fields.Where(f => f.Stored).Select(f => (c, f))).ToArray();
+    });
+
+    /// <summary>True when the class derives from (or is) the named class.</summary>
+    internal bool IsA(int classId, string baseName)
+    {
+        for (int guard = 0; classId != 0 && guard < 64; guard++)
+        {
+            if (!_classes.TryGetValue(classId, out var c)) return false;
+            if (c.Name == baseName) return true;
+            classId = c.Base;
+        }
+        return false;
+    }
+
+    /// <summary>Walks the payload <c>[offset, offset + size)</c> of a block of class <paramref name="classId"/>. With
+    /// <paramref name="tailValid"/>, a queued object that stops the walk (an extensible storage blob) is skipped when the objects queued
+    /// behind it can be read, inside the payload, from exactly one start position and <paramref name="tailValid"/> (walk, index of the first
+    /// object read again) accepts what was read there (RebarShape: the constraints of the edges lie behind the ESEntityCell of the shape;
+    /// their values tell a real start from a misaligned one).</summary>
+    internal Walk Run(byte[] data, int offset, int size, int classId, Func<Walk, int, bool>? tailValid = null)
+    {
+        var walk = new Walk();
+        var ctx = new Context(data, offset + 2, offset + size, walk);
+        int failedAt = -1;
+        try
+        {
+            foreach (var (declaring, field) in Chain(classId)) { ctx.RootField = declaring.Name + "." + field.Name; ReadField(ctx, declaring, field, 0, null); }
+            walk.RootRead = true;
+            ctx.AtRoot = false;
+            RunQueue(ctx, 0, ref failedAt);
+            walk.Exact = ctx.Pos == ctx.End;
+        }
+        catch (Fail failure)
+        {
+            walk.Error = failure.Message;
+            if (tailValid != null && walk.RootRead && failedAt >= 0 && Resume(ctx, failedAt, tailValid)) walk.Error = null;
+        }
+        walk.Position = ctx.Pos;
+        return walk;
+    }
+
+    private void RunQueue(Context ctx, int from, ref int failedAt)
+    {
+        var walk = ctx.Walk;
+        for (int qi = from; qi < walk.Queue.Count; qi++)
+        {
+            failedAt = qi;
+            ctx.QueueIndex = qi;
+            walk.QueueStart.Add(ctx.Pos);
+            walk.QueueCountAtStart.Add(walk.Queue.Count);
+            ReadObject(ctx, walk.Queue[qi], 1);
+            walk.QueueEnd.Add(walk.Queue.Count);
+        }
+        failedAt = -1;
+    }
+
+    /// <summary>After a queued object stopped the walk: the position behind it at which the objects queued after
+    /// it are read to the end of the payload, when there is exactly one.</summary>
+    private const int ResumeScanWindow = 1 << 16;
+
+    private bool Resume(Context ctx, int failed, Func<Walk, int, bool> tailValid)
+    {
+        var walk = ctx.Walk;
+        int first = failed + 1;
+        if (first >= walk.Queue.Count) return false;
+        int failPos = ctx.Pos;
+        int queue = walk.Queue.Count, captures = walk.Captures.Count, records = walk.Records.Count, starts = walk.QueueStart.Count,
+            ends = walk.QueueEnd.Count, counts = walk.QueueCountAtStart.Count;
+        void Rollback()
+        {
+            walk.Queue.RemoveRange(queue, walk.Queue.Count - queue);
+            walk.Captures.RemoveRange(captures, walk.Captures.Count - captures);
+            walk.Records.RemoveRange(records, walk.Records.Count - records);
+            walk.QueueStart.RemoveRange(starts, walk.QueueStart.Count - starts);
+            walk.QueueEnd.RemoveRange(ends, walk.QueueEnd.Count - ends);
+            walk.QueueCountAtStart.RemoveRange(counts, walk.QueueCountAtStart.Count - counts);
+        }
+        bool TryAt(int position)
+        {
+            ctx.Pos = position;
+            int unused = -1;
+            try
+            {
+                // the failed object keeps its entries so that the queue indexes of the objects behind it stay aligned
+                walk.QueueEnd.Add(queue);
+                RunQueue(ctx, first, ref unused);
+                return ctx.Pos <= ctx.End && tailValid(walk, first);
+            }
+            catch (Fail)
+            {
+                return false;
+            }
+        }
+        var found = new List<int>();
+        // the objects behind a blob start within one payload of a shape: a bounded window, and the scan stops at the second match (the result is ambiguous then)
+        for (int position = failPos; position < ctx.End && position - failPos < ResumeScanWindow && found.Count < 2; position++)
+        {
+            bool ok = TryAt(position);
+            Rollback();
+            if (ok) found.Add(position);
+        }
+        if (found.Count != 1)
+        {
+            ctx.Pos = failPos;
+            return false;
+        }
+        TryAt(found[0]);
+        // what lies behind the last object is not read
+        return true;
+    }
+
+    private sealed class Context(byte[] data, int pos, int end, Walk walk)
+    {
+        public readonly byte[] D = data;
+        public int Pos = pos;
+        public readonly int End = end;
+        public readonly Walk Walk = walk;
+        public bool AtRoot = true;
+        public int QueueIndex = -1;
+        public string? RootField;
+    }
+
+    private static int Take(Context c, int n)
+    {
+        if (n < 0 || c.Pos + (long)n > c.End) throw new Fail("end of payload");
+        int p = c.Pos;
+        c.Pos += n;
+        return p;
+    }
+
+    private static uint U32(Context c) => BitConverter.ToUInt32(c.D, Take(c, 4));
+
+    private void ReadObject(Context c, int classId, int depth)
+    {
+        if (depth > 40) throw new Fail("depth");
+        Dictionary<string, object?>? record = _recordClasses.Contains(classId) ? new() : null;
+        if (record != null && c.AtRoot) record[RootFieldKey] = c.RootField;
+        foreach (var (declaring, field) in Chain(classId)) ReadField(c, declaring, field, depth, record);
+        if (record != null) c.Walk.Records.Add((classId, c.QueueIndex, record));
+    }
+
+    private void ReadField(Context c, SchemaClass declaring, SchemaField f, int depth, Dictionary<string, object?>? record)
+    {
+        int hi = f.Mods >> 4;
+        string? key = KeyOf(declaring, f);
+        if (hi == 6)
+        {
+            Scalar(c, declaring, f, key, depth, record, null);
+            return;
+        }
+        if (hi == 1)
+        {
+            int n = f.Fixed ?? 0;
+            for (int i = 0; i < n; i++) Scalar(c, declaring, f, key == null ? null : key + "@" + i, depth, record, null);
+            return;
+        }
+        if (hi == 5)
+        {
+            uint n = U32(c);
+            if (n == 0xFFFFFFFF) n = 0;
+            if (n > 5_000_000) throw new Fail("count " + n + " at " + declaring.Name + "." + f.Name);
+            if (key != null) c.Walk.Captures.Add(new(key + "#", CaptureKind.Integer, n, 0, null, c.AtRoot && depth == 0, c.QueueIndex, declaring.Name, f.Name));
+            // The host type of an empty array is zero (the Revit 2022 walk keeps that zero as the first entry)
+            if (key != null && n == 0 && declaring.Name == "Family" && f.Name == "m_refTypeIds")
+                c.Walk.Captures.Add(new(key + "@0", CaptureKind.Integer, 0, 0, null, c.AtRoot && depth == 0, c.QueueIndex, declaring.Name, f.Name));
+            if (f.Type is 1 or 2 && (f.Mods & 15) == 0)
+            {
+                int at = Take(c, (int)n);
+                // a byte array keyed with AllItemsKeyPrefix is captured whole (RebarInstBase.m_includedBars)
+                if (key != null && key.StartsWith(AllItemsKeyPrefix, StringComparison.Ordinal))
+                    for (int i = 0; i < n; i++)
+                        c.Walk.Captures.Add(new(key + "@" + i, CaptureKind.Integer, c.D[at + i], 0, null, c.AtRoot && depth == 0, c.QueueIndex, declaring.Name, f.Name));
+                return;
+            }
+            // the first item of a counted array is captured; an array keyed with AllItemsKeyPrefix is captured whole
+            for (uint i = 0; i < n; i++)
+                Scalar(c, declaring, f, key != null && (i == 0 || key.StartsWith(AllItemsKeyPrefix, StringComparison.Ordinal)) ? key + "@" + i : null, depth, record, null);
+            return;
+        }
+        Scalar(c, declaring, f, key, depth, record, null);
+    }
+
+    private string? KeyOf(SchemaClass declaring, SchemaField f) =>
+        _keys.GetOrAdd((declaring.Id, f.Name), _ => _keyOf(declaring, f));
+
+    private void Scalar(Context c, SchemaClass declaring, SchemaField f, string? key, int depth, Dictionary<string, object?>? record, object? unused)
+    {
+        var walk = c.Walk;
+        void Note(CaptureKind kind, long i, double d, string? s)
+        {
+            if (key != null) walk.Captures.Add(new(key, kind, i, d, s, c.AtRoot && depth == 0, c.QueueIndex, declaring.Name, f.Name));
+        }
+        switch (f.Type)
+        {
+            case 1: case 2:
+            {
+                int p = Take(c, 1);
+                Note(CaptureKind.Integer, c.D[p], 0, null);
+                if (record != null) record[f.Name] = (long)c.D[p];
+                return;
+            }
+            case 3:
+            {
+                int p = Take(c, 2);
+                short v = BitConverter.ToInt16(c.D, p);
+                Note(CaptureKind.Integer, v, 0, null);
+                if (record != null) record[f.Name] = (long)v;
+                return;
+            }
+            case 4:
+            {
+                int p = Take(c, 4);
+                int v = BitConverter.ToInt32(c.D, p);
+                Note(CaptureKind.Integer, v, 0, null);
+                if (record != null) record[f.Name] = (long)v;
+                return;
+            }
+            case 5:
+            {
+                int p = Take(c, 4);
+                int v = BitConverter.ToInt32(c.D, p);
+                Note(CaptureKind.Integer, v, 0, null);
+                if (record != null) record[f.Name] = (long)v;
+                return;
+            }
+            case 6:
+            {
+                int p = Take(c, 4);
+                float v = BitConverter.ToSingle(c.D, p);
+                Note(CaptureKind.Real, 0, v, null);
+                if (record != null) record[f.Name] = (double)v;
+                return;
+            }
+            case 7:
+            {
+                int p = Take(c, 8);
+                double v = BitConverter.ToDouble(c.D, p);
+                Note(CaptureKind.Real, 0, v, null);
+                if (record != null) record[f.Name] = v;
+                return;
+            }
+            case 10: case 11:
+            {
+                int p = Take(c, 8);
+                long v = BitConverter.ToInt64(c.D, p);
+                Note(CaptureKind.Integer, v, 0, null);
+                if (record != null) record[f.Name] = v;
+                return;
+            }
+            case 8:
+            {
+                uint len = U32(c);
+                if (len > 100_000) throw new Fail("text length");
+                int p = Take(c, 2 * (int)len);
+                string s = Encoding.Unicode.GetString(c.D, p, 2 * (int)len);
+                Note(CaptureKind.Text, 0, 0, s);
+                if (record != null) record[f.Name] = s;
+                return;
+            }
+            case 9:
+                Take(c, 16);
+                return;
+            case 13:
+            {
+                if (f.Args is not { Count: 1 } args || args[0].Fixed is not int count) throw new Fail("template field");
+                var item = args[0] with { Mods = (byte)(args[0].Mods & 15) };
+                // a keyed template field (Trf.m_3x3) is captured as key/index; the Revit 2022 capture list never keys one
+                for (int i = 0; i < count; i++) Scalar(c, declaring, item, key == null ? null : key + "/" + i, depth, null, null);
+                return;
+            }
+            case 14:
+                ReadReference(c, declaring, f, key, depth, record);
+                return;
+            default:
+                throw new Fail("type " + f.Type);
+        }
+    }
+
+    private void ReadReference(Context c, SchemaClass declaring, SchemaField f, string? key, int depth, Dictionary<string, object?>? record)
+    {
+        var walk = c.Walk;
+        int lo = f.Mods & 15;
+        if (lo == 3)
+        {
+            uint back = U32(c);
+            if (key != null) walk.Captures.Add(new(key, CaptureKind.Integer, back, 0, null, c.AtRoot && depth == 0, c.QueueIndex, declaring.Name, f.Name));
+            if (record != null) record[f.Name] = (long)back;
+            return;
+        }
+        if (lo is 1 or 2 or 4)
+        {
+            uint handle = U32(c);
+            int tag = 0;
+            if (handle != 0)
+            {
+                tag = BitConverter.ToUInt16(c.D, Take(c, 2));
+                if (tag != 0)
+                {
+                    if (!_classes.ContainsKey(tag)) throw new Fail("class tag " + tag);
+                    if (walk.Queue.Count >= 1_000_000) throw new Fail("queue");
+                walk.Queue.Add(tag);
+                }
+            }
+            if (key != null) walk.Captures.Add(new(key, CaptureKind.PointerClass, handle == 0 ? 0 : tag == 0 ? -1 : tag, 0, null, c.AtRoot && depth == 0, c.QueueIndex, declaring.Name, f.Name));
+            if (record != null) record[f.Name] = (long)tag;
+            return;
+        }
+        if (f.Ref is int reference)
+        {
+            if (_isIdentifier[reference])
+            {
+                // ElementId: Identifier.m_id (4 bytes) or Identifier.m_id64 (8 bytes)
+                int p = Take(c, _idWidth);
+                long id = _idWidth == 8 ? BitConverter.ToInt64(c.D, p) : BitConverter.ToInt32(c.D, p);
+                if (key != null) walk.Captures.Add(new(key, CaptureKind.Integer, id, 0, null, c.AtRoot && depth == 0, c.QueueIndex, declaring.Name, f.Name));
+                if (record != null) record[f.Name] = id;
+                return;
+            }
+            // an inline structure: the keys of its fields are their own
+            ReadObject(c, reference, depth + 1);
+            // a keyed ForgeTypeId field (ParamDef.m_groupTypeId, m_typeId) is captured as the text of its single string
+            if (key != null && _classes[reference].Name == "ForgeTypeId" && walk.Records is [.., (var recordClass, _, var forge)] && recordClass == reference
+                && forge.GetValueOrDefault("m_typeId") is string forgeText)
+                walk.Captures.Add(new(key, CaptureKind.Text, 0, 0, forgeText, c.AtRoot && depth == 0, c.QueueIndex, declaring.Name, f.Name));
+            return;
+        }
+        {
+            uint handle = U32(c);
+            int tag = 0;
+            if (handle == 0xFFFFFFFF)
+            {
+                tag = BitConverter.ToUInt16(c.D, Take(c, 2));
+                if (!_classes.ContainsKey(tag)) throw new Fail("class tag " + tag);
+                if (walk.Queue.Count >= 1_000_000) throw new Fail("queue");
+                walk.Queue.Add(tag);
+            }
+            if (key != null) walk.Captures.Add(new(key, CaptureKind.PointerClass, handle == 0 ? 0 : tag == 0 ? -1 : tag, 0, null, c.AtRoot && depth == 0, c.QueueIndex, declaring.Name, f.Name));
+        }
+    }
+}
