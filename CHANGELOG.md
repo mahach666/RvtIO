@@ -6,6 +6,10 @@ API between minor releases.
 
 ## [Unreleased]
 
+- Derives IFC base quantities of beams, columns, members and piles from the surface integrals of the source geometry (planes, cylinders and cones); cutting solids no longer enter the totals.
+- Takes the length of a curtain wall mullion from the axis of its own symbol, and the footprint of a curved wall from the area of its rebuilt curve loop.
+- Takes door and window height and width from their parameters or frame extent before the bounding box, and computes their host area from the coarse solids including non-visible geometry.
+
 ## [0.1.0] - first public preview
 
 - Reads Revit projects (`.rvt`) and families (`.rfa`) saved by Revit 2020 to 2026 without Revit; Revit 2027 files open
