@@ -798,18 +798,18 @@ public partial class IfcExporter
     }
 
     /// <summary>Volume (m3) of a foundation of several solids: each measured node counts once with its surface integrals (a cutting node, whose
-    /// volume is negative, is not taken), a solid without them counts by its closed shell, and an open shell without them is left out.</summary>
-    private static double FoundationNodesVolumeCurrent(GeometryData geometry, IReadOnlyList<ShellInfo> shells)
+    /// volume is negative, is not taken), a solid without them counts by its closed shell, an open shell without them is left out, and a node with a negative number takes no part. Null when nothing counts.</summary>
+    private static double? FoundationNodesVolumeCurrent(GeometryData geometry, IReadOnlyList<ShellInfo> shells)
     {
         var measured = new Dictionary<int, double>();
-        foreach (var measure in geometry.NodeMeasures!) measured.TryAdd(measure.Node, measure.Volume);
-        double feet3 = measured.Values.Where(volume => volume > 0).Sum();
+        foreach (var measure in geometry.NodeMeasures ?? []) measured.TryAdd(measure.Node, measure.Volume);
+        double feet3 = measured.Where(pair => pair.Key >= 0 && pair.Value > 0).Sum(pair => pair.Value);
         foreach (var shell in shells)
         {
             int node = shell.Faces.Count > 0 ? shell.Faces[0].GeometryNode : 0;
-            if (shell.Closed && (node <= 0 || !measured.ContainsKey(node))) feet3 += shell.Volume;
+            if (shell.Closed && node >= 0 && !measured.ContainsKey(node)) feet3 += shell.Volume;
         }
-        return feet3 * CubicFeetToCubicMetres;
+        return feet3 > 0 ? feet3 * CubicFeetToCubicMetres : null;
     }
 
     private static ShellPrism? SoleClosedPrismCurrent(IReadOnlyList<ShellInfo> shells, bool verticalOnly = false) =>
@@ -1063,8 +1063,8 @@ public partial class IfcExporter
         // the solid come first; the sketch value stands in when the solid has none. The area of the extrusion data comes before it.
         double surfaceArea = TopSurfaceAreaCurrent(shells) * SquareFeetToSquareMetres;
         double? topArea = surfaceArea > 1e-9 ? surfaceArea : ComputedHostAreaCurrent(element) ?? profileArea;
-        // A foundation without a vertical extrusion (a pile) takes the area of its cap face, and its volume from the node that owns the cap:
-        // the surface integrals of that node. Without them only closed shells give a volume; an open shell has none.
+        // A foundation without a vertical extrusion (a pile) takes the area of its cap face, and its volume from all the geometry:
+        // the measured nodes and the closed shells of the solids that have no measure; an open shell without a measure has none.
         double? netVolume = totals?.Volume;
         if (element.CategoryId == -2001300 && prism == null)
         {
@@ -1072,9 +1072,7 @@ public partial class IfcExporter
             if (cap?.QuadratureArea is { } capArea && capArea > 1e-9)
             {
                 topArea = capArea * SquareFeetToSquareMetres;
-                var capNode = element.Geometry!.NodeMeasures?.FirstOrDefault(measure => measure.Node == cap.GeometryNode && measure.Volume > 0);
-                netVolume = capNode != null ? FoundationNodesVolumeCurrent(element.Geometry!, shells)
-                    : shells.All(shell => shell.Closed) ? totals?.Volume : null;
+                netVolume = FoundationNodesVolumeCurrent(element.Geometry!, shells);
             }
         }
         AddIfPositive(result, QuantityKind.Area, "GrossArea", profileArea ?? topArea);
