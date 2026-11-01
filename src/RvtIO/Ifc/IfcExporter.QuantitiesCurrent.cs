@@ -1058,8 +1058,10 @@ public partial class IfcExporter
             {
                 topArea = capArea * SquareFeetToSquareMetres;
                 var capNode = element.Geometry!.NodeMeasures?.FirstOrDefault(measure => measure.Node == cap.GeometryNode && measure.Volume > 0);
-                netVolume = capNode != null ? capNode.Volume * CubicFeetToCubicMetres
-                    : shells.All(shell => shell.Closed) ? totals?.Volume : null;
+                // Every taken node counts (a foundation can be several solids); the cap node alone only when other nodes have no integrals.
+                netVolume = NodeSolidTotalsCurrent(element.Geometry)?.Volume
+                    ?? (capNode != null ? capNode.Volume * CubicFeetToCubicMetres
+                        : shells.All(shell => shell.Closed) ? totals?.Volume : null);
             }
         }
         AddIfPositive(result, QuantityKind.Area, "GrossArea", profileArea ?? topArea);

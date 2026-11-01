@@ -1150,6 +1150,31 @@ public class IfcExporterBaseQuantitiesCurrentTests
     }
 
     [Fact]
+    public void Pass_Foundation_SumsTheVolumeOfEveryMeasuredNode()
+    {
+        var (w, owner, placement) = NewWriter();
+        int slab = AddProduct(w, "IFCSLAB", "1bOeIks4fCNAuMrZZw4irf", owner, placement);
+        var foundation = new Element
+        {
+            Id = 512280,
+            CategoryId = -2001300,
+            Geometry = new GeometryData
+            {
+                Faces =
+                [
+                    new GeoFace { QuadratureArea = 1, PlaneSurface = true, OuterVertices = [[0, 0, 0]], GeometryNode = 1 },
+                    new GeoFace { PlaneSurface = true, OuterVertices = [[5, 0, 0]], GeometryNode = 2 }
+                ],
+                NodeMeasures = [new RvtIO.Parsing.MeshNodeMeasure(1, 6, 1), new RvtIO.Parsing.MeshNodeMeasure(2, 6, 1)]
+            }
+        };
+
+        Apply(w, owner, new() { [512280] = foundation }, new() { [slab] = 512280 });
+
+        AssertQuantities(Quantities(w, "IFCQUANTITYVOLUME"), ("NetVolume", 2 * CubicFeet));
+    }
+
+    [Fact]
     public void Pass_FoundationPile_WithoutAMeasuredNodeOrAClosedShellHasNoVolume()
     {
         var (w, owner, placement) = NewWriter();
