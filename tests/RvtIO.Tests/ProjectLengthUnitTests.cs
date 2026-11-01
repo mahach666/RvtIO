@@ -3,7 +3,7 @@ using RvtIO.Model;
 using RvtIO.Parsing;
 using Xunit;
 
-namespace RevitReader.Tests;
+namespace RvtIO.Tests;
 
 /// <summary>The declared IFC length unit follows the stored Length format option of every unit layout, and an option that cannot be
 /// used is reported with its reason.</summary>
