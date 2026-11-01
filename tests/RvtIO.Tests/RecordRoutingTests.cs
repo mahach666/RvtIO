@@ -100,6 +100,17 @@ public class RecordRoutingTests
         Assert.Null(DocumentIncrementTable.Route(Parse(Table([(10, 0, [(-1, 7), (0, 0)]), (20, 3, [(-1, 3)])])), 1));
         // an empty increment without versions
         Assert.Null(DocumentIncrementTable.Route(Parse(Table([(10, 0, [])])), 1));
+        // an empty increment that redirects past the last increment
+        Assert.Null(DocumentIncrementTable.Route(Parse(Table([(10, 0, [(-1, 0), (5, 0)]), (20, 3, [(-1, 3)])])), 1));
+    }
+
+    [Fact]
+    public void ARedirectBeyondTheIntRangeEndsTheWalk()
+    {
+        // 4294967296 wraps to 0 under an int cast and would loop on the first increment forever
+        var table = new DocumentIncrementTable.Table(
+            [new DocumentIncrementTable.Increment(10, 0, 0, [new DocumentIncrementTable.Version(4294967296L, 0)])], [], []);
+        Assert.Null(DocumentIncrementTable.Route(table, 1));
     }
 
     [Fact]

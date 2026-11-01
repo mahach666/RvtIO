@@ -142,7 +142,7 @@ internal static class DocumentIncrementTable
             var last = versions.Count > 0 ? versions[^1] : null;
             if (last != null && last.TotalElements != row.TotalElements) return null;
             if (row.TotalElements > 0) return index;
-            if (last == null || last.CausedBy <= index) return null;
+            if (last == null || last.CausedBy <= index || last.CausedBy >= rows.Count) return null;
             index = (int)last.CausedBy;
         }
         return null;
