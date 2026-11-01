@@ -334,6 +334,7 @@ public partial class IfcExporter
         // geometry of its computed symbol (Element.SerializedComputedSymbolGeometry); the elements
         // get their own geometry back after the export.
         var computedSymbolGeometry = CurrentProfile ? UseComputedSymbolGeometryCurrent(info.Elements) : [];
+        // Revit's IFC export holds the main model and the primary option of each design option set: the elements of another option are left out
         var allElements = info.Elements;
         var designOptions = DesignOptions.Of(allElements);
         info.Elements = allElements.Where(element => designOptions.InNonPrimaryOption(element) != true).ToList();
@@ -585,6 +586,7 @@ public partial class IfcExporter
                 int lvlAxisId = w.Add("IFCAXIS2PLACEMENT3D", $"{R(lvlPtId)},$,$");
                 int lvlPlacementId = w.Add("IFCLOCALPLACEMENT", $"{R(bldgLocalPlacementId)},{R(lvlAxisId)}");
                 string lvlName = levelExportNames[lvl.Id];
+                // The legacy profile names a storey after the document GUID (CreateAlternateGUID); the current one after the level's own export id.
                 string? storeyGuid = (CurrentProfile ? ResolveExactElementGlobalId(lvl, _usedExportIds, handleBased: true) : null)
                     ?? ResolveDocumentGlobalId(info, lvl.Id, _usedExportIds);
                 string storeyObjectType = CurrentProfile ? OptionalString(
@@ -4446,9 +4448,9 @@ public partial class IfcExporter
                 "IFCSITE" =>
                     $"{S(productGlobalId)},{R(ownerHistId)},{S(elemName)},$,{S(elemTypeName)},{R(elemPlacementId)},{shapeArg},$,.ELEMENT.,$,$,$,$,$",
                 "IFCDOOR" =>
-                    $"{S(productGlobalId)},{R(ownerHistId)},{S(elemName)},$,{S(elemTypeName)},{R(elemPlacementId)},{shapeArg},{S(elem.Id.ToString())},{D(GetDoorWindowHeight(elem))},{D(GetDoorWindowWidth(elem))}",
+                    $"{S(productGlobalId)},{R(ownerHistId)},{S(elemName)},$,{S(elemTypeName)},{R(elemPlacementId)},{shapeArg},{S(elem.Id.ToString())},{D(GetDoorWindowHeight(elem, referenceElementType))},{D(GetDoorWindowWidth(elem, referenceElementType))}",
                 "IFCWINDOW" =>
-                    $"{S(productGlobalId)},{R(ownerHistId)},{S(elemName)},$,{S(elemTypeName)},{R(elemPlacementId)},{shapeArg},{S(elem.Id.ToString())},{D(GetDoorWindowHeight(elem))},{D(GetDoorWindowWidth(elem))}",
+                    $"{S(productGlobalId)},{R(ownerHistId)},{S(elemName)},$,{S(elemTypeName)},{R(elemPlacementId)},{shapeArg},{S(elem.Id.ToString())},{D(GetDoorWindowHeight(elem, referenceElementType))},{D(GetDoorWindowWidth(elem, referenceElementType))}",
                 "IFCBUILDINGELEMENTPROXY" =>
                     // It is not the spatial ELEMENT default.
                     $"{S(productGlobalId)},{R(ownerHistId)},{S(elemName)},$,{S(elemTypeName)},{R(elemPlacementId)},{shapeArg},{S(elem.Id.ToString())},$",
@@ -5631,6 +5633,9 @@ public partial class IfcExporter
             }
             return layers.Count == 0 ? null : (type.Id, layers);
         }
+        // A layer without a material takes the material of its category (Category.Material, kept in the graphics styles of the category:
+        // 'Default Floor', 'Default Wall' and 'Default Roof' in sample projects; the building pad category has none and
+        // keeps the unnamed material). Only a category whose styles all name the same existing material has one.
         int? CategoryLayerMaterial(int? categoryId)
         {
             if (categoryId is null || info.GraphicsStyles is not { } styles) return null;
@@ -64719,6 +64724,7 @@ public partial class IfcExporter
                 && productElementIdByEntity.TryGetValue(filledBy, out int filledById) && filledById == insert.Id;
             if (doorEntity != null && !written) continue;
             if (doorEntity == null && productElementIds.Contains(insert.Id)) continue;
+            // An IFC class override can take the instance off the door/window path.
             if (HasIfcTypeOverride(insert, unsetIntegerIsNoOverride: true)
                 || insert.FamilyTypeId > 0 && elementsById.TryGetValue(insert.FamilyTypeId, out Element? insertType)
                     && HasIfcTypeOverride(insertType, unsetIntegerIsNoOverride: true))
@@ -67389,6 +67395,7 @@ public partial class IfcExporter
             else if (guidSourceId > 0 && elemById[guidSourceId] is { } source
                 && source.SerializedExportId is { } exportId
                 && !HasIfcGuidOverride(source.Parameters.Concat(typeElem.Parameters), currentProfile))
+                // The current profile gives a door or window style the DoorStyle sub-element (21) of the symbol's ExportId.
                 exactTypeGuids[typeEntityId] = IfcGuid.ToIfcGuid(currentProfile && typeClass is "IFCDOORSTYLE" or "IFCWINDOWSTYLE"
                     ? ElementExportIds.SubElementId(source.SerializedHandleExportId ?? exportId, DoorStyleSubElementIndex) : exportId);
 
@@ -67746,6 +67753,10 @@ public partial class IfcExporter
             _ => null,
         };
     }
+
+    /// <summary>With <paramref name="unsetIntegerIsNoOverride"/> an Integer -1 in the IFC export parameter range is the
+    /// default the 2022 file layout reads for a parameter nobody set (e.g. IFC_EXPORT_ELEMENT_AS,
+    /// a String parameter, as Integer -1), not an override. Only the door and window opening identity uses it so far.</summary>
     private static bool HasIfcTypeOverride(Element element, bool unsetIntegerIsNoOverride = false)
     {
         foreach (string name in new[] { "IfcExportAs", "IfcExportType", "IfcType",
@@ -69337,24 +69348,36 @@ public partial class IfcExporter
     }
 
 
-    /// <summary>Get door/window height in mm from bbox or params.</summary>
-    private static double GetDoorWindowHeight(Element elem)
+    /// <summary>Get door/window height in mm from params, frame extent, or bbox.</summary>
+    private static double GetDoorWindowHeight(Element elem, Element? type)
     {
-        double[]? bbox = elem.BoundingBox ?? elem.Geometry?.BoundingBox;
+        double? paramFeet = ExactNamedParameterFeetCurrent(elem, type, "Height", true, -1001300, -1010300);
+        if (paramFeet != null && paramFeet > 0)
+            return paramFeet.Value * FeetToMetres * 1000;
+        double? frameExtent = InstanceFrameExtentMetresCurrent(elem, 2);
+        if (frameExtent != null && frameExtent > 0)
+            return frameExtent.Value * 1000;
+        double[]? bbox = elem.Geometry?.BoundingBox ?? elem.BoundingBox;
         if (bbox != null && bbox.Length >= 6)
-            return Math.Abs(bbox[5] - bbox[2]) * FeetToMetres * 1000; // feet -> mm
+            return Math.Abs(bbox[5] - bbox[2]) * FeetToMetres * 1000;
         return 0;
     }
 
-    /// <summary>Get door/window width in mm from bbox or params.</summary>
-    private static double GetDoorWindowWidth(Element elem)
+    /// <summary>Get door/window width in mm from params, frame extent, or bbox.</summary>
+    private static double GetDoorWindowWidth(Element elem, Element? type)
     {
-        double[]? bbox = elem.BoundingBox ?? elem.Geometry?.BoundingBox;
+        double? paramFeet = ExactNamedParameterFeetCurrent(elem, type, "Width", true, -1001301, -1010301);
+        if (paramFeet != null && paramFeet > 0)
+            return paramFeet.Value * FeetToMetres * 1000;
+        double? frameExtent = InstanceFrameExtentMetresCurrent(elem, 0);
+        if (frameExtent != null && frameExtent > 0)
+            return frameExtent.Value * 1000;
+        double[]? bbox = elem.Geometry?.BoundingBox ?? elem.BoundingBox;
         if (bbox != null && bbox.Length >= 6)
         {
             double dx = Math.Abs(bbox[3] - bbox[0]) * FeetToMetres * 1000;
             double dy = Math.Abs(bbox[4] - bbox[1]) * FeetToMetres * 1000;
-            return Math.Max(dx, dy); // wider dimension = width
+            return Math.Max(dx, dy);
         }
         return 0;
     }

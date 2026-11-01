@@ -254,7 +254,9 @@ internal static partial class TfBlockDeserializer
         // The room of a family instance (FamInstDesignPropertyManager).
         "1286:m_idRoom",
         "388:m_areaElemName", "388:m_areaElemDescription",
+        // Design options: the primary option of a set, the name of an option or set and the set of an option (DesignOptionSet, DesignOption).
         "1080:m_mainDesignOption", "1080:m_strName", "1074:m_strName", "1074:m_DesignOptionSetId",
+        // A room that is not placed in the plan (RoomElem.m_bIsLocationless) is no IfcSpace.
         "3471:m_bIsLocationless",
         "3170:m_strName", "3170:m_typeId", "3190:m_basicSystemType", "3190:m_abbreviation",
         // MEP curve geometry rules (ElementBuilder.ApplyMepCurveGeometry).
@@ -461,6 +463,8 @@ internal static partial class TfBlockDeserializer
         public List<(ushort, uint)>? RootQueue;
         public ushort TailClassId;
         public int CurveDriverCurveQueueIndex = -1;
+        public int MullionReferenceQueueIndex = -1;
+        public int MullionCurveQueueIndex = -1;
         /// <summary>The nodes (parameter, point, tangent) of the drive curve when it is a GHermiteSpline (flexible curves).</summary>
         public List<double[]>? HermiteNodes;
 
@@ -660,7 +664,8 @@ internal static partial class TfBlockDeserializer
                         cur.CurrentDeferredQueueIndex = qi;
                         cur.CurrentGeomStepQueueIndex = IsSubclassOf(queue[qi].Cls, 96) ? qi : -1;
                         // The FamInstCurveDriver drive curve, when it is a GLine: origin, direction, end params.
-                        bool driveLine = qi == cur.CurveDriverCurveQueueIndex && queue[qi].Cls == 1736;
+                        bool mullionLine = qi == cur.MullionCurveQueueIndex && queue[qi].Cls == 1736;
+                        bool driveLine = (qi == cur.CurveDriverCurveQueueIndex || mullionLine) && queue[qi].Cls == 1736;
                         // the class of that curve is a list fact (CompactFamilyInstanceFacts, getMemberIndexToTagMap); the root queue only,
                         // as for the capture of the line itself
                         if (qi == cur.CurveDriverCurveQueueIndex && ReferenceEquals(queue, cur.RootQueue)) tail.Fields["87:m_pCrv"] = (int)queue[qi].Cls;
@@ -697,16 +702,17 @@ internal static partial class TfBlockDeserializer
                         if (ReferenceEquals(queue, cur.RootQueue)) CopyOccurrence(tail, qf, queue[qi].Cls, refOccurrences);
                         if (driveLine)
                         {
+                            string curveKey = mullionLine ? "2520:m_pCurve" : "87:m_pCrv";
                             if (cur.FamilyLineCapture!.TryGetValue("m_origin", out var lineOrigin)
                                 && cur.FamilyLineCapture.TryGetValue("m_dirVec", out var lineDirection))
                             {
                                 for (int i = 0; i < 3; i++)
                                 {
-                                    tail.DoubleFields["87:m_pCrv.origin@" + i] = lineOrigin[i];
-                                    tail.DoubleFields["87:m_pCrv.dirVec@" + i] = lineDirection[i];
+                                    tail.DoubleFields[curveKey + ".origin@" + i] = lineOrigin[i];
+                                    tail.DoubleFields[curveKey + ".dirVec@" + i] = lineDirection[i];
                                 }
-                                tail.DoubleFields["87:m_pCrv.endParams@0"] = cur.Ep0;
-                                tail.DoubleFields["87:m_pCrv.endParams@1"] = cur.Ep1;
+                                tail.DoubleFields[curveKey + ".endParams@0"] = cur.Ep0;
+                                tail.DoubleFields[curveKey + ".endParams@1"] = cur.Ep1;
                             }
                             cur.FamilyLineCapture = null;
                         }
@@ -4695,6 +4701,30 @@ internal static partial class TfBlockDeserializer
     {
         switch (f.Declaring, f.Name)
         {
+            // A mullion's nominal axis belongs to the first reference of its own symbol, not its trimmed solid.
+            case (1829, "m_refs") when IsSubclassOf(c.RootClassId, 1829) && f.Type == 14 && f.Mods == 81
+                && ReferenceEquals(queue, c.RootQueue):
+            {
+                uint count = ReadU32(c);
+                if (count > 100_000) throw Fail;
+                for (uint i = 0; i < count; i++)
+                {
+                    int before = queue.Count;
+                    ReadPtr(c, queue);
+                    if (i == 0 && queue.Count == before + 1 && queue[before].Item1 == 2520)
+                        c.MullionReferenceQueueIndex = before;
+                }
+                return true;
+            }
+            case (2520, "m_pCurve") when f.Type == 14 && f.Mods == 1
+                && c.CurrentDeferredQueueIndex == c.MullionReferenceQueueIndex
+                && ReferenceEquals(queue, c.RootQueue):
+            {
+                int before = queue.Count;
+                ReadPtr(c, queue);
+                if (queue.Count == before + 1) c.MullionCurveQueueIndex = before;
+                return true;
+            }
             // FamInstCurveDriver (1708) and RbsCurveDriver (3139, duct/pipe/conduit/cable tray; both base CurveDriver
             // 87): remember which queued object is the drive curve m_pCrv. Consumption is the generic owned-pointer
             // grammar.

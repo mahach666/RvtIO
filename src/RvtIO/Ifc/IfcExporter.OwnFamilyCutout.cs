@@ -80,8 +80,16 @@ public partial class IfcExporter
         if (insert.OwnSingleFamilyCutout is not { } source || effective.Id == source.HostId
             || insert.ExtraHostIds?.Contains(effective.Id) != true
             || !elements.TryGetValue(source.HostId, out var primaryWall)
-            || !TryBuildOwnPrimaryFamilyCutout(insert, primaryWall, out var primary)
-            || primaryWall.OwnWallSide0NormalCurrent is not { Length: 3 } normal
+            || !TryBuildOwnPrimaryFamilyCutout(insert, primaryWall, out var primary)) return false;
+        double[]? normal = primaryWall.OwnWallSide0NormalCurrent;
+        if (normal == null && primaryWall.Location is { CurveType: "Line", ArcRadius: null } loc
+            && loc.StartPoint is { Length: >= 2 } sp && loc.EndPoint is { Length: >= 2 } ep)
+        {
+            double ldx = ep[0] - sp[0], ldy = ep[1] - sp[1];
+            double llen = Math.Sqrt(ldx * ldx + ldy * ldy);
+            if (llen > 0) normal = [-ldy / llen, ldx / llen, 0];
+        }
+        if (normal is not { Length: 3 }
             || normal.Any(value => !double.IsFinite(value)) || normal[2] != 0
             || effective.ValidatedWallTypeThicknessFeet is not double width
             || !(width > 0) || !double.IsFinite(width)) return false;

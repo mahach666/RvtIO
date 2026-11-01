@@ -17,6 +17,11 @@ internal record GRepData
     /// <summary>The Geometry nodes written as triangle sets (see GRepParserV2.BuildNodes); null when the mesher is off or no node qualifies.</summary>
     public List<RvtIO.Parsing.GeometryNode>? MeshNodes { get; set; }
 
+    /// <summary>The area and signed volume of every Geometry node whose faces are all planes, cylinders and cones (the surface integrals the exporter's
+    /// NetVolumeCalculator and NetSurfaceAreaCalculator sum), in the frame of the symbol; a negative volume marks a closed node the exporter takes no
+    /// solid from. Null when none is measured.</summary>
+    public List<RvtIO.Parsing.MeshNodeMeasure>? NodeMeasures { get; set; }
+
     /// <summary>The cache is the boundary of a room with a round wall (see GRepParserV2.ParseCurvedSpaceBoundary), not a planar one.</summary>
     public bool CurvedSpaceBoundary { get; set; }
 
@@ -75,6 +80,16 @@ internal record GRepData
     /// <summary>The same block at Revit's Coarse detail level, kept only when it differs from this (Fine) one. The "Area" of a door
     /// or window is computed from the solids of this level (see IfcExporter.DoorWindowQuantitiesCurrent).</summary>
     public GRepData? Coarse { get; set; }
+
+    private Lazy<GRepData?>? _coarseQuantities;
+
+    /// <summary>Coarse solids including non-visible objects, used only for computed door/window surface quantities.</summary>
+    public GRepData? CoarseQuantities
+    {
+        get => _coarseQuantities?.Value;
+        set => _coarseQuantities = value == null ? null : new Lazy<GRepData?>(() => value);
+    }
+    internal void SetCoarseQuantityFactory(Func<GRepData?> factory) => _coarseQuantities = new(factory);
 
     /// <summary>The same block at the Medium detail level, kept only when it differs from this (Fine) one.</summary>
     public GRepData? Medium { get; set; }

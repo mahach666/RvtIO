@@ -27,6 +27,9 @@ namespace RvtIO.Model
         /// <summary>The Geometry nodes written as triangle sets, in the frame of <see cref="Faces"/> (see GRepParserV2.BuildNodes).</summary>
         internal List<RvtIO.Parsing.GeometryNode>? MeshNodes { get; set; }
 
+        /// <summary>The surface integrals of the Geometry nodes (see GRepData.NodeMeasures), under the node ids of <see cref="Faces"/>.</summary>
+        internal List<RvtIO.Parsing.MeshNodeMeasure>? NodeMeasures { get; set; }
+
         /// <summary>A Geometry node written as a triangle set has a face that is not a plane (a round end, a hole): the body is the face meshes,
         /// whatever the dense polygons of the planar faces close into.</summary>
         internal bool HasCurvedFace => MeshNodes?.Any(node => node.Faces.Any(face => face.SurfaceKind != RvtIO.Geometry.Meshing.SurfaceKind.Plane)) == true;

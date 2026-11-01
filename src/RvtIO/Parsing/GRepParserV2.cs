@@ -45,6 +45,7 @@ internal static partial class GRepParserV2
         public ushort RootClass;
         public bool Debug;
         public bool NativeWallBody;
+        public bool IncludeNonVisible;
         public bool SawDetailCondition; // a node was judged below a detail-level condition
         public int BlockStart, BlockEnd; // this block's payload bounds (plane scan)
         public int LastEdgeEnd; // pos after the last decoded Edge
@@ -824,7 +825,7 @@ internal static partial class GRepParserV2
         && fine.Instances.Zip(coarse.Instances).All(pair => pair.First.SymbolElemId == pair.Second.SymbolElemId
             && pair.First.Transform.SequenceEqual(pair.Second.Transform));
 
-    private static GRepData? ParseCore(byte[] d, int blockStart, uint dataSize, bool nativeWallBody)
+    private static GRepData? ParseCore(byte[] d, int blockStart, uint dataSize, bool nativeWallBody, bool includeNonVisible = false)
     {
         int payloadStart = blockStart + 14;
         int payloadEnd = (int)Math.Min((long)blockStart + 16 + dataSize, d.Length);
@@ -843,6 +844,7 @@ internal static partial class GRepParserV2
             BlockStart = payloadStart, BlockEnd = payloadEnd,
             ElementId = elementId, Debug = dbg,
             NativeWallBody = nativeWallBody,
+            IncludeNonVisible = includeNonVisible,
             RootClass = classId,
             CurrentObjectHandle = elementId,
             CurrentObjectClass = classId,
@@ -1002,6 +1004,23 @@ internal static partial class GRepParserV2
             built.QueueClassCounts = c.Queue.GroupBy(item => item.Cls).ToDictionary(group => group.Key, group => group.Count());
             built.HasDetailLevelAlternatives = c.SawDetailCondition;
             built.RootBoundingBox = ValidBox(c.RootBoundingBox) ? c.RootBoundingBox : null;
+        }
+        if (built != null && !includeNonVisible && t_detailLevel == 0
+            && c.Queue.Any(node => (node.Cls == SolidClass || ShouldAttachSymbolGeometry(node.Cls))
+                && c.ObjectGInfo.TryGetValue(node.V, out var info) && IsHiddenInstanceVariant(info.Flags)))
+        {
+            // Retain only this block, not the decompressed partition; decode quantities only when a consumer needs them.
+            var source = d.AsSpan(blockStart, payloadEnd - blockStart).ToArray();
+            built.SetCoarseQuantityFactory(() =>
+            {
+                int previousDetailLevel = t_detailLevel;
+                try
+                {
+                    t_detailLevel = CoarseDetailLevel;
+                    return ParseCore(source, 0, dataSize, nativeWallBody, includeNonVisible: true);
+                }
+                finally { t_detailLevel = previousDetailLevel; }
+            });
         }
         if (MeshDiagPath != null) WriteMeshDiag(c, built, payloadEnd - blockStart);
         return built;
@@ -1598,7 +1617,7 @@ internal static partial class GRepParserV2
                             && IsHiddenInstanceVariant(ownerInfo.Flags);
                         if (MeshDiagPath != null && hiddenVariant)
                             c.FtNotes.Add($"instance-hidden:symbol={symId}");
-                        if (plausibleBasis && !hiddenVariant && ShouldAttachSymbolGeometry(ownerClass))
+                        if (plausibleBasis && (!hiddenVariant || c.IncludeNonVisible) && ShouldAttachSymbolGeometry(ownerClass))
                         {
                             if (c.SymbolId == 0)
                             {
@@ -2716,7 +2735,7 @@ internal static partial class GRepParserV2
         // Revit's solid is a Geometry node, whatever number of disjoint shells it holds,
         // and a node it does not take is marked with a negative id (the faces stay in the geometry
         // for every other consumer): see ResolveGeometryNodes.
-        var geometryNodeByFace = ResolveGeometryNodes(c.Queue, c.QueueLinks, c.ObjectGInfo);
+        var geometryNodeByFace = ResolveGeometryNodes(c.Queue, c.QueueLinks, c.ObjectGInfo, c.IncludeNonVisible);
         foreach (uint handle in inactiveBodyFaceHandles)
         {
             if (!c.DirectSurfaceByFace.TryGetValue(handle, out var surface) || surface.Kind == SurfKind.Unknown
@@ -2751,15 +2770,18 @@ internal static partial class GRepParserV2
             var displayNodeSet = MeshDisplayNodes ? displayOnlyNodes.Select(n => n.Node).ToHashSet() : [];
             var displayFaces = displayNodeSet.Count == 0 ? []
                 : displayFaceHandles.Where(handle => geometryNodeByFace.TryGetValue(handle, out var owner) && displayNodeSet.Contains(owner.Node)).ToHashSet();
+            var nodeMeasures = new List<MeshNodeMeasure>();
             gd.MeshNodes = BuildNodes(c, handleToSurf, displayFaces.Count > 0 ? bodyFaceHandles.Concat(displayFaces).ToHashSet() : bodyFaceHandles,
-                inactiveBodyFaceHandles, loopsByFace, geometryNodeByFace, nodeOrders, displayFaces.Count > 0 ? displayOnlyNodes : null);
+                inactiveBodyFaceHandles, loopsByFace, geometryNodeByFace, nodeOrders, displayFaces.Count > 0 ? displayOnlyNodes : null, nodeMeasures);
+            if (nodeMeasures.Count > 0) gd.NodeMeasures = nodeMeasures;
         }
         if (displayOnlyNodes.Count > 0) gd.DisplayOnlyNodes = displayOnlyNodes;
 
         // m_tightbBox is the schema-defined extent of the root representation. It is also a
         // structural consistency check: a decoded face outside it cannot belong to this GRep and
         // indicates a desynchronised deferred-object walk.
-        double[]? authoritativeBounds = ValidBox(c.RootTightBoundingBox)
+        // The serialized root extent covers visible geometry only. Hidden quantity solids can lie outside it.
+        double[]? authoritativeBounds = c.IncludeNonVisible ? null : ValidBox(c.RootTightBoundingBox)
             ? c.RootTightBoundingBox
             : c.RootBoundingBox;
         var faceIndicesByHandle = new Dictionary<uint, List<int>>();
@@ -3210,6 +3232,9 @@ internal static partial class GRepParserV2
         if (kindDiag && gd.Faces.Count > 100000)
             DiagnosticSink.WriteLine($"GRep eid={c.ElementId} faces={gd.Faces.Count} by surface kind: "
                 + string.Join(", ", kindCounts.OrderByDescending(pair => pair.Value).Select(pair => $"{pair.Key}={pair.Value}")));
+        if (gd.MeshNodes != null && rejectedFaceHandles.Count > 0)
+            gd.MeshNodes = gd.MeshNodes.Select(node => node.Faces.Any(face => rejectedFaceHandles.Contains((uint)face.Marker))
+                ? node with { SourceMeasures = null } : node).ToList();
         return gd;
     }
 
@@ -3379,7 +3404,8 @@ internal static partial class GRepParserV2
     /// </summary>
     internal static Dictionary<uint, (int Node, int Style)> ResolveGeometryNodes(
         IReadOnlyList<(ushort Cls, int V)> queue, IReadOnlyList<(int ParentQueueIndex, string Field)> links,
-        IReadOnlyDictionary<int, (int Tag, int Control, int Category, uint Flags)> gInfo)
+        IReadOnlyDictionary<int, (int Tag, int Control, int Category, uint Flags)> gInfo,
+        bool includeNonVisible = false)
     {
         const ushort faceClass = 1589, geometryClass = 2092;
         const uint visibilityBits = 0x1E0;
@@ -3403,7 +3429,7 @@ internal static partial class GRepParserV2
         foreach (var (handle, node) in nodeByFace)
         {
             bool hasInfo = gInfo.TryGetValue(queue[node - 1].V, out var nodeInfo);
-            bool taken = nodesWithVisibleFace.Contains(node) && !(hasInfo && (nodeInfo.Flags & visibilityBits) != 0);
+            bool taken = includeNonVisible || (nodesWithVisibleFace.Contains(node) && !(hasInfo && (nodeInfo.Flags & visibilityBits) != 0));
             result[handle] = (taken ? node : -node, hasInfo ? nodeInfo.Category : -1);
         }
         return result;
@@ -3460,6 +3486,10 @@ internal static partial class GRepParserV2
 
     internal static bool IsPhysicalBodySurface(uint flags)
         => (flags & (DisplaySurfaceBit | 0x04000000u | 0x40000000u)) == 0;
+
+    /// <summary>The GInfo flags of a drawable node as <see cref="IsPhysicalBodySurface"/> judges them. Bit 0x40000000 stays for a
+    /// Face, except for the faces of an exactly decoded space boundary, and is not judged for a GPolyMesh: the polygon mesh of an RPC
+    /// entourage carries it, and the current profile exports all facets of such a mesh as the body of the proxy.</summary>
     internal static uint NodeSurfaceFlags(int nodeClass, bool exactPlanarSpaceBoundary, uint flags)
         => exactPlanarSpaceBoundary && nodeClass == 1589 || nodeClass == 2038 ? flags & ~0x40000000u : flags;
 
@@ -3493,7 +3523,7 @@ internal static partial class GRepParserV2
                 if (c.ObjectGInfo.TryGetValue(ancestorItem.V, out var geometryInfo))
                 {
                     graphicalGeometryState = (geometryInfo.Flags & 0x000000E0u) != 0;
-                    body = IsPhysicalBodyGeometry(geometryInfo.Flags);
+                    body = IsPhysicalBodyGeometry(geometryInfo.Flags, c.IncludeNonVisible);
                 }
             }
             if (ancestorItem.Cls != 2015) continue;
@@ -3539,8 +3569,8 @@ internal static partial class GRepParserV2
     /// Graphical-state ownership is evaluated separately against the node's serialized parent
     /// conditions.
     /// </summary>
-    internal static bool IsPhysicalBodyGeometry(uint flags)
-        => (flags & 0x00004000u) != 0
+    internal static bool IsPhysicalBodyGeometry(uint flags, bool includeNonVisible = false)
+        => ((flags & 0x00004000u) != 0 || (includeNonVisible && IsHiddenInstanceVariant(flags)))
             && (flags & 0x40000000u) == 0;
 
     /// <summary>
