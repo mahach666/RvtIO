@@ -47,7 +47,10 @@ internal static class PagedGzipStream
     /// not match its own CRC-32 and length.</summary>
     internal static byte[]? Decompress(byte[] raw)
     {
-        byte[]? body = RemoveSegments(raw);
+        // The last page of a stream may end before its segment position (the member is complete and only padding
+        // follows, measured on Global/ElemTable of rmebasic21): the strict removal fails there, the tail-tolerant one
+        // keeps the padding as trailing bytes. The gzip CRC-32 and length below still prove the result.
+        byte[]? body = RemoveSegments(raw) ?? RemoveSegments(raw, tolerateTail: true);
         if (body == null) return null;
         int start = IsGzipHeader(body, 0) ? 0 : IsGzipHeader(body, PrefixLength) ? PrefixLength : -1;
         if (start < 0) return null;
@@ -70,8 +73,9 @@ internal static class PagedGzipStream
         && data[offset] == 0x1F && data[offset + 1] == 0x8B && data[offset + 2] == 0x08;
 
     /// <summary>The stream without its page segments, or null when a segment position does
-    /// not hold a segment (wrong tag, or the stream ends inside one).</summary>
-    internal static byte[]? RemoveSegments(byte[] raw)
+    /// not hold a segment (wrong tag, or the stream ends inside one). With <paramref name="tolerateTail"/> the first
+    /// position after the first segment that holds none ends the removal and the rest of the stream is kept unchanged.</summary>
+    internal static byte[]? RemoveSegments(byte[] raw, bool tolerateTail = false)
     {
         var body = new MemoryStream(raw.Length);
         int source = 0;
@@ -80,7 +84,10 @@ internal static class PagedGzipStream
             int start = (int)segment;
             if (start + SegmentLength > raw.Length
                 || raw[start] != 0 || (raw[start + 1] & 0x0F) != 0)
-                return null;
+            {
+                if (!tolerateTail || source == 0) return null; // the first boundary of a multi-page stream always holds a segment
+                break;
+            }
             body.Write(raw, source, start - source);
             source = start + SegmentLength;
         }
