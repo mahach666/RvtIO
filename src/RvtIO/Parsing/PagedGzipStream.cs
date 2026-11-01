@@ -1,4 +1,6 @@
+using System.Buffers.Binary;
 using System.IO.Compression;
+using ICSharpCode.SharpZipLib.Checksum;
 using OpenMcdf;
 
 namespace RvtIO.Parsing;
@@ -60,12 +62,29 @@ internal static class PagedGzipStream
             using (var gzip = new GZipStream(
                 new MemoryStream(body, start, body.Length - start), CompressionMode.Decompress))
                 gzip.CopyTo(output);
-            return output.ToArray();
+            byte[] decoded = output.ToArray();
+            return HasTrailer(body, start + 10, decoded) ? decoded : null;
         }
         catch (InvalidDataException)
         {
             return null;
         }
+    }
+
+    /// <summary>GZipStream does not fail on a member cut before its trailer, so the CRC-32 and length of
+    /// the decoded bytes must be present in the stream after the header.</summary>
+    private static bool HasTrailer(byte[] body, int from, byte[] decoded)
+    {
+        var crc = new Crc32();
+        crc.Update(decoded);
+        uint expectedCrc = (uint)crc.Value, expectedLength = (uint)decoded.Length;
+        for (int i = from; i + 8 <= body.Length; i++)
+        {
+            if (BinaryPrimitives.ReadUInt32LittleEndian(body.AsSpan(i)) == expectedCrc
+                && BinaryPrimitives.ReadUInt32LittleEndian(body.AsSpan(i + 4)) == expectedLength)
+                return true;
+        }
+        return false;
     }
 
     private static bool IsGzipHeader(byte[] data, int offset) =>

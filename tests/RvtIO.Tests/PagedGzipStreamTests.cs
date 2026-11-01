@@ -49,4 +49,20 @@ public class PagedGzipStreamTests
         byte[] raw = [.. new byte[PagedGzipStream.PrefixLength], .. Member(Payload(100_000))];
         Assert.Null(PagedGzipStream.Decompress(raw));
     }
+
+    [Fact]
+    public void MemberCutInsideItsSecondSegment_IsRejected()
+    {
+        byte[] raw = StreamWithSegment(Member(Payload(200_000)), tail: 0);
+        byte[] cut = raw[..(PagedGzipStream.PageDataLength + PagedGzipStream.PageStride + 1)];
+        Assert.Null(PagedGzipStream.Decompress(cut));
+    }
+
+    [Fact]
+    public void MemberCutBeforeItsTrailer_IsRejected()
+    {
+        byte[] member = Member(Payload(1_000));
+        Assert.Null(PagedGzipStream.Decompress(member[..^8]));
+        Assert.NotNull(PagedGzipStream.Decompress(member));
+    }
 }
