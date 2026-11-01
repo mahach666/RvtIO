@@ -9,6 +9,10 @@ API between minor releases.
 - Derives IFC base quantities of beams, columns, members and piles from the surface integrals of the source geometry (planes, cylinders and cones); cutting solids no longer enter the totals.
 - Takes the length of a curtain wall mullion from the axis of its own symbol, and the footprint of a curved wall from the area of its rebuilt curve loop.
 - Takes door and window height and width from their parameters or frame extent before the bounding box, and computes their host area from the coarse solids including non-visible geometry.
+- Selects the element table and record layout by the release of the file's own schema, the older of it and the saved release, and reports the release in the diagnostics.
+- Decodes the document increment table of a file saved in several increments with a bound on the work it may do; a malformed table is rejected instead of guessed.
+- Adds the opt-in `ResolveCurrentCopies` reader option and `--resolve-current-copies` command line option, which keep only the current copy of an element that several partition streams hold. It is off by default and the default output does not change.
+- Fixes the partition framing check so that a damaged or truncated partition stream is rejected instead of read past its end.
 
 ## [0.1.0] - first public preview
 

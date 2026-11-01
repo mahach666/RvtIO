@@ -1,0 +1,55 @@
+namespace RvtIO.Parsing;
+
+/// <summary>
+/// The Revit release whose class schema a file carries, and the release that decides layouts and row sizes.
+///
+/// A project saved by a newer release can keep the schema of an older release it passed through, so the year written to
+/// BasicFileInfo (the saving release) is not always the release of the stored layouts. The schema release is read from the
+/// file's own Formats/Latest: the class id of the framing marker <c>ContentMarker</c> and the number of classes are both fixed per
+/// release. When both are known they must agree, otherwise the release is unknown (null) and nothing is guessed.
+/// </summary>
+internal static class SchemaRelease
+{
+    // ContentMarker class id -> release (the marker classes are looked up by name, their numbers belong to the release)
+    private static readonly Dictionary<int, int> ByMarker = new()
+    {
+        [779] = 2020, [801] = 2021, [817] = 2022, [869] = 2023, [891] = 2024, [913] = 2025, [931] = 2026, [951] = 2027,
+    };
+
+    // class count of Formats/Latest -> release
+    private static readonly Dictionary<int, int> ByClassCount = new()
+    {
+        [4098] = 2019, [4164] = 2020, [4168] = 2021, [4307] = 2022, [4418] = 2023, [4492] = 2024, [4600] = 2025, [4690] = 2026, [4757] = 2027,
+    };
+
+    internal static int? FromSchema(FormatsSchema schema) => FromEvidence(schema.IdOf("ContentMarker"), schema.Classes.Count);
+
+    internal static int? FromSchema(FileSchema schema) => FromEvidence(schema.ByName("ContentMarker")?.Id, schema.Classes.Count);
+
+    /// <summary>The release of a schema with this <c>ContentMarker</c> class id and class count, or null when neither is known or
+    /// the two name different releases.</summary>
+    internal static int? FromEvidence(int? markerId, int classCount)
+    {
+        int? marker = markerId is int id && ByMarker.TryGetValue(id, out int m) ? m : null;
+        int? count = ByClassCount.TryGetValue(classCount, out int c) ? c : null;
+        if (marker is not null && count is not null && marker != count) return null;
+        return marker ?? count;
+    }
+
+    /// <summary>The release saved in BasicFileInfo (a four digit year), or null.</summary>
+    internal static int? Saved(string? revitVersion)
+        => int.TryParse(revitVersion, out int year) && year is >= 2000 and <= 2100 ? year : null;
+
+    /// <summary>The older of the two releases, which decides every layout and row-size choice; the one that is known when only one
+    /// is, null when neither is.</summary>
+    internal static int? Effective(int? saved, int? schema)
+        => saved is int s && schema is int c ? Math.Min(s, c) : saved ?? schema;
+
+    /// <summary>One diagnostics line naming both releases and the one that is used.</summary>
+    internal static string Describe(int? saved, int? schema)
+    {
+        string Show(int? year) => year?.ToString() ?? "unknown";
+        string note = saved is int s && schema is int c && s != c ? $", the layout of release {Math.Min(s, c)} is used" : "";
+        return $"Release: saved by {Show(saved)}, schema of {Show(schema)}{note}";
+    }
+}

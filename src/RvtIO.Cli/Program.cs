@@ -25,6 +25,7 @@ internal static partial class Program
           --revit-localization <dir>        read the system family names from the resource DLLs of a Revit installation
           --r22-layout                      read the Revit 2022 layout for a JSON export too (an IFC export does it by default)
           --no-r22-layout                   keep the 64-bit schema path alone in an IFC export
+          --resolve-current-copies          keep only the current copy of an element that several partition streams hold (off by default)
 
         Report options (read the file and print or write a report instead of exporting):
           --api-demo                        print a tour of the document API
@@ -74,7 +75,7 @@ internal static partial class Program
     private static readonly HashSet<string> SwitchOptions =
     [
         "--json-full", "--compact-json", "--ifc-revit-parameters", "--ifc-revit-parameter-groups", "--ifc-no-base-quantities", "--r22-layout",
-        "--no-r22-layout", "--api-demo", "--dev-solids-only", "--elemtable-diag", "--tf-calibrate", "--name-scan", "--typemap", "--block-map",
+        "--no-r22-layout", "--resolve-current-copies", "--api-demo", "--dev-solids-only", "--elemtable-diag", "--tf-calibrate", "--name-scan", "--typemap", "--block-map",
         "--decode-blocks", "--decode-catc", "--wide", "--blocks", "--no-recover", "--no-d64", "--trim", "--dump-partial",
     ];
 

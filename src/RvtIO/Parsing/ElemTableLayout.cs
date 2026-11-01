@@ -11,7 +11,7 @@ namespace RvtIO.Parsing;
 /// </summary>
 internal static class ElemTableLayout
 {
-    internal readonly record struct Row(long Id, long OriginalId, int CreationDate, int PartitionId, long OwningId);
+    internal readonly record struct Row(long Id, long OriginalId, int CreationDate, int PartitionId, long OwningId, int? LastModificationDate = null);
 
     internal const int HeaderLength = 6;
 
@@ -39,7 +39,7 @@ internal static class ElemTableLayout
 
         // offsets of the leaves the reader needs, found by their declared path
         int? id = Offset(schema, rec, ["m_id"]), original = Offset(schema, rec, ["m_history", "m_originalElementId"]),
-            created = Offset(schema, rec, ["m_history", "m_creationDate"]), partition = Offset(schema, rec, ["m_partitionId"]),
+            created = Offset(schema, rec, ["m_history", "m_creationDate"]), modified = Offset(schema, rec, ["m_history", "m_lastModificationDate"]), partition = Offset(schema, rec, ["m_partitionId"]),
             owner = Offset(schema, rec, ["m_OwningElementId"]);
         if (id is null || original is null || created is null || partition is null || owner is null) return null;
         int idWidth = IdWidth(schema)!.Value;
@@ -54,7 +54,7 @@ internal static class ElemTableLayout
             if (rowId <= previous) return null;
             previous = rowId;
             rows.Add(new Row(rowId, Read(data, at + original.Value, idWidth), BitConverter.ToInt32(data, at + created.Value),
-                BitConverter.ToInt32(data, at + partition.Value), Read(data, at + owner.Value, idWidth)));
+                BitConverter.ToInt32(data, at + partition.Value), Read(data, at + owner.Value, idWidth), modified is int m ? BitConverter.ToInt32(data, at + m) : null));
         }
         return rows;
     }
