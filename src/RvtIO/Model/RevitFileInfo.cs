@@ -74,6 +74,10 @@ namespace RvtIO.Model
         [System.Text.Json.Serialization.JsonIgnore]
         internal string? SerializedLengthUnit { get; set; }
 
+        /// <summary>Why <see cref="SerializedLengthUnit"/> is null; null when it is set.</summary>
+        [System.Text.Json.Serialization.JsonIgnore]
+        internal string? SerializedLengthUnitIssue { get; set; }
+
         /// <summary>Whether the document is workshared, from the BasicFileInfo "Worksharing" line ("Not enabled" is false,
         /// "Local" and "Central" are true); null when the line is missing or says something else.</summary>
         [System.Text.Json.Serialization.JsonIgnore]

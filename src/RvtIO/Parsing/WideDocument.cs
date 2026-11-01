@@ -10,14 +10,19 @@ namespace RvtIO.Parsing;
 /// </summary>
 internal static class WideDocument
 {
+    /// <summary>The schema maps are null in the layout that does not persist them (Revit 2020 and older: the units are display unit enums).</summary>
     internal sealed record Result(uint UnitsElemId,
-        TfBlockDeserializer.DocumentSchemaMap Units, TfBlockDeserializer.DocumentSchemaMap Parameters);
+        TfBlockDeserializer.DocumentSchemaMap? Units, TfBlockDeserializer.DocumentSchemaMap? Parameters);
 
     /// <summary>The units element id and the persisted schema maps of a decoded Global/Latest stream; null when the stream is
     /// not an ADocument, the walk fails, or the storage / tracking objects are not unique.</summary>
-    internal static Result? Read(byte[] latest, SchemaDocument schema)
+    internal static Result? Read(byte[] latest, SchemaDocument schema) => Read(latest, schema, out _);
+
+    internal static Result? Read(byte[] latest, SchemaDocument schema, out string? failure)
     {
+        failure = "Global/Latest is shorter than its header";
         if (latest.Length < 8) return null;
+        failure = "Global/Latest is not an ADocument";
         var classes = schema.Classes.GroupBy(c => c.Id).ToDictionary(g => g.Key, g => g.First());
         int root = BitConverter.ToUInt16(latest, 0);
         if (!classes.TryGetValue(root, out var document) || document.Name != "ADocument") return null;
@@ -30,6 +35,7 @@ internal static class WideDocument
             },
             ["std::pair< AString, AString >"]);
         var walk = walker.Run(latest, 0, latest.Length, root);
+        failure = $"the ADocument walk stopped: {walk.Error ?? "root not read"}";
         if (walk.Error != null || !walk.RootRead) return null;
 
         int storage = -1, tracking = -1;
@@ -39,15 +45,25 @@ internal static class WideDocument
             if (name == "ESSchemaStorage") { if (storage >= 0) return null; storage = i; }
             else if (name == "UnitsTracking") { if (tracking >= 0) return null; tracking = i; }
         }
+        failure = "the schema storage or the units tracking object is missing or not unique";
         if (storage < 0 || tracking < 0) return null;
+        failure = "the units tracking object has no single positive units element id";
         var ids = walk.Captures.Where(c => c.QueueIndex == tracking && c.Field == "m_unitsElemId").ToList();
         if (ids.Count != 1 || ids[0].Integer is <= 0 or > uint.MaxValue) return null;
+        if (!walker.Class(walk.Queue[storage])!.Fields.Any(f => f.Name == "m_storedForgeSchemas"))
+        {
+            failure = null;
+            return new((uint)ids[0].Integer, null, null);
+        }
+        failure = "the persisted schema maps do not match their counts";
         long forgeCount = Count(walk, storage, "m_storedForgeSchemas"), parameterCount = Count(walk, storage, "m_storedParameterSchemas");
         var pairs = walk.Records.Where(r => r.QueueIndex == storage).Select(r => r.Values).ToList();
         if (forgeCount < 0 || parameterCount < 0 || pairs.Count != forgeCount + parameterCount) return null;
         var units = Map(pairs.Take((int)forgeCount));
         var parameters = Map(pairs.Skip((int)forgeCount));
-        return units == null || parameters == null ? null : new((uint)ids[0].Integer, units, parameters);
+        if (units == null || parameters == null) return null;
+        failure = null;
+        return new((uint)ids[0].Integer, units, parameters);
     }
 
     private static long Count(WideBlockWalker.Walk walk, int queueIndex, string field)
@@ -66,6 +82,37 @@ internal static class WideDocument
             entries.Add(new(key, value, 0, 0));
         }
         return new(0, 0, entries.ToArray());
+    }
+
+    // DisplayUnitType values (the Revit 2020 API) a Length option can hold, and the unit id of Revit 2021 and later that names the same unit.
+    private static readonly Dictionary<long, string> LegacyLengthUnits = new()
+    {
+        [0] = "autodesk.unit.unit:meters-1.0.0",
+        [1] = "autodesk.unit.unit:centimeters-1.0.1",
+        [2] = "autodesk.unit.unit:millimeters-1.0.1",
+        [3] = "autodesk.unit.unit:feet-1.0.1",
+        [4] = "autodesk.unit.unit:feetFractionalInches-1.0.0",
+        [5] = "autodesk.unit.unit:fractionalInches-1.0.0",
+        [6] = "autodesk.unit.unit:inches-1.0.1",
+        [9] = "autodesk.unit.unit:metersCentimeters-1.0.1",
+    };
+
+    /// <summary>The Length unit of a UnitsElem block of the Revit 2020 layout: AUnits.m_formatOptionsArr holds one FormatOptions per UnitType
+    /// in the order of the UnitType enum (Length first) and a FormatOptions names its unit by the DisplayUnitType in m_displayUnits.
+    /// Null, with the reason, when the block does not have that shape or the option follows the default.</summary>
+    internal static string? LegacyLengthUnit(IReadOnlyList<(string Class, Dictionary<string, object?> Values)> records, out string? issue)
+    {
+        var formats = records.Where(r => r.Class == "FormatOptions").Select(r => r.Values).ToList();
+        var units = records.Where(r => r.Class == "AUnits").ToList();
+        issue = null;
+        if (units.Count != 1 || records.Any(r => r.Class == "ForgeTypeId") || formats.Count == 0)
+            issue = "the units element has neither Forge unit ids nor a display unit array";
+        else if (formats[0].GetValueOrDefault("m_bUseDefault") is not long useDefault || formats[0].GetValueOrDefault("m_displayUnits") is not long unit)
+            issue = "the first display unit option has no readable fields";
+        else if (useDefault != 0) issue = "the Length format option follows the library default";
+        else if (!LegacyLengthUnits.TryGetValue(unit, out string? id)) issue = $"the display unit {unit} is not a length unit";
+        else return id;
+        return null;
     }
 
     /// <summary>The unit options of a UnitsElem block (<paramref name="records"/> are the records of ForgeTypeId, FormatOptions and

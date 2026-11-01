@@ -9,6 +9,7 @@ API between minor releases.
 - Derives IFC base quantities of beams, columns, members and piles from the surface integrals of the source geometry (planes, cylinders and cones); cutting solids no longer enter the totals.
 - Takes the length of a curtain wall mullion from the axis of its own symbol, and the footprint of a curved wall from the area of its rebuilt curve loop.
 - Takes door and window height and width from their parameters or frame extent before the bounding box, and computes their host area from the coarse solids including non-visible geometry.
+- Reads the project length unit in every file layout (including the Revit 2020 display unit layout and family documents) for the IFC length unit, and reports the reason through diagnostics when it falls back to millimetres.
 
 ## [0.1.0] - first public preview
 

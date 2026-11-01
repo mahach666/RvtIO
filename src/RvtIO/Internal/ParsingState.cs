@@ -35,6 +35,9 @@ internal class ParsingState
     /// <summary>The unit id of the Length format option of a file with 64-bit ids (see ReadWideDocumentUnits); null when not read.</summary>
     public string? WideLengthUnit { get; set; }
 
+    /// <summary>Why the wide reader found no Length unit; null when it found one or did not run.</summary>
+    public string? WideLengthUnitIssue { get; set; }
+
     /// <summary>Verbatim persisted maps from the unique named-manager ESSchemaStorage.
     /// Not SDK defaults, parsed/evaluated schemas or a winning native unit table.</summary>
     public (TfBlockDeserializer.DocumentSchemaMap Units, TfBlockDeserializer.DocumentSchemaMap Parameters)?

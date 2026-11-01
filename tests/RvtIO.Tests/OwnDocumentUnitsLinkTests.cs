@@ -117,6 +117,19 @@ public class OwnDocumentUnitsLinkTests
         }
     }
 
+    [Theory]
+    [InlineData(0)]
+    [InlineData(100_001)]
+    [InlineData(400_000)]
+    public void ByteBlobOfAnAppInfoIsBoundedByTheDataNotTheCollectionLimit(int bytes)
+    {
+        var f=Fixture(blobBytes:bytes); var link=TfBlockDeserializer.ExtractOwnDocumentUnitsLink(f.Data,out var failure); Assert.True(link!=null,failure);
+        Assert.NotNull(link); Assert.Equal(712u,link.UnitsElemId);
+        // a count beyond the data that is left still rejects
+        var span=f.Fields.Single(x=>x.Declaring==1541 && x.Name=="m_db");
+        byte[] data=[..f.Data]; BitConverter.GetBytes((uint)bytes+1000).CopyTo(data,span.Start); Assert.Null(Read(data));
+    }
+
     [Fact]
     public void UnsupportedNonemptyEnqueuedNobleContainerRejectsWithoutWidthGuess()
     {
@@ -186,7 +199,7 @@ public class OwnDocumentUnitsLinkTests
 
     private sealed record GraphFixture(byte[] Data,int TrackingStart,
         TfBlockDeserializer.DocumentGraphField[] Fields,TfBlockDeserializer.DocumentGraphObject[] Objects);
-    private static GraphFixture Fixture(bool reverse=false,int owner=712,uint empty=0)
+    private static GraphFixture Fixture(bool reverse=false,int owner=712,uint empty=0,int blobBytes=-1)
     {
         using var stream=new MemoryStream(); using var w=new BinaryWriter(stream);
         var fields=new List<TfBlockDeserializer.DocumentGraphField>(); var objects=new List<TfBlockDeserializer.DocumentGraphObject>();
@@ -197,8 +210,9 @@ public class OwnDocumentUnitsLinkTests
         Pointer(0,0); Pointer(0,0); Pointer(uint.MaxValue,2546);
         w.Write(-1);w.Write(-1);w.Write(17);w.Write(2662);w.Write(new byte[3]);w.Write(0u);w.Write(0u);Pointer(0,0);
         w.Write(1u);w.Write(0u); // ContentTable, empty
-        w.Write(1u);w.Write((uint)AppInfos.Length+1);
         ushort[] children=reverse?AppInfos.AsEnumerable().Reverse().ToArray():AppInfos;
+        if(blobBytes>=0)children=[..children,1541];
+        w.Write(1u);w.Write((uint)children.Length+1);
         foreach(var cls in children)Pointer(uint.MaxValue,cls);Pointer(uint.MaxValue,4030);
         void Record(int cls,int index,int depth=0)
         {
@@ -238,7 +252,8 @@ public class OwnDocumentUnitsLinkTests
                 {
                     bool nonempty=decl!=3867 && !(decl==2546 && f.Name=="m_enqueuedData2primaryParents")
                         && (reference.HasValue || Refs.ContainsKey((decl,f.Name)));
-                    w.Write(nonempty?1u:empty);if(nonempty)Scalar();
+                    if(decl==1541 && f.Name=="m_db") { w.Write((uint)blobBytes);w.Write(new byte[blobBytes]); }
+                    else { w.Write(nonempty?1u:empty);if(nonempty)Scalar(); }
                 }
                 else if(hi==1) { for(int i=0;i<f.Cnt!.Value;i++)Scalar(); }
                 else Scalar();
