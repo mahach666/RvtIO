@@ -797,6 +797,21 @@ public partial class IfcExporter
         return (taken.Sum(measure => measure.Volume) * CubicFeetToCubicMetres, taken.Sum(measure => measure.Area) * SquareFeetToSquareMetres);
     }
 
+    /// <summary>Volume (m3) of a foundation of several solids: each measured node counts once with its surface integrals (a cutting node, whose
+    /// volume is negative, is not taken), a solid without them counts by its closed shell, and an open shell without them is left out.</summary>
+    private static double FoundationNodesVolumeCurrent(GeometryData geometry, IReadOnlyList<ShellInfo> shells)
+    {
+        var measured = new Dictionary<int, double>();
+        foreach (var measure in geometry.NodeMeasures!) measured.TryAdd(measure.Node, measure.Volume);
+        double feet3 = measured.Values.Where(volume => volume > 0).Sum();
+        foreach (var shell in shells)
+        {
+            int node = shell.Faces.Count > 0 ? shell.Faces[0].GeometryNode : 0;
+            if (shell.Closed && (node <= 0 || !measured.ContainsKey(node))) feet3 += shell.Volume;
+        }
+        return feet3 * CubicFeetToCubicMetres;
+    }
+
     private static ShellPrism? SoleClosedPrismCurrent(IReadOnlyList<ShellInfo> shells, bool verticalOnly = false) =>
         shells.Count == 1 && shells[0].Closed ? FindPrismCurrent(shells[0], verticalOnly) : null;
 
@@ -1058,10 +1073,8 @@ public partial class IfcExporter
             {
                 topArea = capArea * SquareFeetToSquareMetres;
                 var capNode = element.Geometry!.NodeMeasures?.FirstOrDefault(measure => measure.Node == cap.GeometryNode && measure.Volume > 0);
-                // Every taken node counts (a foundation can be several solids); the cap node alone only when other nodes have no integrals.
-                netVolume = NodeSolidTotalsCurrent(element.Geometry)?.Volume
-                    ?? (capNode != null ? capNode.Volume * CubicFeetToCubicMetres
-                        : shells.All(shell => shell.Closed) ? totals?.Volume : null);
+                netVolume = capNode != null ? FoundationNodesVolumeCurrent(element.Geometry!, shells)
+                    : shells.All(shell => shell.Closed) ? totals?.Volume : null;
             }
         }
         AddIfPositive(result, QuantityKind.Area, "GrossArea", profileArea ?? topArea);

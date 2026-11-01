@@ -1175,6 +1175,23 @@ public class IfcExporterBaseQuantitiesCurrentTests
     }
 
     [Fact]
+    public void Pass_Foundation_AddsTheClosedShellOfASolidWithoutIntegrals()
+    {
+        var (w, owner, placement) = NewWriter();
+        int slab = AddProduct(w, "IFCSLAB", "1bOeIks4fCNAuMrZZw4irf", owner, placement);
+        var geometry = Box(1, 1, 1);
+        foreach (var face in geometry.Faces) face.GeometryNode = 2;
+        geometry.Faces.Add(new GeoFace { QuadratureArea = 1, PlaneSurface = true, OuterVertices = [[9, 0, 0]], GeometryNode = 1 });
+        geometry.BrepSolids.Add(new GeoBrepSolid { IsClosed = false, FaceIndices = [6] });
+        geometry.NodeMeasures = [new RvtIO.Parsing.MeshNodeMeasure(1, 6, 1)];
+        var foundation = new Element { Id = 512281, CategoryId = -2001300, Geometry = geometry };
+
+        Apply(w, owner, new() { [512281] = foundation }, new() { [slab] = 512281 });
+
+        Assert.Equal(2 * CubicFeet, Quantities(w, "IFCQUANTITYVOLUME").Single(q => q.Name == "NetVolume").Value, 9);
+    }
+
+    [Fact]
     public void Pass_FoundationPile_WithoutAMeasuredNodeOrAClosedShellHasNoVolume()
     {
         var (w, owner, placement) = NewWriter();
