@@ -168,4 +168,27 @@ public class IfcExporterCurrentDoorWindowOpeningTests
         Assert.Equal(before, f.Find(opening).Args);
         Assert.Equal(count, f.W.EntityCount);
     }
+
+    [Fact]
+    public void BaseQuantities_UpdatedWithCutLoopModelFrameExtents()
+    {
+        var (f, opening, elements, products) = Scene([-1.5748031496062993, -2.9564656610201734, 0, 1.5748031496062993, 0.4297900262467311, 7.152230971128607]);
+        int qDepth = f.W.Add("IFCQUANTITYLENGTH", "'Depth','',$,0.1");
+        int qHeight = f.W.Add("IFCQUANTITYLENGTH", "'Height','',$,0.885");
+        int qWidth = f.W.Add("IFCQUANTITYLENGTH", "'Width','',$,2.135");
+        int qSet = f.W.Add("IFCELEMENTQUANTITY", $"'qset',#1,'BaseQuantities',$,$,(#{qDepth},#{qHeight},#{qWidth})");
+        f.W.Add("IFCRELDEFINESBYPROPERTIES", $"'rel',#1,$,$,(#{opening}),#{qSet}");
+
+        Assert.Equal(1, new IfcExporter().ApplyCurrentDoorWindowOpenings(f.W, elements, products));
+
+        var depthArgs = f.Attributes(qDepth);
+        var heightArgs = f.Attributes(qHeight);
+        var widthArgs = f.Attributes(qWidth);
+
+        Assert.Equal(0.202, double.Parse(depthArgs[3], System.Globalization.CultureInfo.InvariantCulture), 3);
+        double h = double.Parse(heightArgs[3], System.Globalization.CultureInfo.InvariantCulture);
+        double w = double.Parse(widthArgs[3], System.Globalization.CultureInfo.InvariantCulture);
+        Assert.Equal(0.8, h, 3);
+        Assert.Equal(2.1, w, 3);
+    }
 }

@@ -47,14 +47,24 @@ public partial class IfcExporter
         for (int i = 0; i < w.EntityCount; i++) indexById[w.EntityAt(i).Id] = i;
         var fillingByOpening = new Dictionary<int, int>();
         var hostByOpening = new Dictionary<int, int>();
+        var psetByProduct = new Dictionary<int, int>();
         for (int i = 0; i < w.EntityCount; i++)
         {
             var (_, type, args) = w.EntityAt(i);
-            if (type is not ("IFCRELFILLSELEMENT" or "IFCRELVOIDSELEMENT")) continue;
+            if (type is not ("IFCRELFILLSELEMENT" or "IFCRELVOIDSELEMENT" or "IFCRELDEFINESBYPROPERTIES")) continue;
             var attributes = SplitStepArguments(args);
-            if (attributes.Length < 6 || !TryEntityId(attributes[4], out int first) || !TryEntityId(attributes[5], out int second)) continue;
-            if (type == "IFCRELFILLSELEMENT") fillingByOpening[first] = second;
-            else hostByOpening[second] = first;
+            if (attributes.Length < 6) continue;
+            if (type == "IFCRELFILLSELEMENT" && TryEntityId(attributes[4], out int first) && TryEntityId(attributes[5], out int second))
+                fillingByOpening[first] = second;
+            else if (type == "IFCRELVOIDSELEMENT" && TryEntityId(attributes[4], out int voidHost) && TryEntityId(attributes[5], out int voidOp))
+                hostByOpening[voidOp] = voidHost;
+            else if (type == "IFCRELDEFINESBYPROPERTIES" && TryEntityId(attributes[5], out int psetId))
+            {
+                string prods = attributes[4].Trim();
+                if (prods.StartsWith('(') && prods.EndsWith(')')) prods = prods[1..^1];
+                foreach (string prodToken in SplitStepArguments(prods))
+                    if (TryEntityId(prodToken, out int prodId)) psetByProduct[prodId] = psetId;
+            }
         }
 
         var globals = new GlobalsCurrent(w);
@@ -131,6 +141,37 @@ public partial class IfcExporter
             openingAttributes[5] = StepWriter.Ref(placement);
             openingAttributes[6] = StepWriter.Ref(newShape);
             w.ReplaceArgs(openingIndex, string.Join(",", openingAttributes));
+
+            if (psetByProduct.TryGetValue(openingId, out int psetId)
+                && indexById.TryGetValue(psetId, out int psetIndex)
+                && w.EntityAt(psetIndex).Type == "IFCELEMENTQUANTITY")
+            {
+                var psetArgs = SplitStepArguments(w.EntityAt(psetIndex).Args);
+                if (psetArgs.Length >= 6 && psetArgs[2].Trim('\'') == "BaseQuantities")
+                {
+                    string inner = psetArgs[5].Trim();
+                    if (inner.StartsWith('(') && inner.EndsWith(')')) inner = inner[1..^1];
+                    foreach (string qToken in SplitStepArguments(inner))
+                    {
+                        if (TryEntityId(qToken, out int qId) && indexById.TryGetValue(qId, out int qIndex)
+                            && w.EntityAt(qIndex).Type == "IFCQUANTITYLENGTH")
+                        {
+                            var qArgs = SplitStepArguments(w.EntityAt(qIndex).Args);
+                            if (qArgs.Length >= 4)
+                            {
+                                string qName = qArgs[0].Trim('\'');
+                                if (qName == "Height")
+                                    w.ReplaceArgs(qIndex, $"'{qName}','',$,{StepWriter.Real(built.Height)}");
+                                else if (qName == "Width")
+                                    w.ReplaceArgs(qIndex, $"'{qName}','',$,{StepWriter.Real(built.Width)}");
+                                else if (qName == "Depth")
+                                    w.ReplaceArgs(qIndex, $"'{qName}','',$,{StepWriter.Real(built.Depth)}");
+                            }
+                        }
+                    }
+                }
+            }
+
             rewritten++;
         }
         if (rewritten > 0) RemoveDetachedCurrent(w, detached);
@@ -141,7 +182,7 @@ public partial class IfcExporter
 
     /// <summary>The opening placement, authored profile in its plane, extrusion axis and depth.</summary>
     private readonly record struct DoorWindowOpeningCurrent(double[] RelativeOrigin, List<double[]> ProfileLoop,
-        bool IsRectangle, double[] Axis, double Depth);
+        bool IsRectangle, double[] Axis, double Depth, double Height, double Width);
 
     private static bool TryDoorWindowOpeningCurrent(StepWriter w, Dictionary<int, int> indexById,
         IReadOnlyDictionary<int, Element> elementsById, Element hosted, Element wall, string[] wallAttributes, out DoorWindowOpeningCurrent opening,
@@ -234,7 +275,10 @@ public partial class IfcExporter
             projected[i][0] * projected[(i + 1) % projected.Count][1] - projected[(i + 1) % projected.Count][0] * projected[i][1]);
         if (area == 0 || !double.IsFinite(area)) { failure = "degenerate-loop"; return false; }
 
-        opening = new DoorWindowOpeningCurrent(relative, projected, rectangle, axis, width);
+        var wallLocalLoop = cut.Vertices.Select(v => wallPlacement.ToLocal(ToModel(v))).ToList();
+        var (loopHeight, loopWidth) = CutLoopHeightWidthCurrent(wallLocalLoop);
+
+        opening = new DoorWindowOpeningCurrent(relative, projected, rectangle, axis, width, loopHeight, loopWidth);
         return true;
 
         static double LoopAreaOf(IReadOnlyList<double[]> vertices)

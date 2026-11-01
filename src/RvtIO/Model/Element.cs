@@ -103,6 +103,16 @@ namespace RvtIO.Model
         [JsonIgnore]
         internal double? CoarseSurfaceArea { get; set; }
 
+        /// <summary>The geometry of a column has Medium detail-level alternatives that differ from the Fine solids (a tube drawn with sharp
+        /// corners at the Medium level and with round ones at the Fine level); without them the Medium solids are the Fine ones.</summary>
+        [JsonIgnore]
+        internal bool HasMediumAlternatives { get; set; }
+
+        /// <summary>The volume (cubic metres) and surface (square metres) of the taken solids of a column at the Medium level when it
+        /// differs from the Fine one; null when the element has no alternatives or its Medium solids have no surface integrals.</summary>
+        [JsonIgnore]
+        internal (double Volume, double Area)? MediumSolidTotals { get; set; }
+
         /// <summary>EnergyDataSettings.m_buildingTypeId as stored (the project's HVAC load building type).</summary>
         [JsonIgnore]
         internal int? EnergyBuildingTypeId { get; set; }
@@ -292,12 +302,20 @@ namespace RvtIO.Model
         /// <summary>ElementHeader.m_designOptionId of a file with 64-bit ids; null when not decoded.</summary>
         [JsonIgnore]
         internal int? NativeHeaderDesignOptionId { get; set; }
+
+        /// <summary>DesignOptionSet.m_mainDesignOption of a design option set (class 1080): the primary option; null when not decoded.</summary>
         [JsonIgnore]
         internal int? NativePrimaryDesignOptionId { get; set; }
+
+        /// <summary>DesignOption.m_DesignOptionSetId of a design option (class 1074); null when not decoded.</summary>
         [JsonIgnore]
         internal int? NativeDesignOptionSetId { get; set; }
+
+        /// <summary>DesignOption.m_strName or DesignOptionSet.m_strName; null when not decoded.</summary>
         [JsonIgnore]
         internal string? NativeDesignOptionName { get; set; }
+
+        /// <summary>Whether the root class derives from Symbol, by the class schema of a file with 64-bit ids; null for the other files.</summary>
         [JsonIgnore]
         internal bool? NativeIsSymbol { get; set; }
 

@@ -27,7 +27,7 @@ internal static partial class GRepParserV2
     private static List<GeometryNode>? BuildNodes(Cur c, Dictionary<uint, SurfaceRec> surfaces, HashSet<uint> bodyFaces,
         IEnumerable<uint> inactiveBodyFaces, Dictionary<uint, List<int>> loopsByFace,
         Dictionary<uint, (int Node, int Style)> nodeByFace, Dictionary<int, long> nodeOrders,
-        List<(int Node, int Style, int RenderStyleId)>? displayOnlyNodes = null)
+        List<(int Node, int Style, int RenderStyleId)>? displayOnlyNodes = null, List<MeshNodeMeasure>? nodeMeasures = null)
     {
         var edges = EdgesByHandle(c);
         MeshMarkFreeformEdges(edges, surfaces);
@@ -38,10 +38,17 @@ internal static partial class GRepParserV2
         // a geometry that carries no node ids at all (the own GRep of a railing or a wall) is the
         // one node 0
         bool withoutNodes = !bodyFaces.Any(nodeByFace.ContainsKey);
+        var closedNodes = nodeMeasures != null ? ClosedNodes(c.Edges.Select(edge => (edge.FaceA, edge.FaceB)), nodeByFace) : [];
         foreach (var group in c.FaceOrder.Where(bodyFaces.Contains).Where(handle => withoutNodes || nodeByFace.ContainsKey(handle))
                      .GroupBy(handle => withoutNodes ? 0 : nodeByFace[handle].Node).Where(g => g.Key > 0 || withoutNodes))
         {
             bool curved = false, usable = true;
+            // The surface integrals of the node. A closed node whose faces point into it (negative signed volume, a cutting body) is not a
+            // solid the exporter takes: its measure keeps the negative volume, which the quantities read as "not taken"; its geometry is exported as ever.
+            var measured = MeasureAnalyticSolid(c, group, surfaces, loopsByFace, edges);
+            if (nodeMeasures != null && group.Key > 0 && measured is { } integrals
+                && (integrals.Volume > 0 || integrals.Volume < 0 && !c.IncludeNonVisible && closedNodes.Contains(group.Key)))
+                nodeMeasures.Add(new MeshNodeMeasure(group.Key, integrals.Area, integrals.Volume));
             if (MeshNodeLog)
                 DiagnosticSink.WriteLine($"[meshnode] eid={c.ElementId} node={group.Key} active {string.Join(",", group.GroupBy(h => surfaces.TryGetValue(h, out var sx) ? sx.Kind.ToString() : "none").Select(g => $"{g.Key}:{g.Count()}"))}"
                     + $" inactive {(inactiveByNode.TryGetValue(group.Key, out var inx) ? string.Join(",", inx.GroupBy(h => c.DirectSurfaceByFace.TryGetValue(h, out var sy) ? sy.Kind.ToString() : "none").Select(g => $"{g.Key}:{g.Count()}")) : "-")}");
@@ -91,6 +98,7 @@ internal static partial class GRepParserV2
             result.Add(new GeometryNode(group.Key, nodeOrders.GetValueOrDefault(group.Key - 1), faces, diagonal)
             {
                 Ghost = display != null, Style = display?.Item1 ?? 0, RenderStyleId = display?.Item2 ?? 0,
+                SourceMeasures = measured is { } m ? (m.Area, Math.Abs(m.Volume)) : null,
             });
         }
         if (MeshNodeLog)
@@ -172,6 +180,10 @@ internal static partial class GRepParserV2
     }
 }
 
+/// <summary>The surface integrals of a Geometry node (square feet, cubic feet): its area and its signed volume. A negative volume is that of a closed
+/// node whose faces point into it; the exporter takes no solid from it.</summary>
+internal sealed record MeshNodeMeasure(int Node, double Area, double Volume);
+
 /// <summary>
 /// One Geometry node written as a triangle set: its faces in the terms of the Revit face
 /// mesher, where the node stands in Revit's walk of the nodes, and the diagonal of its
@@ -179,6 +191,8 @@ internal static partial class GRepParserV2
 /// </summary>
 internal sealed record GeometryNode(int Node, long NodeOrder, IReadOnlyList<BrFace> Faces, double Diagonal, double[]? Placement = null)
 {
+    /// <summary>The area and the volume of the source measures of the node; null when the node was not measured.</summary>
+    public (double Area, double Volume)? SourceMeasures { get; init; }
     /// <summary>
     /// Revit exports the node as a solid, but the geometry holds no polygon of it: all its
     /// faces are display surfaces (GInfo bit 0x00200000) or its polygons duplicate those of another

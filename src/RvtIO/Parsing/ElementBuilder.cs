@@ -22,7 +22,7 @@ internal static partial class ElementBuilder
             var placed = BuildPlacedSymbolGeometry(
                 instance.SymbolElemId, instance.Transform, state, new HashSet<int>());
             if (placed == null) { LogUnresolvedSymbol(elem, instance.SymbolElemId, "no-geometry", state); continue; }
-            placed = ClipGeometryToBounds(placed, grep.BoundingBox);
+            if (!state.IncludeNonVisibleQuantities) placed = ClipGeometryToBounds(placed, grep.BoundingBox);
             if (placed == null) { LogUnresolvedSymbol(elem, instance.SymbolElemId, "clipped-away", state); continue; }
             AppendGeometry(elem.Geometry, placed, instance.NodeOrder);
             expandedTopLevel.Add(new GeoInstance
@@ -200,7 +200,8 @@ internal static partial class ElementBuilder
         try
         {
             if (!state.GrepBlocks.TryGetValue((uint)symbolId, out var symbol)) return null;
-            if (state.CoarseView && symbol.Coarse != null) symbol = symbol.Coarse;
+            if (state.IncludeNonVisibleQuantities && symbol.CoarseQuantities != null) symbol = symbol.CoarseQuantities;
+            else if (state.CoarseView && symbol.Coarse != null) symbol = symbol.Coarse;
             else if (state.DetailView == 2 && symbol.Medium != null) symbol = symbol.Medium;
             if (symbol.Faces.Count > scaledComponentFaceBudget && IsRescaledPlacement(transform))
             {
@@ -420,6 +421,7 @@ internal static partial class ElementBuilder
                 NodeOrder = f.NodeOrder,
                 GeometryStyle = f.GeometryStyle,
                 MeshMarker = f.SourceFace != 0 ? f.SourceFace : f.MeshMarker,
+                QuadratureArea = IsRigidPlacement(t) ? f.QuadratureArea : null,
             });
             faceMap[sourceFaceIndex] = targetFaceIndex;
         }
@@ -438,6 +440,8 @@ internal static partial class ElementBuilder
             DiagnosticSink.WriteLine($"[meshmesh] {sym.MeshNodes.Count} nodes not placed: the transform is scaled ({string.Join(",", t.Select(v => v.ToString("G4")))})");
         if (sym.MeshNodes is { Count: > 0 } && IsRigidPlacement(t))
             outGeo.MeshNodes = sym.MeshNodes.Select(node => node with { Placement = node.Placement == null ? (double[])t.Clone() : ComposeTransforms(t, node.Placement) }).ToList();
+        // area and volume are the same in a rigidly placed frame; a scaled one has none
+        if (sym.NodeMeasures is { Count: > 0 } && IsRigidPlacement(t)) outGeo.NodeMeasures = sym.NodeMeasures;
         if (sym.BrepSolids is { Count: > 0 })
         {
             outGeo.BrepSolids = new();
@@ -572,6 +576,16 @@ internal static partial class ElementBuilder
             if (changed) clippedFaces.Add(oldIndex);
         }
         if (result.Faces.Count == 0) return null;
+        // the integrals of a node are those of the whole solid: a node with a clipped or dropped face has none
+        if (source.NodeMeasures is { Count: > 0 } measures)
+        {
+            var affected = new HashSet<int>();
+            for (int oldIndex = 0; oldIndex < source.Faces.Count; oldIndex++)
+                if (!oldToNew.ContainsKey(oldIndex) || clippedFaces.Contains(oldIndex))
+                    affected.Add(source.Faces[oldIndex].GeometryNode);
+            var kept = measures.Where(measure => !affected.Contains(measure.Node)).ToList();
+            if (kept.Count > 0) result.NodeMeasures = kept;
+        }
 
         if (source.BrepSolids is { Count: > 0 })
         {
@@ -628,6 +642,7 @@ internal static partial class ElementBuilder
                 Normal = face.XVector, CurvedSurface = face.CurvedSurface,
             }).ToList(),
             MeshNodes = grep.MeshNodes,
+            NodeMeasures = grep.NodeMeasures,
             Transform = grep.Transform,
             Instances = grep.Instances.Count > 0
                 ? grep.Instances.Select(instance => new GeoInstance
@@ -3187,6 +3202,8 @@ internal static partial class ElementBuilder
                 }
                 if (tableValue == null) continue;
                 if (NativeFieldParameters.NotWithCompleteStores.Contains((entry.ParamId, entry.Key)) && np.RootParameterStoresComplete) continue;
+                // Presence domains: where the field is set, those of the row; where it is "not set" (ElementId -1, double >= 1e29)
+                // the row's UnsetDomains (null: an older row, whose "not set" value has always been created, is not checked).
                 string[]? checkedDomains = tableSet ? (entry.Domains.Length > 0 ? entry.Domains : null) : entry.UnsetDomains;
                 if (checkedDomains != null)
                 {
@@ -6174,6 +6191,7 @@ internal static partial class ElementBuilder
         ApplyStructuralColumnParams(rvtInfo);
         ApplyRoomLevelParams(rvtInfo);
         ApplyFramingSymbolLength(rvtInfo);
+        if (state != null) ApplyMullionSymbolLength(rvtInfo.Elements, state.NativeParams);
         ApplyRoomBuildingTypeLoads(rvtInfo);
         ApplyHeadHeight(rvtInfo);
         ApplyStructuralConnectionParams(rvtInfo);
@@ -6261,9 +6279,17 @@ internal static partial class ElementBuilder
                 else if (p.Id == -1010300) pan = p;
             }
             if (gen?.Value is double gv && pan == null)
+            {
                 e.Parameters.Add(BipHelpers.MakeBipParam(-1010300, "CURTAIN_WALL_PANELS_HEIGHT", StorageType.Double, gv));
+                if (e.BoundingBoxDimensionParamIds != null && e.BoundingBoxDimensionParamIds.Contains(-1001300))
+                    e.BoundingBoxDimensionParamIds.Add(-1010300);
+            }
             else if (pan?.Value is double pv && gen == null)
+            {
                 e.Parameters.Add(BipHelpers.MakeBipParam(-1001300, "GENERIC_HEIGHT", StorageType.Double, pv));
+                if (e.BoundingBoxDimensionParamIds != null && e.BoundingBoxDimensionParamIds.Contains(-1010300))
+                    e.BoundingBoxDimensionParamIds.Add(-1001300);
+            }
             // Same pair for the width: GENERIC_WIDTH equals CURTAIN_WALL_PANELS_WIDTH on every
             // element that has the panel width.
             Parameter? genWidth = null, panWidth = null;
@@ -6273,7 +6299,17 @@ internal static partial class ElementBuilder
                 else if (p.Id == -1010301) panWidth = p;
             }
             if (panWidth?.Value is double pw && genWidth == null)
+            {
                 e.Parameters.Add(BipHelpers.MakeBipParam(-1001301, "GENERIC_WIDTH", StorageType.Double, pw));
+                if (e.BoundingBoxDimensionParamIds != null && e.BoundingBoxDimensionParamIds.Contains(-1010301))
+                    e.BoundingBoxDimensionParamIds.Add(-1001301);
+            }
+            else if (genWidth?.Value is double gw && panWidth == null)
+            {
+                e.Parameters.Add(BipHelpers.MakeBipParam(-1010301, "CURTAIN_WALL_PANELS_WIDTH", StorageType.Double, gw));
+                if (e.BoundingBoxDimensionParamIds != null && e.BoundingBoxDimensionParamIds.Contains(-1001301))
+                    e.BoundingBoxDimensionParamIds.Add(-1010301);
+            }
         }
         CreateElemTablePlaceholders(rvtInfo, state);
         // NOTE: PropagateFamilyTypeValues remains disabled. The chain rule that works perfectly for
@@ -6359,6 +6395,10 @@ internal static partial class ElementBuilder
                     Node = node.Node + Math.Sign(node.Node) * nodeOffset,
                     NodeOrder = instanceOrder is { } and not 0 && node.NodeOrder != 0 ? GRepParserV2.NestOrderKey(instanceOrder.Value, node.NodeOrder) : node.NodeOrder,
                 });
+
+        if (source.NodeMeasures is { Count: > 0 })
+            foreach (var measure in source.NodeMeasures.Where(measure => measure.Node != 0))
+                (target.NodeMeasures ??= new()).Add(measure with { Node = measure.Node + Math.Sign(measure.Node) * nodeOffset });
 
         if (source.BrepSolids is { Count: > 0 })
         {

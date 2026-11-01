@@ -11,8 +11,11 @@ public partial class IfcExporter
     private const double CubicFeetToCubicMetres = FeetToMetres * FeetToMetres * FeetToMetres;
 
     /// <summary>One decoded shell: its faces, its volume (the divergence theorem over its planar faces) and the sum of
-    /// its face areas (holes subtracted), in feet.</summary>
-    internal sealed record ShellInfo(IReadOnlyList<GeoFace> Faces, bool Closed, double Volume, double Area);
+    /// its face areas (holes subtracted), in feet. Complete analytic nodes use source surface integrals.</summary>
+    internal sealed record ShellInfo(IReadOnlyList<GeoFace> Faces, bool Closed, double Volume, double Area)
+    {
+        public bool SourceMeasured { get; init; }
+    }
 
     /// <summary>The prism a shell is, in feet: Depth is the distance of the two end faces, ProfileArea the net area of an
     /// end face, OuterPerimeter the length of its outer loop and ExtentX/ExtentY the world extents of the loop that is measured
@@ -24,7 +27,10 @@ public partial class IfcExporter
 
     /// <summary>The total surface area (feet squared) of the solids of a geometry: the sum over its shells, the holes of the faces
     /// subtracted.</summary>
-    internal static double SurfaceAreaCurrent(GeometryData? geometry) => ShellsOfCurrent(geometry).Sum(shell => shell.Area);
+    internal static double SurfaceAreaCurrent(GeometryData? geometry) => ShellsOfCurrent(geometry).Sum(shell => shell.SourceMeasured ? shell.Area :
+        shell.Faces.GroupBy(face => (face.GeometryNode, Marker: face.SourceFace != 0 ? face.SourceFace : face.MeshMarker))
+            .Sum(group => group.Key.Marker != 0 && group.First().QuadratureArea is { } exact
+                ? exact : group.Sum(face => NetFaceArea(face) ?? 0)));
 
     private static double[] RingNormal(IReadOnlyList<double[]> ring)
     {
@@ -102,7 +108,18 @@ public partial class IfcExporter
                 var p = face.OuterVertices![0];
                 volume += (p[0] * normal[0] + p[1] * normal[1] + p[2] * normal[2]) * net / 3;
             }
-            result.Add(new ShellInfo(shellFaces, closed, Math.Abs(volume), area));
+            bool sourceMeasured = false;
+            if (closed && shellFaces.Select(face => face.GeometryNode).Distinct().ToList() is [var nodeId]
+                && geometry.NodeMeasures?.Any(measure => measure.Node == nodeId && measure.Volume < 0) != true  // a cutting node has no solid to measure
+                && geometry.MeshNodes?.FirstOrDefault(node => node.Node == nodeId) is { SourceMeasures: { } measures } source
+                && shellFaces.Select(face => face.SourceFace != 0 ? face.SourceFace : face.MeshMarker).ToHashSet()
+                    .SetEquals(source.Faces.Select(face => (uint)face.Marker)))
+            {
+                area = measures.Area;
+                volume = measures.Volume;
+                sourceMeasured = true;
+            }
+            result.Add(new ShellInfo(shellFaces, closed, Math.Abs(volume), area) { SourceMeasured = sourceMeasured });
         }
         return result;
     }

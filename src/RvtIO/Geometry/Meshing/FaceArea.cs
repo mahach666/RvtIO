@@ -14,14 +14,19 @@ internal static class FaceArea
     /// not converge or a coedge has fewer than two points.
     /// </summary>
     internal static double? Compute(IEnumerable<Coedge> coedges)
+        => Integrate(coedges, null) is { } area ? Math.Abs(area) : null;
+
+    internal delegate double SurfaceIntegrand(double u, double v, double du, double dv);
+
+    internal static double? Integrate(IEnumerable<Coedge> coedges, SurfaceIntegrand? integrand)
     {
         double total = 0;
         foreach (var coedge in coedges)
         {
-            if (coedge.Points.Count < 2 || Integrate(coedge) is not { } value) return null;
+            if (coedge.Points.Count < 2 || Integrate(coedge, integrand) is not { } value) return null;
             total += value;
         }
-        return Math.Abs(total);
+        return double.IsFinite(total) ? total : null;
     }
 
     internal static (double[] Value, double[] Derivative) HermiteBasis(double s)
@@ -90,23 +95,24 @@ internal static class FaceArea
         return ((u, v), (du * intervals, dv * intervals));
     }
 
-    private static double Integrand(Coedge coedge, double t)
+    private static double Integrand(Coedge coedge, double t, SurfaceIntegrand? integrand)
     {
         bool reverse = (coedge.Flags & 1) != (coedge.SecondFace ? 1 : 0);
         var (point, derivative) = Evaluate(coedge.Points, reverse ? 1.0 - t : t);
         if (reverse) derivative = (-derivative.U, -derivative.V);
-        return 0.5 * (point.U * derivative.V - point.V * derivative.U);
+        return integrand != null ? integrand(point.U, point.V, derivative.U, derivative.V)
+            : 0.5 * (point.U * derivative.V - point.V * derivative.U);
     }
 
-    private static double? Integrate(Coedge coedge)
+    private static double? Integrate(Coedge coedge, SurfaceIntegrand? integrand)
     {
-        double previous = (Integrand(coedge, 0.0) + Integrand(coedge, 1.0)) * 0.5;
+        double previous = (Integrand(coedge, 0.0, integrand) + Integrand(coedge, 1.0, integrand)) * 0.5;
         var step = new List<double> { 1.0 };
         var estimate = new List<double> { previous };
         int level = 1;
         for (; level <= 4; level++)
         {
-            previous = Refine(coedge, level, estimate[^1]);
+            previous = Refine(coedge, level, estimate[^1], integrand);
             step.Add(step[^1] * 0.25);
             estimate.Add(previous);
         }
@@ -116,7 +122,7 @@ internal static class FaceArea
         {
             if (level >= MaxLevels) return null;
             step.Add(step[^1] * 0.25);
-            estimate.Add(Refine(coedge, level, estimate[^1]));
+            estimate.Add(Refine(coedge, level, estimate[^1], integrand));
             step.RemoveAt(0);
             estimate.RemoveAt(0);
             (value, error) = Extrapolate(step, estimate);
@@ -126,13 +132,13 @@ internal static class FaceArea
         return value;
     }
 
-    private static double Refine(Coedge coedge, int level, double previous)
+    private static double Refine(Coedge coedge, int level, double previous, SurfaceIntegrand? integrand)
     {
         int panels = 1 << (level - 1);
         double width = 1.0 / panels, t = width * 0.5 + 0.0, sum = 0;
         for (int i = 0; i < panels; i++)
         {
-            sum += Integrand(coedge, t);
+            sum += Integrand(coedge, t, integrand);
             t += width;
         }
         return (sum * 1.0 / panels + previous) * 0.5;

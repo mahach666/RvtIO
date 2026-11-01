@@ -114,6 +114,7 @@ internal class ParsingState
 
     /// <summary>While set, the symbols placed from <see cref="GrepBlocks"/> are taken at the Coarse detail level.</summary>
     public bool CoarseView { get; set; }
+    public bool IncludeNonVisibleQuantities { get; set; }
 
     /// <summary>The detail level the geometry is placed at: 0 Fine, 1 Coarse, 2 Medium.</summary>
     public int DetailView { get; set; }
