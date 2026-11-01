@@ -1,6 +1,7 @@
 using System.Buffers.Binary;
-using System.IO.Compression;
+using ICSharpCode.SharpZipLib;
 using ICSharpCode.SharpZipLib.Checksum;
+using ICSharpCode.SharpZipLib.Zip.Compression;
 using OpenMcdf;
 
 namespace RvtIO.Parsing;
@@ -14,8 +15,8 @@ namespace RvtIO.Parsing;
 /// the segments start at stream offsets 64,896 + k * 65,249. Each one begins with a zero byte
 /// followed by a byte whose low nibble is zero, like the removable segments of partition pages
 /// (<see cref="ChunkDecompressor"/>). A short stream has no segment and is decoded unchanged.
-/// The result is accepted only through <see cref="GZipStream"/>, which rejects a CRC-32 or
-/// length mismatch, so a wrong page rule yields no data rather than wrong data.
+/// The result is accepted only when the CRC-32 and length of the gzip trailer that follows the
+/// deflate data match, so a wrong page rule yields no data rather than wrong data.
 /// </summary>
 internal static class PagedGzipStream
 {
@@ -56,35 +57,59 @@ internal static class PagedGzipStream
         if (body == null) return null;
         int start = IsGzipHeader(body, 0) ? 0 : IsGzipHeader(body, PrefixLength) ? PrefixLength : -1;
         if (start < 0) return null;
+        return Inflate(body, start);
+    }
+
+    /// <summary>Inflates one gzip member and requires its CRC-32 and length trailer right after the deflate data.
+    /// GZipStream cannot be used: it does not fail on a member cut before the trailer.</summary>
+    private static byte[]? Inflate(byte[] body, int start)
+    {
+        int deflateStart = HeaderEnd(body, start);
+        if (deflateStart < 0) return null;
+        var inflater = new Inflater(noHeader: true);
+        inflater.SetInput(body, deflateStart, body.Length - deflateStart);
+        using var output = new MemoryStream();
+        var buffer = new byte[81_920];
         try
         {
-            using var output = new MemoryStream();
-            using (var gzip = new GZipStream(
-                new MemoryStream(body, start, body.Length - start), CompressionMode.Decompress))
-                gzip.CopyTo(output);
-            byte[] decoded = output.ToArray();
-            return HasTrailer(body, start + 10, decoded) ? decoded : null;
+            while (!inflater.IsFinished)
+            {
+                int count = inflater.Inflate(buffer, 0, buffer.Length);
+                if (count == 0 && (inflater.IsNeedingInput || inflater.IsNeedingDictionary)) return null;
+                output.Write(buffer, 0, count);
+            }
         }
-        catch (InvalidDataException)
+        catch (SharpZipBaseException)
         {
             return null;
         }
-    }
-
-    /// <summary>GZipStream does not fail on a member cut before its trailer, so the CRC-32 and length of
-    /// the decoded bytes must be present in the stream after the header.</summary>
-    private static bool HasTrailer(byte[] body, int from, byte[] decoded)
-    {
+        int trailer = deflateStart + (int)inflater.TotalIn;
+        if (trailer + 8 > body.Length) return null;
+        byte[] decoded = output.ToArray();
         var crc = new Crc32();
         crc.Update(decoded);
-        uint expectedCrc = (uint)crc.Value, expectedLength = (uint)decoded.Length;
-        for (int i = from; i + 8 <= body.Length; i++)
+        return BinaryPrimitives.ReadUInt32LittleEndian(body.AsSpan(trailer)) == (uint)crc.Value
+            && BinaryPrimitives.ReadUInt32LittleEndian(body.AsSpan(trailer + 4)) == (uint)decoded.Length
+            ? decoded : null;
+    }
+
+    /// <summary>Offset of the deflate data after the gzip header (RFC 1952), or -1 when the header is cut.</summary>
+    private static int HeaderEnd(byte[] data, int start)
+    {
+        int flags = data[start + 3], at = start + 10;
+        if ((flags & 4) != 0)
         {
-            if (BinaryPrimitives.ReadUInt32LittleEndian(body.AsSpan(i)) == expectedCrc
-                && BinaryPrimitives.ReadUInt32LittleEndian(body.AsSpan(i + 4)) == expectedLength)
-                return true;
+            if (at + 2 > data.Length) return -1;
+            at += 2 + BinaryPrimitives.ReadUInt16LittleEndian(data.AsSpan(at));
         }
-        return false;
+        foreach (int bit in new[] { 8, 16 })
+        {
+            if ((flags & bit) == 0) continue;
+            while (at < data.Length && data[at] != 0) at++;
+            at++;
+        }
+        if ((flags & 2) != 0) at += 2;
+        return at <= data.Length ? at : -1;
     }
 
     private static bool IsGzipHeader(byte[] data, int offset) =>

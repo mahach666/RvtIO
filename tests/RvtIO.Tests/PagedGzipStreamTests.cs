@@ -65,4 +65,17 @@ public class PagedGzipStreamTests
         Assert.Null(PagedGzipStream.Decompress(member[..^8]));
         Assert.NotNull(PagedGzipStream.Decompress(member));
     }
+
+    [Fact]
+    public void MemberWithAnExtraHeaderField_IsDecodedAndWhenCutIsRejected()
+    {
+        byte[] payload = Payload(200_000);
+        byte[] member = Member(payload);
+        byte[] extra = [1, 2, 3, 4, 5, 6, 7, 8];
+        byte[] withExtra = [.. member[..3], (byte)(member[3] | 4), .. member[4..10], 8, 0, .. extra, .. member[10..]];
+        byte[] raw = StreamWithSegment(withExtra, tail: 0);
+        byte[] cut = raw[..(PagedGzipStream.PageDataLength + PagedGzipStream.PageStride + 1)];
+        Assert.Null(PagedGzipStream.Decompress(cut));
+        Assert.Equal(payload, PagedGzipStream.Decompress(raw));
+    }
 }
