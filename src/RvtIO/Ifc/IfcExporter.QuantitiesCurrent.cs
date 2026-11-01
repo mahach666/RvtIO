@@ -128,14 +128,18 @@ public partial class IfcExporter
     private static bool TryParseStepReal(string token, out double value) =>
         double.TryParse(token, NumberStyles.Float, CultureInfo.InvariantCulture, out value);
 
-    private static bool IsCuttingExtrusionCurrent(StepWriter w, Dictionary<int, int> indexById, string token, IReadOnlyList<double> cuttingVolumes) =>
-        TryEntityId(token, out int id) && indexById.TryGetValue(id, out int index)
-        && ReadExtrusionItemCurrent(w, indexById, index, lastOfSeveral: false) is { } extrusion
-        && cuttingVolumes.Any(volume => Math.Abs(extrusion.Area * extrusion.Depth - volume) <= 1e-3 * volume);
+    /// <summary>True when the body item is the solid of a cutting node, by the node the item was written from (not by its volume).</summary>
+    private static bool IsCuttingItemCurrent(string token, Func<int, bool> isCuttingItem) =>
+        TryEntityId(token, out int id) && isCuttingItem(id);
+
+    /// <summary>True when the item was written from a closed node of its geometry whose faces point into it: the exporter takes no solid from it.</summary>
+    private bool IsCuttingNodeItemCurrent(int itemId) =>
+        _bodyItemOrigins.TryGetValue(itemId, out var origin)
+        && origin.Geometry.NodeMeasures?.Any(measure => measure.Node == origin.Node && measure.Volume < 0) == true;
 
     /// <summary>The extrusion an item of a Body representation is, a mapped item through its representation map; null for any other item.</summary>
     private static ProfileExtrusion? ReadExtrusionItemCurrent(StepWriter w, Dictionary<int, int> indexById, int itemIndex, bool lastOfSeveral,
-        IReadOnlyList<double>? cuttingVolumes = null)
+        Func<int, bool>? isCuttingItem = null)
     {
         var item = w.EntityAt(itemIndex);
         if (item.Type == "IFCMAPPEDITEM")
@@ -156,8 +160,8 @@ public partial class IfcExporter
                         if (repArgs.Length >= 4 && repArgs[3].Length >= 3)
                         {
                             var repItems = SplitStepArguments(repArgs[3][1..^1]);
-                            if (cuttingVolumes is { Count: > 0 })
-                                repItems = repItems.Where(token => !IsCuttingExtrusionCurrent(w, indexById, token, cuttingVolumes)).ToArray();
+                            if (isCuttingItem != null)
+                                repItems = repItems.Where(token => !IsCuttingItemCurrent(token, isCuttingItem)).ToArray();
                             if ((repItems.Length == 1 || lastOfSeveral && repItems.Length > 1) && TryEntityId(repItems[^1], out int innerItemId)
                                 && indexById.TryGetValue(innerItemId, out int innerItemIndex))
                             {
@@ -196,10 +200,10 @@ public partial class IfcExporter
     /// <summary>The extrusion of the Body of a product, or null when the body is anything else (a Brep, several items) or its profile is not one the
     /// exporter writes. The exporter keeps one extrusion data object per product and each body it exports overwrites it, so a
     /// product written as several extrusions has the data of the last one (<paramref name="lastOfSeveral"/>); otherwise only a lone item counts.
-    /// An extrusion whose volume is one of <paramref name="cuttingVolumes"/> (m3) is the solid of a cutting node: the exporter exports no body for it, so it
+    /// An item for which <paramref name="isCuttingItem"/> (by entity id) holds is the solid of a cutting node: the exporter exports no body for it, so it
     /// is not an item of the body here.</summary>
     internal static ProfileExtrusion? ReadBodyExtrusionCurrent(StepWriter w, Dictionary<int, int> indexById, string representationArgument, bool lastOfSeveral = false,
-        IReadOnlyList<double>? cuttingVolumes = null)
+        Func<int, bool>? isCuttingItem = null)
     {
         if (!TryEntityId(representationArgument, out int shapeId) || !indexById.TryGetValue(shapeId, out int shapeIndex))
             return null;
@@ -218,12 +222,12 @@ public partial class IfcExporter
                 || representationArguments[1] != "'Body'" || representationArguments[3].Length < 3)
                 continue;
             var items = SplitStepArguments(representationArguments[3][1..^1]);
-            if (cuttingVolumes is { Count: > 0 })
-                items = items.Where(token => !IsCuttingExtrusionCurrent(w, indexById, token, cuttingVolumes)).ToArray();
+            if (isCuttingItem != null)
+                items = items.Where(token => !IsCuttingItemCurrent(token, isCuttingItem)).ToArray();
             if (items.Length == 0 || items.Length != 1 && !lastOfSeveral
                 || !TryEntityId(items[^1], out int itemId) || !indexById.TryGetValue(itemId, out int itemIndex))
                 return null;
-            return ReadExtrusionItemCurrent(w, indexById, itemIndex, lastOfSeveral, cuttingVolumes);
+            return ReadExtrusionItemCurrent(w, indexById, itemIndex, lastOfSeveral, isCuttingItem);
         }
         return null;
     }
@@ -714,7 +718,7 @@ public partial class IfcExporter
         if (element == null) return none;
         ProfileExtrusion? body = type is "IFCMEMBER" or "IFCCOLUMN" or "IFCBEAM" or "IFCSLAB"
             ? ReadBodyExtrusionCurrent(context.W, context.IndexById, arguments[6], lastOfSeveral: type == "IFCCOLUMN",
-                cuttingVolumes: CuttingNodeVolumesCurrent(element.Geometry)) : null;
+                isCuttingItem: IsCuttingNodeItemCurrent) : null;
         return type switch
         {
             "IFCDOOR" or "IFCWINDOW" => DoorWindowQuantitiesCurrent(context, element),
@@ -792,10 +796,6 @@ public partial class IfcExporter
         if (taken.Count == 0) return null;
         return (taken.Sum(measure => measure.Volume) * CubicFeetToCubicMetres, taken.Sum(measure => measure.Area) * SquareFeetToSquareMetres);
     }
-
-    /// <summary>The volumes (m3) of the cutting nodes of a geometry: closed nodes whose faces point into them, of which the exporter takes no solid.</summary>
-    internal static IReadOnlyList<double> CuttingNodeVolumesCurrent(GeometryData? geometry) =>
-        geometry?.NodeMeasures?.Where(measure => measure.Volume < 0).Select(measure => -measure.Volume * CubicFeetToCubicMetres).ToList() ?? [];
 
     private static ShellPrism? SoleClosedPrismCurrent(IReadOnlyList<ShellInfo> shells, bool verticalOnly = false) =>
         shells.Count == 1 && shells[0].Closed ? FindPrismCurrent(shells[0], verticalOnly) : null;
@@ -1048,22 +1048,25 @@ public partial class IfcExporter
         // the solid come first; the sketch value stands in when the solid has none. The area of the extrusion data comes before it.
         double surfaceArea = TopSurfaceAreaCurrent(shells) * SquareFeetToSquareMetres;
         double? topArea = surfaceArea > 1e-9 ? surfaceArea : ComputedHostAreaCurrent(element) ?? profileArea;
-        double? pileVolume = null;
+        // A foundation without a vertical extrusion (a pile) takes the area of its cap face, and its volume from the node that owns the cap:
+        // the surface integrals of that node. Without them only closed shells give a volume; an open shell has none.
+        double? netVolume = totals?.Volume;
         if (element.CategoryId == -2001300 && prism == null)
         {
             var cap = element.Geometry?.Faces?.FirstOrDefault(f => f.QuadratureArea != null);
             if (cap?.QuadratureArea is { } capArea && capArea > 1e-9)
             {
-                double pileTopArea = capArea * SquareFeetToSquareMetres;
-                topArea = pileTopArea;
-                pileVolume = pileTopArea * 6.0027628;
+                topArea = capArea * SquareFeetToSquareMetres;
+                var capNode = element.Geometry!.NodeMeasures?.FirstOrDefault(measure => measure.Node == cap.GeometryNode && measure.Volume > 0);
+                netVolume = capNode != null ? capNode.Volume * CubicFeetToCubicMetres
+                    : shells.All(shell => shell.Closed) ? totals?.Volume : null;
             }
         }
         AddIfPositive(result, QuantityKind.Area, "GrossArea", profileArea ?? topArea);
         AddIfPositive(result, QuantityKind.Area, "NetArea", topArea);
         if (prism != null)
             AddIfPositive(result, QuantityKind.Volume, "GrossVolume", profileArea * prism.Value.Depth * FeetToMetres);
-        AddIfPositive(result, QuantityKind.Volume, "NetVolume", pileVolume ?? totals?.Volume);
+        AddIfPositive(result, QuantityKind.Volume, "NetVolume", netVolume);
         // The parameter called "Perimeter" (HOST_PERIMETER_COMPUTED) of the floor comes before the profile; its value is the
         // length of every boundary loop of the floor, the loops of its holes included (the parser's parameter is the outer loop).
         AddIfPositive(result, QuantityKind.Length, "Perimeter",

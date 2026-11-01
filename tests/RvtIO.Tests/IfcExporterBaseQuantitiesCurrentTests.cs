@@ -272,8 +272,8 @@ public class IfcExporterBaseQuantitiesCurrentTests
         new Dictionary<int, (int, int, string)>();
 
     private static int Apply(StepWriter w, int owner, Dictionary<int, Element>? elements = null, Dictionary<int, int>? elementByEntity = null,
-        Dictionary<int, double>? storeyHeights = null) =>
-        new IfcExporter().ApplyCurrentBaseQuantities(w, elements ?? new(), elementByEntity ?? new(), NoProducts, owner, storeyHeights);
+        Dictionary<int, double>? storeyHeights = null, IfcExporter? exporter = null) =>
+        (exporter ?? new IfcExporter()).ApplyCurrentBaseQuantities(w, elements ?? new(), elementByEntity ?? new(), NoProducts, owner, storeyHeights);
 
     private static List<string> Args(StepWriter w, string type) =>
         Enumerable.Range(0, w.EntityCount).Select(w.EntityAt).Where(e => e.Type == type).Select(e => e.Args).ToList();
@@ -1121,7 +1121,7 @@ public class IfcExporterBaseQuantitiesCurrentTests
     }
 
     [Fact]
-    public void Pass_FoundationPile_UsesCapReferenceAreaAndCylinderVolume()
+    public void Pass_FoundationPile_UsesCapQuadratureAreaAndTheVolumeOfTheCapNode()
     {
         var (w, owner, placement) = NewWriter();
         int slab = AddProduct(w, "IFCSLAB", "1bOeIks4fCNAuMrZZw4irf", owner, placement);
@@ -1134,18 +1134,83 @@ public class IfcExporterBaseQuantitiesCurrentTests
             {
                 Faces =
                 [
-                    new GeoFace { QuadratureArea = capArea, PlaneSurface = true, OuterVertices = [[0, 0, 0]] }
-                ]
+                    new GeoFace { QuadratureArea = capArea, PlaneSurface = true, OuterVertices = [[0, 0, 0]], GeometryNode = 7 }
+                ],
+                NodeMeasures = [new RvtIO.Parsing.MeshNodeMeasure(7, 62.41021102598124, 14.981675720484212)]
             }
         };
 
         Apply(w, owner, new() { [512279] = pile }, new() { [slab] = 512279 });
 
         double areaM2 = capArea * SquareFeet;
-        double volM3 = areaM2 * 6.0027628;
+        double volM3 = 14.981675720484212 * CubicFeet;
         AssertQuantities(Quantities(w, "IFCQUANTITYAREA"), ("GrossArea", areaM2), ("NetArea", areaM2));
         AssertQuantities(Quantities(w, "IFCQUANTITYVOLUME"), ("NetVolume", volM3));
         Assert.Empty(Quantities(w, "IFCQUANTITYLENGTH"));
+    }
+
+    [Fact]
+    public void Pass_FoundationPile_WithoutAMeasuredNodeOrAClosedShellHasNoVolume()
+    {
+        var (w, owner, placement) = NewWriter();
+        int slab = AddProduct(w, "IFCSLAB", "1bOeIks4fCNAuMrZZw4irf", owner, placement);
+        var pile = new Element
+        {
+            Id = 512279,
+            CategoryId = -2001300,
+            Geometry = new GeometryData { Faces = [new GeoFace { QuadratureArea = 0.76, PlaneSurface = true, OuterVertices = [[0, 0, 0]] }] }
+        };
+
+        Apply(w, owner, new() { [512279] = pile }, new() { [slab] = 512279 });
+
+        AssertQuantities(Quantities(w, "IFCQUANTITYAREA"), ("GrossArea", 0.76 * SquareFeet), ("NetArea", 0.76 * SquareFeet));
+        Assert.Empty(Quantities(w, "IFCQUANTITYVOLUME"));
+    }
+
+    /// <summary>A closed box of a x b x c whose top is shifted by <paramref name="shift"/> along X: a sloped solid, no vertical extrusion.</summary>
+    private static GeometryData SlopedBox(double a, double b, double c, double shift) => new()
+    {
+        Faces =
+        [
+            Face([0, 0, 0], [0, b, 0], [a, b, 0], [a, 0, 0]),
+            Face([shift, 0, c], [a + shift, 0, c], [a + shift, b, c], [shift, b, c]),
+            Face([0, 0, 0], [a, 0, 0], [a + shift, 0, c], [shift, 0, c]),
+            Face([0, b, 0], [shift, b, c], [a + shift, b, c], [a, b, 0]),
+            Face([0, 0, 0], [shift, 0, c], [shift, b, c], [0, b, 0]),
+            Face([a, 0, 0], [a, b, 0], [a + shift, b, c], [a + shift, 0, c]),
+        ],
+        BrepSolids = [new GeoBrepSolid { IsClosed = true, FaceIndices = [0, 1, 2, 3, 4, 5] }],
+    };
+
+    [Fact]
+    public void Pass_SlopedFoundation_NetVolumeIsTheVolumeOfItsSolid()
+    {
+        var (w, owner, placement) = NewWriter();
+        int slab = AddProduct(w, "IFCSLAB", "2bOeIks4fCNAuMrZZw4irf", owner, placement);
+        var geometry = SlopedBox(2, 1, 0.5, 3);
+        geometry.Faces[0].QuadratureArea = 2;
+        var foundation = new Element { Id = 41, CategoryId = -2001300, Geometry = geometry };
+
+        Apply(w, owner, new() { [41] = foundation }, new() { [slab] = 41 });
+
+        // the volume of the box (1 ft3), not the area of its first face times a length
+        AssertQuantities(Quantities(w, "IFCQUANTITYVOLUME"), ("NetVolume", 1 * CubicFeet));
+    }
+
+    [Fact]
+    public void Pass_SlopedFoundation_NetVolumeIsTheMeasureOfTheNodeOfTheCapFace()
+    {
+        var (w, owner, placement) = NewWriter();
+        int slab = AddProduct(w, "IFCSLAB", "3bOeIks4fCNAuMrZZw4irf", owner, placement);
+        var geometry = SlopedBox(2, 1, 0.5, 3);
+        foreach (var face in geometry.Faces) face.GeometryNode = 5;
+        geometry.Faces[0].QuadratureArea = 2;
+        geometry.NodeMeasures = [new RvtIO.Parsing.MeshNodeMeasure(5, 9, 1.25)];
+        var foundation = new Element { Id = 42, CategoryId = -2001300, Geometry = geometry };
+
+        Apply(w, owner, new() { [42] = foundation }, new() { [slab] = 42 });
+
+        AssertQuantities(Quantities(w, "IFCQUANTITYVOLUME"), ("NetVolume", 1.25 * CubicFeet));
     }
 
     [Fact]
@@ -1731,15 +1796,6 @@ public class IfcExporterBaseQuantitiesCurrentTests
     }
 
     [Fact]
-    public void CuttingNodeVolumes_AreThePositiveVolumesOfTheNegativeMeasures()
-    {
-        var volumes = IfcExporter.CuttingNodeVolumesCurrent(BoxesInNodes(3, 4));
-
-        Assert.Equal(9 * CubicFeet, Assert.Single(volumes), 12);
-        Assert.Empty(IfcExporter.CuttingNodeVolumesCurrent(null));
-    }
-
-    [Fact]
     public void Shells_OfACuttingNodeAreNotMeasuredFromTheSource()
     {
         var meshNode = new RvtIO.Parsing.GeometryNode(5, 0,
@@ -1773,11 +1829,30 @@ public class IfcExporterBaseQuantitiesCurrentTests
         // the last extrusion (0.5 x 0.25 x 4.0 = 0.5 m3) is the body of a node whose faces point into it
         geometry.NodeMeasures = [new RvtIO.Parsing.MeshNodeMeasure(2, 10, -0.5 / CubicFeet)];
         var element = new Element { Id = 22, CategoryId = -2001330, Geometry = geometry };
+        var exporter = new IfcExporter();
+        int lastSolid = Enumerable.Range(0, w.EntityCount).Select(w.EntityAt).Last(e => e.Type == "IFCEXTRUDEDAREASOLID").Id;
+        exporter._bodyItemOrigins[lastSolid] = (geometry, 2);
 
-        Apply(w, owner, new() { [22] = element }, new() { [column] = 22 });
+        Apply(w, owner, new() { [22] = element }, new() { [column] = 22 }, exporter: exporter);
 
         Assert.Equal(1.5, Quantities(w, "IFCQUANTITYLENGTH").Single(q => q.Name == "Length").Value, 9);
         Assert.Equal(0.5 * 0.25, Quantities(w, "IFCQUANTITYAREA").Single(q => q.Name == "CrossSectionArea").Value, 9);
+    }
+
+    [Fact]
+    public void Pass_Column_KeepsAnExtrusionThatOnlyHasTheVolumeOfACuttingNode()
+    {
+        var (w, owner, placement) = NewWriter();
+        int shape = AddTwoExtrusionBody(w, 0.5, 0.25, 1.5, 4.0);
+        int column = AddProduct(w, "IFCCOLUMN", "GZGD7y6S5209$mGLi_sPlj", owner, placement, shape);
+        var geometry = Box(1, 2, 5);
+        // a cutting node of 0.5 m3 exists, like the last extrusion (0.5 x 0.25 x 4.0), but no body item was written from it
+        geometry.NodeMeasures = [new RvtIO.Parsing.MeshNodeMeasure(2, 10, -0.5 / CubicFeet)];
+        var element = new Element { Id = 23, CategoryId = -2001330, Geometry = geometry };
+
+        Apply(w, owner, new() { [23] = element }, new() { [column] = 23 });
+
+        Assert.Equal(4.0, Quantities(w, "IFCQUANTITYLENGTH").Single(q => q.Name == "Length").Value, 9);
     }
 
     private static List<FaceArea.Coedge> UnitSquare() => Enumerable.Range(0, 4).Select(i =>

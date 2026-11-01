@@ -28,8 +28,8 @@ public partial class IfcExporter
         "IFCFACETEDBREP", "IFCEXTRUDEDAREASOLID", "IFCFACEBASEDSURFACEMODEL", "IFCSHELLBASEDSURFACEMODEL"
     ];
 
-    /// <summary>The faceted breps written from the faces of a Geometry node: brep entity to its geometry and node.</summary>
-    private readonly Dictionary<int, (GeometryData Geometry, int Node)> _bodyItemOrigins = new();
+    /// <summary>The body items (faceted breps and extrusions) written from the faces of a Geometry node: item entity to its geometry and node.</summary>
+    internal readonly Dictionary<int, (GeometryData Geometry, int Node)> _bodyItemOrigins = new();
 
     /// <summary>The boundary geometry each IfcSpace body was written from, by space entity.</summary>
     private readonly Dictionary<int, GeometryData> _spaceBodyGeometry = new();
