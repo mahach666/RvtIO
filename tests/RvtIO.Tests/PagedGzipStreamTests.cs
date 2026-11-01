@@ -78,4 +78,30 @@ public class PagedGzipStreamTests
         Assert.Null(PagedGzipStream.Decompress(cut));
         Assert.Equal(payload, PagedGzipStream.Decompress(raw));
     }
+
+    private static byte[] WithHeaderFlags(byte[] member, byte flags, byte[] afterHeader) =>
+        [.. member[..3], flags, .. member[4..10], .. afterHeader, .. member[10..]];
+
+    [Fact]
+    public void HeaderWithAWrongHeaderCrc_IsRejected()
+    {
+        byte[] member = Member(Payload(1_000));
+        Assert.Null(PagedGzipStream.Decompress(WithHeaderFlags(member, 2, [0, 0])));
+    }
+
+    [Fact]
+    public void HeaderWithTheRightHeaderCrc_IsDecoded()
+    {
+        byte[] payload = Payload(1_000);
+        byte[] member = Member(payload);
+        var crc = new ICSharpCode.SharpZipLib.Checksum.Crc32();
+        crc.Update(member[..3].Concat(new byte[] { 2 }).Concat(member[4..10]).ToArray());
+        Assert.Equal(payload, PagedGzipStream.Decompress(WithHeaderFlags(member, 2, BitConverter.GetBytes((ushort)crc.Value))));
+    }
+
+    [Fact]
+    public void HeaderWithAReservedFlag_IsRejected()
+    {
+        Assert.Null(PagedGzipStream.Decompress(WithHeaderFlags(Member(Payload(1_000)), 0x20, [])));
+    }
 }

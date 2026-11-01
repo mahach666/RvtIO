@@ -93,10 +93,12 @@ internal static class PagedGzipStream
             ? decoded : null;
     }
 
-    /// <summary>Offset of the deflate data after the gzip header (RFC 1952), or -1 when the header is cut.</summary>
+    /// <summary>Offset of the deflate data after the gzip header (RFC 1952), or -1 when the header is cut,
+    /// sets a reserved flag or carries a header CRC-16 that does not match.</summary>
     private static int HeaderEnd(byte[] data, int start)
     {
         int flags = data[start + 3], at = start + 10;
+        if ((flags & 0xE0) != 0) return -1;
         if ((flags & 4) != 0)
         {
             if (at + 2 > data.Length) return -1;
@@ -108,7 +110,14 @@ internal static class PagedGzipStream
             while (at < data.Length && data[at] != 0) at++;
             at++;
         }
-        if ((flags & 2) != 0) at += 2;
+        if ((flags & 2) != 0)
+        {
+            if (at + 2 > data.Length) return -1;
+            var crc = new Crc32();
+            crc.Update(data.AsSpan(start, at - start).ToArray());
+            if (BinaryPrimitives.ReadUInt16LittleEndian(data.AsSpan(at)) != (ushort)crc.Value) return -1;
+            at += 2;
+        }
         return at <= data.Length ? at : -1;
     }
 
