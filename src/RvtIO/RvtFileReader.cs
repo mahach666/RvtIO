@@ -736,9 +736,9 @@ public partial class RvtFileReader
         rvtInfo.SerializedDocumentGuid = state.DocumentDetachGuid;
         rvtInfo.SerializedFormatSettings = Compact.CompactFormatSettings.Create(
             state.OwnDocumentUnitOptions, state.OwnDocumentUnitConversions, state.OwnDocumentSchemas);
-        string? lengthUnitIssue = null;
+        var lengthOptions = state.OwnDocumentLengthUnitOptions(out string? lengthUnitIssue);
         rvtInfo.SerializedLengthUnit = state.WideLengthUnit
-            ?? Ifc.IfcLengthUnitChoice.StoredLengthUnit(state.OwnDocumentUnitOptions?.Value, out lengthUnitIssue);
+            ?? (lengthOptions == null ? null : Ifc.IfcLengthUnitChoice.StoredLengthUnit(lengthOptions.Value, out lengthUnitIssue));
         if (rvtInfo.SerializedLengthUnit == null)
             rvtInfo.SerializedLengthUnitIssue = state.WideLengthUnitIssue ?? lengthUnitIssue;
         // BasicFileInfo "Worksharing: Not enabled | Local | Central"; any other text is not decided.

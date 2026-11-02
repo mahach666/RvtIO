@@ -1,4 +1,5 @@
 using RvtIO.Ifc;
+using RvtIO.Internal;
 using RvtIO.Model;
 using RvtIO.Parsing;
 using Xunit;
@@ -75,6 +76,49 @@ public class ProjectLengthUnitTests
         Assert.NotNull(issue);
         Assert.Null(WideDocument.LegacyLengthUnit([("AUnits", []), ("ForgeTypeId", []), ("FormatOptions", [])], out issue));
         Assert.NotNull(issue);
+    }
+
+    private const string FeetInches = "autodesk.unit.unit:feetFractionalInches-1.0.0";
+
+    private static TfBlockDeserializer.UnitsElemOptions Elem(uint owner, int family, int access) =>
+        new(owner, family, access, 0, 0, Options((LengthSpec, FeetInches, 0)));
+
+    [Theory]
+    [InlineData(-1)]
+    [InlineData(17)]
+    public void SelectedUnitsElem_ServesProjectAndFamilyDocuments(int family)
+    {
+        var state = new ParsingState { OwnDocumentUnitsElemId = 542 };
+        state.OwnUnitOptions[542] = (1, Elem(542, family, 1));
+        var options = state.OwnDocumentLengthUnitOptions(out string? issue);
+        Assert.Null(issue);
+        Assert.Equal(FeetInches, IfcLengthUnitChoice.StoredLengthUnit(options!.Value));
+    }
+
+    [Theory]
+    [InlineData(0, 542u, 1, "no decoded")]
+    [InlineData(2, 542u, 1, "2 blocks")]
+    [InlineData(1, 543u, 1, "malformed")]
+    [InlineData(1, 542u, 0, "not document accessible")]
+    public void SelectedUnitsElem_RejectsMissingDuplicateForeignAndInaccessible(int count, uint owner, int access, string reason)
+    {
+        var state = new ParsingState { OwnDocumentUnitsElemId = 542 };
+        state.OwnUnitOptions[542] = (count, Elem(owner, 17, access));
+        Assert.Null(state.OwnDocumentLengthUnitOptions(out string? issue));
+        Assert.Contains(reason, issue);
+        state.OwnUnitOptions[542] = (1, null);
+        Assert.Null(state.OwnDocumentLengthUnitOptions(out issue));
+        Assert.Contains("malformed", issue);
+        Assert.Null(new ParsingState().OwnDocumentLengthUnitOptions(out issue));
+        Assert.Contains("names no units element", issue);
+    }
+
+    [SkippableFact]
+    public void FamilyFile_DeclaresTheStoredFoot()
+    {
+        var info = new RvtFileReader().Read(TestFiles.Find("One Way Sign in Route Analysis.rfa"));
+        Assert.Equal(FeetInches, info.SerializedLengthUnit);
+        Assert.Null(info.SerializedLengthUnitIssue);
     }
 
     private static string Export(string? lengthUnit, string? issue, out string diagnostics)

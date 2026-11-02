@@ -64,6 +64,21 @@ internal class ParsingState
             && validation.Options is { } options && options.OwnerId == owner
             && options.FamilyId == -1 && options.DocumentAccess == 1 ? options : null;
 
+    /// <summary>The units element selected by Global/Latest for the length unit: as <see cref="OwnDocumentUnitOptions"/> but also for a
+    /// family document, whose selected units element names its family (a project's is -1). The owner, uniqueness and
+    /// document access checks are the same; <paramref name="issue"/> says which one failed.</summary>
+    public TfBlockDeserializer.UnitsElemOptions? OwnDocumentLengthUnitOptions(out string? issue)
+    {
+        issue = null;
+        if (OwnDocumentUnitsElemId is not uint owner) issue = "Global/Latest names no units element";
+        else if (!OwnUnitOptions.TryGetValue(owner, out var proof) || proof.BlockCount == 0) issue = $"no decoded UnitsElem block for id {owner}";
+        else if (proof.BlockCount != 1) issue = $"UnitsElem {owner} was found in {proof.BlockCount} blocks";
+        else if (proof.Options is not { } options || options.OwnerId != owner) issue = $"the UnitsElem block {owner} is malformed";
+        else if (options.DocumentAccess != 1) issue = $"the UnitsElem {owner} is not document accessible";
+        else return options;
+        return null;
+    }
+
     /// <summary>Numeric length/thermal export plan, not emitted IFC units. Computed
     /// so later duplicate roots or rejected display projections revoke acceptance.</summary>
     public Ifc.IfcNumericUnitPlan? OwnDocumentIfcNumericUnitPlan
