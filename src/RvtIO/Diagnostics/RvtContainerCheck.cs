@@ -42,12 +42,16 @@ public static class RvtContainerCheck
         }
     }
 
-    private static void Walk(Storage storage, string prefix, byte[] buffer)
+    // A Revit file nests storages only a few levels deep; a damaged directory can loop back on itself, which would overflow the stack.
+    private const int MaxDepth = 64;
+
+    private static void Walk(Storage storage, string prefix, byte[] buffer, int depth = 0)
     {
+        if (depth > MaxDepth) throw new InvalidDataException($"storage nesting deeper than {MaxDepth} levels at '{prefix}'");
         foreach (var entry in storage.EnumerateEntries())
         {
             string name = prefix + entry.Name;
-            if (entry.Type == EntryType.Storage) { Walk(storage.OpenStorage(entry.Name), name + "/", buffer); continue; }
+            if (entry.Type == EntryType.Storage) { Walk(storage.OpenStorage(entry.Name), name + "/", buffer, depth + 1); continue; }
             if (entry.Type != EntryType.Stream) continue;
             if (entry.Length > Array.MaxLength)
                 throw new RvtLimitException(new ReaderLimitHit(name, "array-length", Array.MaxLength, Raisable: false,
