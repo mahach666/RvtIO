@@ -15,7 +15,7 @@ public static class RvtContainerCheck
         try { info = new FileInfo(path); }
         catch (Exception ex) when (ex is ArgumentException or NotSupportedException or PathTooLongException)
         { throw new RvtInputException("cannot-open", $"'{path}' is not a usable file path.", ex); }
-        if (!info.Exists) throw new RvtInputException("cannot-open", $"'{path}' does not exist.");
+        if (!info.Exists) throw new RvtInputException("cannot-open", $"'{info.Name}' does not exist.");
         if (info.Length == 0) throw new RvtInputException("empty-file", $"'{info.Name}' is empty.");
 
         // An operating system refusal (sharing, permission) is "cannot-open"; what OpenMcdf rejects after this is the format.
@@ -23,7 +23,7 @@ public static class RvtContainerCheck
         FileStream file;
         try { file = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite); }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
-        { throw new RvtInputException("cannot-open", $"'{info.Name}' cannot be opened: {ex.Message}", ex); }
+        { throw new RvtInputException("cannot-open", $"'{info.Name}' cannot be opened ({ex.GetType().Name}); the file may be in use or not readable.", ex); }
         using var _ = file;
         RootStorage root;
         try { root = RootStorage.Open(file, StorageModeFlags.LeaveOpen); }

@@ -112,8 +112,12 @@ public class ExportReportTests
     [Fact]
     public void AMissingFileIsAnInputError()
     {
-        var error = Assert.Throws<RvtInputException>(() => RvtContainerCheck.Verify(Path.Combine(Path.GetTempPath(), "rr-missing-" + Guid.NewGuid() + ".rvt")));
+        string missing = Path.Combine(Path.GetTempPath(), "rr-missing-" + Guid.NewGuid() + ".rvt");
+        var error = Assert.Throws<RvtInputException>(() => RvtContainerCheck.Verify(missing));
         Assert.Equal("cannot-open", error.Kind);
+        // the message goes into the report: the file name, never the directory
+        Assert.DoesNotContain(Path.GetTempPath(), error.Message);
+        Assert.Contains(Path.GetFileName(missing), error.Message);
     }
 
     [Fact]
