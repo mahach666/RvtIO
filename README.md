@@ -55,7 +55,7 @@ rvtio project.rvt project.parameters.ifc --ifc-revit-parameters
 
 A `.ifc` output path selects IFC. Any other output path selects JSON, which is compact by default. If the output path is omitted, the tool writes `output.json`. Diagnostics go to standard error.
 
-Use `--ifc-revit-parameter-groups` for one property set per parameter group. Run `rvtio --help` for all options. Unknown options exit with code 1; options starting with `--dev-` are not a stable interface.
+Use `--ifc-revit-parameter-groups` for one property set per parameter group. Use `--resolve-current-copies` for a file saved in several increments: it keeps only the current copy of an element that more than one partition stream holds; without it every copy is decoded as before. Run `rvtio --help` for all options. Unknown options exit with code 1; options starting with `--dev-` are not a stable interface.
 
 ## Library
 

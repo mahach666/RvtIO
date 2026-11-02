@@ -31,7 +31,7 @@ internal static class WideElementRecords
     /// <summary>Byte width of the element id of this schema (ElemRec.m_id): 4 up to Revit 2023, 8 from Revit 2024; null otherwise.</summary>
     internal static int? IdWidth(FileSchema schema)
         => schema.ByName("ElemRec") is { } rec && FileSchema.SerializedFields(rec).FirstOrDefault(f => f.Name == "m_id") is { } id
-           && schema.FieldSize(id) is 4 or 8 ? schema.FieldSize(id) : null;
+           && schema.FieldSize(id) is (4 or 8) and int width && (SchemaRelease.IdWidth(schema.Release) is not int expected || expected == width) ? width : null;
 
     private static ulong ReadId(byte[] data, int at, int width)
         => width == 8 ? BitConverter.ToUInt64(data, at) : BitConverter.ToUInt32(data, at);

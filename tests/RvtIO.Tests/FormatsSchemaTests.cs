@@ -59,6 +59,21 @@ public class FormatsSchemaTests
             .Build();
     }
 
+    [Theory]
+    [InlineData(779, 2020)]
+    [InlineData(801, 2021)]
+    [InlineData(817, 2022)]
+    [InlineData(931, 2026)]
+    [InlineData(500, null)]
+    public void TheSchemaReleaseComesFromTheClassIdOfTheFramingMarker(int markerId, int? release)
+    {
+        var b = new SchemaBuilder();
+        for (int id = 12; id < markerId; id++) b.Class("Filler" + id, 0, 1);
+        var schema = FormatsSchema.TryParse(b.Class("ContentMarker", 0, 1).Build())!;
+        Assert.Equal(markerId, schema.IdOf("ContentMarker"));
+        Assert.Equal(release, SchemaRelease.FromSchema(schema));
+    }
+
     [Fact]
     public void ParsesTopLevelAndInlineClassesAndBackReferences()
     {
@@ -148,9 +163,9 @@ public class FormatsSchemaTests
         var rows = ElemTableLayout.TryParse(Rows(wideIds, (1, 1, 0, 0, -1), (700, 500, 64, 7, 1), (third, 9, 3, -1, 700)), schema);
         Assert.NotNull(rows);
         Assert.Equal(3, rows.Count);
-        Assert.Equal(new ElemTableLayout.Row(1, 1, 0, 0, -1), rows[0]);
-        Assert.Equal(new ElemTableLayout.Row(700, 500, 64, 7, 1), rows[1]);
-        Assert.Equal(new ElemTableLayout.Row(third, 9, 3, -1, 700), rows[2]);
+        Assert.Equal(new ElemTableLayout.Row(1, 1, 0, 0, -1, 1), rows[0]);
+        Assert.Equal(new ElemTableLayout.Row(700, 500, 64, 7, 1, 65), rows[1]);
+        Assert.Equal(new ElemTableLayout.Row(third, 9, 3, -1, 700, 4), rows[2]);
     }
 
     [Theory]

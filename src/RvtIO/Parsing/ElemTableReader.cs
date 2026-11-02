@@ -55,9 +55,13 @@ internal static class ElemTableReader
 
             if (PagedGzipStream.Decompress(data) is { } exactTable)
             {
-                // Every version but R22: the layout comes from the file's own schema, not from a constant.
-                if (exactTable.Length >= 2 && BitConverter.ToUInt16(exactTable, 0) != ElementExportIds.ElemTableClassId
-                    && FormatsSchema.TryRead(root) is { } schema && ElemTableLayout.TryParse(exactTable, schema) is { } rows)
+                // Every version but R22: the layout comes from the file's own schema, not from a constant. The shipped R22 layout
+                // is used only for a file whose release in force (the older of the saved and the schema release) is 2022 or unknown.
+                var formats = FormatsSchema.TryRead(root);
+                bool shipped = exactTable.Length >= 2 && BitConverter.ToUInt16(exactTable, 0) == ElementExportIds.ElemTableClassId
+                    && SchemaRelease.AllowsShipped(formats?.Release ?? SchemaRelease.Of(root, null), 2022);
+                if (exactTable.Length >= 2 && !shipped
+                    && formats is { } schema && ElemTableLayout.TryParse(exactTable, schema) is { } rows)
                 {
                     foreach (var row in rows)
                     {
@@ -70,7 +74,7 @@ internal static class ElemTableReader
                     exact = result.Count > 0;
                     return result;
                 }
-                if (exactTable.Length >= 2 && BitConverter.ToUInt16(exactTable) != ElementExportIds.ElemTableClassId
+                if (exactTable.Length >= 2 && !shipped
                     && FileSchema.Read(root) is { } wideSchema
                     && WideElementRecords.ParseElemTable(exactTable, wideSchema) is { } wide)
                 {
@@ -82,6 +86,8 @@ internal static class ElemTableReader
                     exact = result.Count > 0;
                     return result;
                 }
+                // The release in force has a layout other than the one the bytes have: no row is guessed.
+                if (formats != null && ElemTableLayout.DisagreesWithRelease(formats)) return result;
                 ParseRows(exactTable, result, out worksets, out creationDates);
                 exact = result.Count > 0;
                 return result;

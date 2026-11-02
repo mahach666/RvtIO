@@ -121,8 +121,16 @@ internal sealed class FileSchema
     }
 
     /// <summary>The schema of the file, or null when Formats/Latest is missing or does not parse.</summary>
-    internal static FileSchema? Read(OpenMcdf.RootStorage root) =>
-        TfSchemaReader.Read(root) is { } document ? new FileSchema(document) : null;
+    internal static FileSchema? Read(OpenMcdf.RootStorage root)
+    {
+        if (TfSchemaReader.Read(root) is not { } document) return null;
+        var schema = new FileSchema(document);
+        schema.Release = SchemaRelease.Of(root, SchemaRelease.FromSchema(schema));
+        return schema;
+    }
+
+    /// <summary>The release whose layouts apply to this file (<see cref="SchemaRelease.Of"/>); null for a schema parsed from bytes alone.</summary>
+    internal int? Release { get; private set; }
 
     /// <summary>Parses a decoded Formats/Latest stream; null on any grammar violation.</summary>
     internal static FileSchema? Parse(byte[] data) =>

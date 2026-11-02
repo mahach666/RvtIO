@@ -8723,6 +8723,9 @@ internal static partial class ElementBuilder
     private static void BuildLocationCurve(Element elem, uint elemId, ParsingState state)
     {
         state.CurveDriverCandidates.TryGetValue(elemId, out var candidates);
+        if ((candidates == null || candidates.Count == 0) && state.StaleCopiesRemoved
+            && state.ExactCurveDrivers.TryGetValue(elemId, out var exactCandidates))
+            candidates = exactCandidates;
         CurveDriverData? ownLine = state.OwnWallLocationLines.GetValueOrDefault(elemId);
         if ((candidates == null || candidates.Count == 0) && ownLine == null)
         {

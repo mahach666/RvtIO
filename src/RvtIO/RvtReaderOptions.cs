@@ -29,6 +29,11 @@ public class RvtReaderOptions
     /// layout, so that the geometry and element readers written for 2022 see them (see <see cref="Parsing.R22Transcoder"/>). Off by default.</summary>
     public bool R22Layout { get; set; }
 
+    /// <summary>When several partition streams hold a copy of the same element, keep the current copy named by the file's document
+    /// increment table and drop the superseded ones before decoding (see <see cref="Parsing.RecordRouting"/>). Off by default: the copies
+    /// are then all decoded as before.</summary>
+    public bool ResolveCurrentCopies { get; set; }
+
     /// <summary>Write diagnostic/progress messages to this TextWriter. Null for silent operation.</summary>
     public TextWriter? DiagnosticOutput { get; set; }
 }

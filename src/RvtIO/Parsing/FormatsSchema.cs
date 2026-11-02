@@ -32,6 +32,9 @@ internal sealed class FormatsSchema
         }
     }
 
+    /// <summary>The release whose layouts apply to this file (<see cref="SchemaRelease.Of"/>); null for a schema parsed from bytes alone.</summary>
+    internal int? Release { get; private set; }
+
     /// <summary>
     /// The id of the class with this exact name, or null (names are unique in every checked file).
     /// </summary>
@@ -43,7 +46,13 @@ internal sealed class FormatsSchema
     /// The schema of the file, or null when Formats/Latest is missing or does not decode exactly.
     /// </summary>
     internal static FormatsSchema? TryRead(OpenMcdf.RootStorage root)
-        => TfSchemaReader.Read(root) is { } document ? new FormatsSchema(document) : null;
+        => TfSchemaReader.Read(root) is { } document ? new FormatsSchema(document).WithRelease(root) : null;
+
+    private FormatsSchema WithRelease(OpenMcdf.RootStorage root)
+    {
+        Release = SchemaRelease.Of(root, SchemaRelease.FromSchema(this));
+        return this;
+    }
 
     /// <summary>Parse a decoded Formats/Latest stream; null unless every byte follows the grammar.</summary>
     internal static FormatsSchema? TryParse(byte[] data)
