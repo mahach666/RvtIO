@@ -45,6 +45,21 @@ internal static class SchemaRelease
     internal static int? Effective(int? saved, int? schema)
         => saved is int s && schema is int c ? Math.Min(s, c) : saved ?? schema;
 
+    /// <summary>The release that decides the layouts of an open file: the older of the saved release and the schema's release
+    /// (<paramref name="schemaRelease"/>), null when neither is known. Every layout and row-size choice reads this one value.</summary>
+    internal static int? Of(OpenMcdf.RootStorage root, int? schemaRelease)
+        => Effective(Saved(BasicFileInfoReader.Read(root).GetValueOrDefault("RevitVersion")), schemaRelease);
+
+    /// <summary>Byte width of the element id in the layout of this release: 4 up to Revit 2023, 8 from Revit 2024; null when the
+    /// release is not known.</summary>
+    internal static int? IdWidth(int? release) => release is int year ? (year >= 2024 ? 8 : 4) : null;
+
+    /// <summary>Byte width of one ElemRec row in the layout of this release: 28 up to Revit 2023, 40 from Revit 2024.</summary>
+    internal static int? RowLength(int? release) => IdWidth(release) is int width ? (width == 8 ? 40 : 28) : null;
+
+    /// <summary>True when the release in force is unknown or is <paramref name="year"/>, so the layout shipped for that one release applies.</summary>
+    internal static bool AllowsShipped(int? release, int year) => release is null || release == year;
+
     /// <summary>One diagnostics line naming both releases and the one that is used.</summary>
     internal static string Describe(int? saved, int? schema)
     {

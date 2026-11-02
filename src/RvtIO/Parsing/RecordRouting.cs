@@ -40,7 +40,7 @@ internal static class RecordRouting
         failure = null;
         if (schema == null) { failure = "no schema"; return null; }
         if (PartitionFraming.TagsOf(schema) is not { } tags) { failure = "schema has no framing marker classes"; return null; }
-        if (ElemTableLayout.IdWidth(schema) is not int width) { failure = "schema has no element id width"; return null; }
+        if (ElemTableLayout.IdWidth(schema) is not int width) { failure = "schema has no element id width of the release in force"; return null; }
         return new Census { Schema = schema, Tags = tags, IdWidth = width };
     }
 

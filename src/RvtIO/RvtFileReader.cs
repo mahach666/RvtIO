@@ -913,8 +913,11 @@ public partial class RvtFileReader
         ReadElemRecs(RootStorage root)
     {
         if (PagedGzipStream.Read(root, "Global", "ElemTable") is not { } bytes) return (null, null, null);
-        if (ElementExportIds.ParseElemTable(bytes, out var owners) is { } histories) return (histories, owners, null);
-        if (FileSchema.Read(root) is { } schema && WideElementRecords.ParseElemTable(bytes, schema) is { } wide)
+        var schema = FileSchema.Read(root);
+        // the layout shipped for Revit 2022 applies to a file whose release in force (SchemaRelease.Of) is 2022 or unknown
+        if (SchemaRelease.AllowsShipped(schema?.Release ?? SchemaRelease.Of(root, null), 2022)
+            && ElementExportIds.ParseElemTable(bytes, out var owners) is { } histories) return (histories, owners, null);
+        if (schema != null && WideElementRecords.ParseElemTable(bytes, schema) is { } wide)
             return (wide.Histories, wide.OwningElementIds, schema);
         return (null, null, null);
     }

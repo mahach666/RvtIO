@@ -210,16 +210,13 @@ public class RecordRoutingTests
         Assert.Null(RecordRouting.Prune(chunks, [5, 5], [(1, 2)]));
     }
 
-    private static string? Sample(string name)
-        => TestFiles.TryFind(name) is { } p && new FileInfo(p).Length > 1_000_000 ? p : null;
-
     /// <summary>TESTFILE.rvt is a Revit 2022 project saved in five increments (partition streams 0, 1, 3, 4, 5). Measured
     /// on the file: the null-key map holds 8050 + 88 + 1 + 90 + 0 element records, 68 element ids occur in more than one
     /// partition, and the 50,851 keyed records of the loaded families never carry a project element id.</summary>
-    [Fact]
+    [SkippableFact]
     public void TheIncrementsOfARealFileRouteEveryRepeatedElementToAPartitionThatHoldsIt()
     {
-        if (Sample("TESTFILE.rvt") is not { } path) return;
+        string path = TestFiles.Find("TESTFILE.rvt");
         using var root = RootStorage.OpenRead(path);
         var schema = FormatsSchema.TryRead(root)!;
         var rows = ElemTableLayout.TryParse(PagedGzipStream.Read(root, "Global", "ElemTable")!, schema)!;

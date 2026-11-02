@@ -17,11 +17,20 @@ internal static class ElemTableLayout
 
     /// <summary>Byte width of one ElemRec row of this schema, or null when the schema does not have the expected shape.</summary>
     internal static int? RowLength(FormatsSchema schema)
-        => schema.Get("ElemRec") is { } rec ? Width(schema, rec, 0) : null;
+        => schema.Get("ElemRec") is { } rec && Width(schema, rec, 0) is int width && Agrees(SchemaRelease.RowLength(schema.Release), width) ? width : null;
 
     /// <summary>Byte width of the element id field (<c>Identifier</c>): 4 or 8, null when it is neither.</summary>
     internal static int? IdWidth(FormatsSchema schema)
-        => schema.Get("Identifier") is { Fields: [{ } field] } ? LeafWidth(field.Type) : null;
+        => schema.Get("Identifier") is { Fields: [{ } field] } && LeafWidth(field.Type) is int width && Agrees(SchemaRelease.IdWidth(schema.Release), width) ? width : null;
+
+    /// <summary>True when the schema declares an element id width that the release in force does not have (a file saved by an older
+    /// release than its schema): the layout of that release is not the layout of the bytes.</summary>
+    internal static bool DisagreesWithRelease(FormatsSchema schema)
+        => schema.Get("Identifier") is { Fields: [{ } field] } && LeafWidth(field.Type) is int width && !Agrees(SchemaRelease.IdWidth(schema.Release), width);
+
+    /// <summary>The widths the schema declares must be those of the release in force (the older of the saved and the schema release);
+    /// a file whose two releases disagree on the layout is not decoded by a layout it does not have.</summary>
+    private static bool Agrees(int? releaseWidth, int declared) => releaseWidth is not int expected || expected == declared;
 
     /// <summary>The rows of a decoded Global/ElemTable stream, or null unless the stream is this schema's ElemTable: the class
     /// id and the m_elemArr element class match, every row fits, and the ids strictly increase.</summary>

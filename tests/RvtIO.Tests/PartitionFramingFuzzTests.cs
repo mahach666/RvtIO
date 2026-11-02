@@ -7,10 +7,10 @@ namespace RvtIO.Tests;
 /// <summary>Truncated and mutated partition streams are rejected with a reason: no exception escapes, no run takes long.</summary>
 public class PartitionFramingFuzzTests
 {
-    [Fact]
+    [SkippableFact]
     public void MutatedAndTruncatedStreamsAreRejectedWithoutAnException()
     {
-        if (TestFiles.TryFind("TESTFILE.rvt") is not { } path) return;
+        string path = TestFiles.Find("TESTFILE.rvt");
         using var root = RootStorage.OpenRead(path);
         var schema = FormatsSchema.TryRead(root)!;
         var storage = root.OpenStorage("Partitions");
