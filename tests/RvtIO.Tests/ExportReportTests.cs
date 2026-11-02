@@ -37,6 +37,14 @@ public class ExportReportTests
     }
 
     [Fact]
+    public void FailedReportDropsSourcePathsFromTheStackTrace()
+    {
+        var report = ExportReport.Failed("a.rvt", 1, "decode-failure", "m", RvtExitCodes.DecodeError, null, false, false,
+            "System.Exception: x\n   at A.B() in /build/work dir/A.cs:line 12\n   at C.D()");
+        Assert.Equal("System.Exception: x\n   at A.B()\n   at C.D()", report.Error!.Detail);
+    }
+
+    [Fact]
     public void FailedReportSerializesTheDocumentedFields()
     {
         var diagnostics = new RvtReadDiagnostics();

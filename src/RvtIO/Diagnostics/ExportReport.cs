@@ -218,6 +218,10 @@ public sealed class ExportReport
         public List<int> Examples { get; set; } = new();
     }
 
+    // A stack trace names the source files of the build machine: keep the frames, drop the paths.
+    internal static string StripSourcePaths(string trace) =>
+        System.Text.RegularExpressions.Regex.Replace(trace, @" in [^\r\n]*?:line \d+", "");
+
     /// <summary>The report of a file that could not be read.</summary>
     public static ExportReport Failed(string file, long bytes, string kind, string message, int exitCode, RvtReadDiagnostics? diagnostics,
         bool raised, bool partialAllowed, string? detail = null)
@@ -225,7 +229,7 @@ public sealed class ExportReport
         var report = new ExportReport { Status = "failed", ExitCode = exitCode };
         report.Input.File = file;
         report.Input.Bytes = bytes;
-        report.Error = new ReportError { Kind = kind, Message = message, Detail = detail };
+        report.Error = new ReportError { Kind = kind, Message = message, Detail = detail == null ? null : StripSourcePaths(detail) };
         report.Limits.Raised = raised;
         report.Limits.PartialAllowed = partialAllowed;
         if (diagnostics != null) report.Fill(diagnostics);
