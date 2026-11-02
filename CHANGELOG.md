@@ -13,6 +13,7 @@ API between minor releases.
 - Decodes the document increment table of a file saved in several increments with a bound on the work it may do; a malformed table is rejected instead of guessed.
 - Adds the opt-in `ResolveCurrentCopies` reader option and `--resolve-current-copies` command line option, which keep only the current copy of an element that several partition streams hold. It is off by default and the default output does not change.
 - Fixes the partition framing check so that a damaged or truncated partition stream is rejected instead of read past its end.
+- Reads the project length unit in every file layout (including the Revit 2020 display unit layout and family documents) for the IFC length unit, and reports the reason through diagnostics when it falls back to millimetres.
 
 ## [0.1.0] - first public preview
 

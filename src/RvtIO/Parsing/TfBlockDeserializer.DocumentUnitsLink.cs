@@ -117,11 +117,11 @@ internal static partial class TfBlockDeserializer
         var spans = new List<DocumentGraphField>();
         int fieldBudget = 1_000_000;
         string currentField = "before deferred FIFO";
-        uint Count()
+        uint Count(long max = 100_000)
         {
             uint value = ReadU32(cursor);
             if (value == uint.MaxValue) return 0;
-            if (value > 100_000) throw Fail;
+            if (value > max) throw Fail;
             return value;
         }
         void String()
@@ -195,6 +195,12 @@ internal static partial class TfBlockDeserializer
             {
                 int hi = field.Mods >> 4;
                 if (hi == 6) String();
+                else if (hi == 5 && field.Type is 2 or 3 && field.Ref == null)
+                {
+                    // a byte array (a stored steel model blob) is bounded by the data left, not by the collection limit
+                    uint count = Count(cursor.End - cursor.Pos);
+                    if (!cursor.Take((int)count)) throw Fail;
+                }
                 else if (hi is 1 or 5)
                 {
                     uint count = hi == 5 ? Count() : field.Cnt is int n && n >= 0 && n <= 100_000 ? (uint)n : throw Fail;

@@ -362,7 +362,9 @@ public partial class IfcExporter
         // The legacy profile writes millimetres whatever the document says; the current profile
         // follows the length unit of the project (IfcLengthUnitChoice).
         _unitFamily = CurrentProfile ? IfcLengthUnitChoice.Family(info.SerializedLengthUnit) : IfcUnitFamily.Millimetre;
-        _diag?.WriteLine($"IFC length unit: stored option {info.SerializedLengthUnit ?? "unreadable"} -> {_unitFamily}");
+        _diag?.WriteLine(info.SerializedLengthUnit != null
+            ? $"IFC length unit: stored option {info.SerializedLengthUnit} -> {_unitFamily}"
+            : $"IFC length unit: stored option unreadable ({info.SerializedLengthUnitIssue ?? "not read"}); using the default {_unitFamily}");
 
         int orgId = w.Add("IFCORGANIZATION", $"$,{S("RvtIO")},$,$,$");
         int appId = w.Add("IFCAPPLICATION", $"{R(orgId)},{S("1.0")},{S("RvtIO IFC Exporter")},{S("RvtIO")}");

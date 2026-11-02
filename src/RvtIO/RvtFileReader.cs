@@ -738,7 +738,11 @@ public partial class RvtFileReader
         rvtInfo.SerializedDocumentGuid = state.DocumentDetachGuid;
         rvtInfo.SerializedFormatSettings = Compact.CompactFormatSettings.Create(
             state.OwnDocumentUnitOptions, state.OwnDocumentUnitConversions, state.OwnDocumentSchemas);
-        rvtInfo.SerializedLengthUnit = state.WideLengthUnit ?? Ifc.IfcLengthUnitChoice.StoredLengthUnit(state.OwnDocumentUnitOptions?.Value);
+        var lengthOptions = state.OwnDocumentLengthUnitOptions(out string? lengthUnitIssue);
+        rvtInfo.SerializedLengthUnit = state.WideLengthUnit
+            ?? (lengthOptions == null ? null : Ifc.IfcLengthUnitChoice.StoredLengthUnit(lengthOptions.Value, out lengthUnitIssue));
+        if (rvtInfo.SerializedLengthUnit == null)
+            rvtInfo.SerializedLengthUnitIssue = state.WideLengthUnitIssue ?? lengthUnitIssue;
         // BasicFileInfo "Worksharing: Not enabled | Local | Central"; any other text is not decided.
         rvtInfo.SerializedIsWorkshared = fileMetadata.GetValueOrDefault("Worksharing") switch
         {
@@ -1028,29 +1032,56 @@ public partial class RvtFileReader
             + $"categories={index.HeaderCategories.Count}, root classes={index.RootClasses.Count} of {state.AllKnownIds.Count} elements");
     }
 
-    /// <summary>The document units of a 64-bit-id file: the units element named by Global/Latest, its FormatOptions and the persisted schema
-    /// maps (see <see cref="WideDocument"/>), recorded where the Revit 2022 reader records the same facts.</summary>
+    /// <summary>The document units of a file read by the schema walk: the units element named by Global/Latest, its FormatOptions and the
+    /// persisted schema maps (see <see cref="WideDocument"/>), recorded where the Revit 2022 reader records the same facts. A file of the
+    /// Revit 2020 layout has no schema maps; its Length option is the first display unit of the units element.</summary>
     private static void ReadWideDocumentUnits(RootStorage root, ParsingState state, SchemaDocument schemaDocument, WideNativeParams fields,
         Dictionary<uint, List<(WideBlockWalker.Walk Walk, int Class)>> walks, TextWriter? diag)
     {
-        if (PagedGzipStream.Read(root, "Global", "Latest") is not { } latest || WideDocument.Read(latest, schemaDocument) is not { } document)
+        void Fail(string reason)
         {
-            diag?.WriteLine("Wide document units: Global/Latest has no readable units element and schema maps");
+            state.WideLengthUnitIssue = reason;
+            diag?.WriteLine($"Wide document units: {reason}");
+        }
+        string? failure = "Global/Latest is missing or rejected by CRC/length decoding";
+        if (PagedGzipStream.Read(root, "Global", "Latest") is not { } latest
+            || WideDocument.Read(latest, schemaDocument, out failure) is not { } document)
+        {
+            Fail($"Global/Latest has no readable units element and schema maps ({failure})");
             return;
         }
         state.OwnDocumentUnitsElemId = document.UnitsElemId;
-        RecordOwnDocumentSchemas(state, new TfBlockDeserializer.DocumentSchemaPrefix(0, 0, 0, document.Units, document.Parameters, [], [], []), diag);
+        if (document.Units != null && document.Parameters != null)
+            RecordOwnDocumentSchemas(state, new TfBlockDeserializer.DocumentSchemaPrefix(0, 0, 0, document.Units, document.Parameters, [], [], []), diag);
         if (!walks.TryGetValue(document.UnitsElemId, out var blocks) || blocks.Count != 1 || !state.NativeParams.TryGetValue(document.UnitsElemId, out var np))
         {
-            diag?.WriteLine($"Wide document units: no unique decoded UnitsElem block for id {document.UnitsElemId} (blocks {blocks?.Count ?? 0})");
+            Fail($"no unique decoded UnitsElem block for id {document.UnitsElemId} (blocks {blocks?.Count ?? 0})");
             return;
         }
         var records = blocks[0].Walk.Records.Select(r => (fields.Walker.Class(r.ClassId)!.Name, r.Values)).ToList();
-        if (WideDocument.UnitOptions(records) is not { } options
-            || !np.Fields.TryGetValue("m_id", out int owner) || (uint)owner != document.UnitsElemId
-            || !np.Fields.TryGetValue("m_famId", out int family) || !np.Fields.TryGetValue("m_docAccess", out int access)) return;
+        if (!np.Fields.TryGetValue("m_id", out int owner) || (uint)owner != document.UnitsElemId
+            || !np.Fields.TryGetValue("m_famId", out int family) || !np.Fields.TryGetValue("m_docAccess", out int access))
+        {
+            Fail($"the UnitsElem block {document.UnitsElemId} has no matching owner fields");
+            return;
+        }
+        if (document.Units == null)
+        {
+            string? legacyIssue = "the UnitsElem is not document accessible";
+            if (access == 1) state.WideLengthUnit = WideDocument.LegacyLengthUnit(records, out legacyIssue);
+            if (state.WideLengthUnit == null) Fail(legacyIssue!);
+            else diag?.WriteLine($"Wide document units: UnitsElem {document.UnitsElemId}, display unit layout, length {state.WideLengthUnit}");
+            return;
+        }
+        if (WideDocument.UnitOptions(records) is not { } options)
+        {
+            Fail($"the UnitsElem block {document.UnitsElemId} does not have the format option shape");
+            return;
+        }
         // kept apart from OwnUnitOptions, which the continuous walk revokes for these files (it counts the block a second time)
-        if (family == -1 && access == 1) state.WideLengthUnit = Ifc.IfcLengthUnitChoice.StoredLengthUnit(options);
+        string? issue = "the UnitsElem is not document accessible";
+        if (access == 1) state.WideLengthUnit = Ifc.IfcLengthUnitChoice.StoredLengthUnit(options, out issue);
+        if (state.WideLengthUnit == null) state.WideLengthUnitIssue = issue;
         state.OwnUnitOptions[document.UnitsElemId] = (1, new TfBlockDeserializer.UnitsElemOptions(document.UnitsElemId, family, access, 0, 0, options));
         diag?.WriteLine($"Wide document units: UnitsElem {document.UnitsElemId}, {options.Options.Length} format options, unit schemas {document.Units.Entries.Length}");
     }
