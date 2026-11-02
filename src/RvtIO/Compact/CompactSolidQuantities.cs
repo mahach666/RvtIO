@@ -40,6 +40,7 @@ internal sealed class CompactSolidQuantities
             SystemFamilyNameLocale = "ENU",
             SeparateFacesWithDistinctOpenings = true,
             R22Layout = true,
+            ResolveCurrentCopies = options.ResolveCurrentCopies,
         });
         var info = reader.Read(path);
         var state = reader.LastParsingState ?? throw new InvalidOperationException("The reader kept no parsing state.");

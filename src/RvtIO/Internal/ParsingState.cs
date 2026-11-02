@@ -85,6 +85,12 @@ internal class ParsingState
     /// so the 2022 record, block and geometry readers apply to them.</summary>
     public bool R22View { get; set; }
 
+    /// <summary>True when record routing removed the superseded copies of repeated elements from the partition chunks
+    /// (<see cref="Parsing.RecordRouting"/>). The per-chunk block walk then no longer stops at a header-like byte run whose element
+    /// is not in the ElemTable: with the old copies gone, the current copy of an element can be the first block behind such a run
+    /// and the stop would hide it.</summary>
+    public bool StaleCopiesRemoved { get; set; }
+
     /// <summary>The own name of an element of a <see cref="WideSchema"/> file, read from its root block by the schema-driven walk.</summary>
     public Dictionary<uint, string> WideNames { get; } = new();
 
@@ -306,6 +312,12 @@ internal class ParsingState
     /// <summary>CurveDriver location data extracted from 0xFFFF blocks (wall location curves).
     /// Multiple candidates may be stored per wall - ElementBuilder picks the best one.</summary>
     public Dictionary<uint, List<CurveDriverData>> CurveDriverCandidates { get; set; } = new();
+
+    /// <summary>Drive curves read from the exact root block of a wall that has one record in the partition streams
+    /// (<see cref="Parsing.BlockParser.ExtractCurveDriverFromBlock"/> over the block the schema walk found). Used only where record routing
+    /// removed superseded copies (<see cref="StaleCopiesRemoved"/>) and the per-chunk block scan found no candidate: the scan
+    /// reached the old copy of such a wall, which routing removed, and may miss the current one.</summary>
+    internal Dictionary<uint, List<CurveDriverData>> ExactCurveDrivers { get; } = new();
 
     // Exact owned driver fallback where the legacy block scan found no location candidate.
     internal Dictionary<uint, CurveDriverData> OwnWallLocationLines { get; } = new();

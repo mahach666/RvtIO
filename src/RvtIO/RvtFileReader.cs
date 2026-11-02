@@ -52,7 +52,7 @@ public partial class RvtFileReader
 
         Dictionary<string, TfClassRegistry.TfClassDef>? tfSchemas = null;
         LogPhase("Decompressing partitions...");
-        var chunks = DecompressPartitions(root, diag, out var ownPartitionWallParts, out var partitionStreams);
+        var chunks = DecompressPartitions(root, diag, out var ownPartitionWallParts, out var partitionStreams, out bool staleCopiesRemoved);
         var fmtChunks = DecompressStorage(root, "Formats", diag);
         if (fmtChunks.Count > 0)
         {
@@ -71,6 +71,7 @@ public partial class RvtFileReader
 
         // Episode GUID table: nested stream Global/History (there is no top-level "History" storage).
         var (elemRecHistories, elemRecOwners, wideSchema) = ReadElemRecs(root);
+        LogRelease(root, fileMetadata, wideSchema, diag);
         var episodeTable = ReadEpisodeTable(root, diag, wideSchema);
         bool r22View = false;
         if (wideSchema != null && _options.R22Layout && RewriteToR22Layout(root, wideSchema, chunks, partitionStreams, diag) is { } r22Chunks)
@@ -97,6 +98,7 @@ public partial class RvtFileReader
             ElemRecHistories = elemRecHistories,
             ElemRecOwningElementIds = elemRecOwners,
             R22View = r22View,
+            StaleCopiesRemoved = staleCopiesRemoved,
         };
         ReadWideElementIndex(root, state, partitionStreams, wideSchema, diag);
         ReadRebarBars(root, state, partitionStreams, wideSchema);
@@ -826,7 +828,7 @@ public partial class RvtFileReader
         var (previewBase64, previewMime) = PreviewImageReader.Read(root);
 
         LogPhase("Decompressing partitions...");
-        var chunks = DecompressPartitions(root, diag, out var ownPartitionWallParts, out var partitionStreams);
+        var chunks = DecompressPartitions(root, diag, out var ownPartitionWallParts, out var partitionStreams, out bool staleCopiesRemoved);
 
         // Episode GUID table: nested stream Global/History (see Read() above).
         var (elemRecHistories, elemRecOwners, wideSchema) = ReadElemRecs(root);
@@ -852,6 +854,7 @@ public partial class RvtFileReader
             ElemRecHistories = elemRecHistories,
             ElemRecOwningElementIds = elemRecOwners,
             R22View = r22View,
+            StaleCopiesRemoved = staleCopiesRemoved,
         };
         ReadWideElementIndex(root, state, partitionStreams, wideSchema, diag);
         ReadRebarBars(root, state, partitionStreams, wideSchema);
@@ -895,14 +898,26 @@ public partial class RvtFileReader
         return (rvtInfo, state);
     }
 
+    /// <summary>Diagnostics: the release saved in BasicFileInfo, the release of the file's own schema and the one that decides the layout.</summary>
+    private static void LogRelease(RootStorage root, Dictionary<string, string> fileMetadata, FileSchema? wideSchema, TextWriter? diag)
+    {
+        if (diag == null) return;
+        int? schemaRelease = wideSchema != null ? SchemaRelease.FromSchema(wideSchema)
+            : FormatsSchema.TryRead(root) is { } schema ? SchemaRelease.FromSchema(schema) : null;
+        diag.WriteLine(SchemaRelease.Describe(SchemaRelease.Saved(fileMetadata.GetValueOrDefault("RevitVersion")), schemaRelease));
+    }
+
     /// <summary>Element table records of the file: the Revit 2022 layout (shipped schema tables) or, when that does not
     /// apply, the 64-bit layout declared by the file's own schema, in which case the schema is returned too.</summary>
     private static (Dictionary<uint, ElemRecHistory>? Histories, Dictionary<uint, int>? Owners, FileSchema? WideSchema)
         ReadElemRecs(RootStorage root)
     {
         if (PagedGzipStream.Read(root, "Global", "ElemTable") is not { } bytes) return (null, null, null);
-        if (ElementExportIds.ParseElemTable(bytes, out var owners) is { } histories) return (histories, owners, null);
-        if (FileSchema.Read(root) is { } schema && WideElementRecords.ParseElemTable(bytes, schema) is { } wide)
+        var schema = FileSchema.Read(root);
+        // the layout shipped for Revit 2022 applies to a file whose release in force (SchemaRelease.Of) is 2022 or unknown
+        if (SchemaRelease.AllowsShipped(schema?.Release ?? SchemaRelease.Of(root, null), 2022)
+            && ElementExportIds.ParseElemTable(bytes, out var owners) is { } histories) return (histories, owners, null);
+        if (schema != null && WideElementRecords.ParseElemTable(bytes, schema) is { } wide)
             return (wide.Histories, wide.OwningElementIds, schema);
         return (null, null, null);
     }
@@ -932,11 +947,20 @@ public partial class RvtFileReader
             catch (FormatException) { diag?.WriteLine("Wide element records: Formats/Latest does not parse for the field walk"); }
         }
         var walks = new Dictionary<uint, List<(WideBlockWalker.Walk Walk, int Class)>>();
+        var drivers = new Dictionary<uint, List<CurveDriverData>>();
+        var wallShim = new Dictionary<uint, ElementRecord>();
         var index = WideElementRecords.BuildIndex(partitionStreams, schema, state.AllKnownIds,
             fields == null ? null : (id, data, offset, size, cls) =>
             {
                 if (!walks.TryGetValue(id, out var list)) walks[id] = list = [];
                 list.Add((fields.Walker.Run(data, offset, size, cls), cls));
+                // the roots of a straight or an arc wall: the block of the drive curve (the classes the Revit 2022 reader names)
+                if (state.StaleCopiesRemoved && fields.R22Id(cls) is 3524 or 361)
+                {
+                    wallShim[id] = new ElementRecord { ElemId = id, CategoryId = -2000011 };
+                    if (!drivers.TryGetValue(id, out var found)) drivers[id] = found = [];
+                    BlockParser.ExtractCurveDriverFromBlock(data, offset, offset + size, id, drivers, wallShim);
+                }
             });
         if (index == null)
         {
@@ -953,6 +977,7 @@ public partial class RvtFileReader
             {
                 // a copy of the element in two streams is decoded only when it is one record
                 if (list.Count != 1 || !index.RootClasses.TryGetValue(id, out int rootClass) || list[0].Class != rootClass) continue;
+                if (drivers.TryGetValue(id, out var exactDrivers) && exactDrivers.Count > 0) state.ExactCurveDrivers[id] = exactDrivers;
                 var np = fields.Build(list[0].Walk, rootClass);
                 if (np == null) continue;
                 if (fields.LevelElevation(list[0].Walk, rootClass) is double levelElevation)
@@ -1032,8 +1057,9 @@ public partial class RvtFileReader
 
     private List<byte[]> DecompressPartitions(RootStorage root, TextWriter? diag,
         out Dictionary<uint, OwnPartitionParts.WallParts>? ownPartitionWallParts,
-        out List<IReadOnlyList<byte[]>> partitionStreams)
+        out List<IReadOnlyList<byte[]>> partitionStreams, out bool staleCopiesRemoved)
     {
+        staleCopiesRemoved = false;
         var partStor = root.OpenStorage("Partitions");
         var partEntries = partStor.EnumerateEntries()
             .Where(e => e.Type == EntryType.Stream)
@@ -1045,6 +1071,7 @@ public partial class RvtFileReader
         var allChunks = new List<byte[]>();
         partitionStreams = new List<IReadOnlyList<byte[]>>();
         ownPartitionWallParts = null;
+        var routing = _options.ResolveCurrentCopies && partEntries.Count > 1 ? PlanRecordRouting(root, partStor, partEntries.Select(e => e.Name).ToList(), diag) : null;
 
         foreach (var partEntry in partEntries)
         {
@@ -1056,18 +1083,64 @@ public partial class RvtFileReader
             // shortcut: saved format9 with one partition stream; multi-stream scope needs its own load validation.
             if (partEntries.Count == 1 && partEntry.Name == "0")
             {
-                ownPartitionWallParts = OwnPartitionParts.Read(raw, out var failure);
+                var framingSchema = FormatsSchema.TryRead(root);
+                var wallClasses = framingSchema == null ? null : OwnPartitionParts.ClassesOf(framingSchema);
+                string? failure;
+                ownPartitionWallParts = wallClasses != null && ElemTableLayout.IdWidth(framingSchema!) is int framingWidth
+                    ? OwnPartitionParts.Read(raw, wallClasses, framingWidth, out failure)
+                    : Fail("the schema lacks the framing or wall classes", out failure);
                 diag?.WriteLine($"  Own partition wall parts: {ownPartitionWallParts?.Count.ToString() ?? "unavailable"} ({failure ?? "exact"})");
             }
 
             var chunks = decompressor.DecompressAll(raw);
             diag?.WriteLine($"  Chunks: {chunks.Count} decompressed");
+            if (routing != null && int.TryParse(partEntry.Name, out int partitionNumber)
+                && RecordRouting.Stale(routing.Census, routing.Current, partitionNumber) is { Count: > 0 } stale)
+            {
+                if (RecordRouting.Prune(chunks, routing.Census.SegmentLengths[partitionNumber], stale) is { } pruned)
+                {
+                    chunks = pruned;
+                    staleCopiesRemoved = true;
+                    diag?.WriteLine($"  Record routing: {stale.Count} records of {partEntry.Name} are not the current copy and were removed");
+                }
+                else diag?.WriteLine($"  Record routing: the chunks of {partEntry.Name} are not the framed segments; {stale.Count} stale records kept");
+            }
             allChunks.AddRange(chunks);
             partitionStreams.Add(chunks);
         }
 
         diag?.WriteLine($"Total chunks: {allChunks.Count} decompressed");
         return allChunks;
+    }
+
+    private static Dictionary<uint, OwnPartitionParts.WallParts>? Fail(string reason, out string? failure) { failure = reason; return null; }
+
+    private sealed record RoutingPlan(RecordRouting.Census Census, Dictionary<ulong, int> Current);
+
+    /// <summary>The current copy of every element that several partition streams hold (<see cref="RecordRouting"/>), or null with the
+    /// reason in the diagnostics when the framing, the element table or the increment table does not decode.</summary>
+    private static RoutingPlan? PlanRecordRouting(RootStorage root, Storage partStor, IReadOnlyList<string> names, TextWriter? diag)
+    {
+        var schema = FormatsSchema.TryRead(root);
+        var census = RecordRouting.Begin(schema, out var failure);
+        if (census == null) { diag?.WriteLine($"Record routing: not applied ({failure})"); return null; }
+        if (PagedGzipStream.Read(root, "Global", "ElemTable") is not { } elemTable || ElemTableLayout.TryParse(elemTable, schema!) is not { } rows)
+        { diag?.WriteLine("Record routing: not applied (ElemTable does not decode by the schema)"); return null; }
+        if (PagedGzipStream.Read(root, "Global", "DocumentIncrementTable") is not { } incrementBytes
+            || DocumentIncrementTable.TryParse(incrementBytes, schema!, out failure) is not { } table)
+        { diag?.WriteLine($"Record routing: not applied (DocumentIncrementTable: {failure ?? "missing"})"); return null; }
+        foreach (string name in names)
+        {
+            if (!int.TryParse(name, out int partition)) { diag?.WriteLine($"Record routing: not applied (partition stream '{name}')"); return null; }
+            using var stream = partStor.OpenStream(name);
+            var raw = new byte[stream.Length];
+            stream.ReadExactly(raw);
+            if (!RecordRouting.Collect(census, partition, raw, out failure))
+            { diag?.WriteLine($"Record routing: not applied (framing of partition {name}: {failure})"); return null; }
+        }
+        var current = RecordRouting.Current(census, rows, table);
+        diag?.WriteLine($"Record routing: {current.Count} elements are held by several partitions; {census.KeyedRecords} keyed-block records are not project elements");
+        return new RoutingPlan(census, current);
     }
 
     private List<byte[]> DecompressStorage(RootStorage root, string storageName, TextWriter? diag)

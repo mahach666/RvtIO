@@ -81,6 +81,39 @@ public class OwnPartitionPartsTests
         Assert.Null(OwnPartitionParts.Read(raw, out _));
     }
 
+    [Fact]
+    public void AFinalTailThatEndsTheStreamExactlyIsRemovedWithoutItsZeroTag()
+    {
+        // measured on a 2022 partition: the stream ends at a tail position and the last tail starts 60 a5, not 00 xx
+        byte[] clean = Partition([new()]);
+        Array.Resize(ref clean, 64896);
+        byte[] tail = new byte[353];
+        tail[0] = 0x60; tail[1] = 0xa5;
+        byte[] raw = [.. clean, .. tail];
+        Assert.NotNull(OwnPartitionParts.Read(raw, out var failure));
+        Assert.Null(failure);
+        // one more byte and the tail is no longer the end of the stream: the zero tag is demanded again
+        Assert.Null(OwnPartitionParts.Read([.. raw, 0], out _));
+    }
+
+    [Fact]
+    public void MarkerAndRootClassesComeFromTheSchemaOfTheFile()
+    {
+        // the class numbers of another release: the 2022 constants do not frame this partition, its own classes do
+        var other = new Tags(869, 868, 3662, 3655, 3681, 2222);
+        byte[] raw = Partition([new(NodeClass: 5000), new(Keyed: true, Owner: 99)], other);
+        Assert.Null(OwnPartitionParts.Read(raw, out var wrong));
+        Assert.Equal("content-marker", wrong);
+        var classes = new OwnPartitionParts.Classes(new PartitionFraming.Tags(869, 868, 3662, 3655, 3681), [5000, 6000], 2222);
+        var parts = OwnPartitionParts.Read(raw, classes, 4, out var failure);
+        Assert.Null(failure);
+        var wall = Assert.Single(parts!).Value;
+        Assert.Equal(SHA256.HashData(Record(42, 102, 5000)), wall.NodeSha256);
+        Assert.Equal(SHA256.HashData(Record(42, 103, 2222)), wall.GeometrySha256);
+        // a node class that is not one of the file's wall roots is not admitted
+        Assert.Empty(OwnPartitionParts.Read(Partition([new(NodeClass: 5001)], other), classes, 4, out _)!);
+    }
+
     private static byte[] Record(uint owner, uint index, ushort kind, string? fault = null)
     {
         using var stream = new MemoryStream();
@@ -94,22 +127,25 @@ public class OwnPartitionPartsTests
         return stream.ToArray();
     }
 
-    private static byte[] Partition(Map[] maps)
+    private sealed record Tags(ushort Marker = 817, ushort Key = 816, ushort Segment = 3561, ushort Checkback = 3554, ushort Signature = 3580, ushort Geometry = 2007);
+
+    private static byte[] Partition(Map[] maps, Tags? tags = null)
     {
+        tags ??= new Tags();
         using var stream = new MemoryStream();
         using var writer = new BinaryWriter(stream);
         writer.Write(9ul);
         foreach (var map in maps)
         {
-            writer.Write((ushort)817);
+            writer.Write(tags.Marker);
             writer.Write(map.Keyed ? uint.MaxValue : 0u);
-            if (map.Keyed) writer.Write((ushort)816);
+            if (map.Keyed) writer.Write(tags.Key);
             writer.Write(map.Fault == "owner-count" ? 2u : 1u);
             if (map.Keyed) writer.Write(new byte[16]);
             for (uint index = 101; index <= 103; index++)
             {
                 uint owner = map.Fault == "owner-set" && index == 103 ? map.Owner + 1 : map.Owner;
-                ushort kind = index == 102 ? map.NodeClass : index == 103 ? (ushort)2007 : (ushort)1;
+                ushort kind = index == 102 ? map.NodeClass : index == 103 ? tags.Geometry : (ushort)1;
                 byte[] records = Record(owner, index, kind, map.Fault);
                 uint count = 1, sum = 3;
                 if (map.Repeat && index == 102)
@@ -119,24 +155,24 @@ public class OwnPartitionPartsTests
                 }
                 if (map.Split)
                 {
-                    Segment(writer, index, records[..5], 0, 0, 2, map.Fault);
-                    Segment(writer, index, records[5..], count, sum, 1, map.Fault);
+                    Segment(writer, tags, index, records[..5], 0, 0, 2, map.Fault);
+                    Segment(writer, tags, index, records[5..], count, sum, 1, map.Fault);
                 }
-                else Segment(writer, index, records, count, sum, 0, map.Fault);
+                else Segment(writer, tags, index, records, count, sum, 0, map.Fault);
             }
-            writer.Write((ushort)3561);
+            writer.Write(tags.Segment);
             writer.Write(new byte[16]);
-            writer.Write((ushort)3580);
+            writer.Write(tags.Signature);
             writer.Write(map.Fault == "signature-bounds" ? uint.MaxValue : 0u);
             writer.Write(0u);
         }
-        writer.Write((ushort)817);
+        writer.Write(tags.Marker);
         writer.Write(0u);
         writer.Write(uint.MaxValue);
         return stream.ToArray();
     }
 
-    private static void Segment(BinaryWriter writer, uint index, byte[] bytes, uint count,
+    private static void Segment(BinaryWriter writer, Tags tags, uint index, byte[] bytes, uint count,
         uint sum, uint mode, string? fault)
     {
         using var compressed = new MemoryStream();
@@ -151,7 +187,7 @@ public class OwnPartitionPartsTests
         if (fault == "deflate") payload[10] = 7; // Reserved DEFLATE block type3.
         if (fault == "gzip-extra") payload = [.. payload[..^8], 0, .. payload[^8..]];
         uint size = (uint)payload.Length + 8;
-        writer.Write((ushort)3561);
+        writer.Write(tags.Segment);
         writer.Write(fault == "continuation" ? 1u : fault == "unfinished-chain" ? 2u : mode);
         writer.Write(fault == "count" ? count + 1 : count);
         writer.Write(size);
@@ -159,7 +195,7 @@ public class OwnPartitionPartsTests
         writer.Write(fault == "index" ? 104u : index);
         writer.Write(19u);
         writer.Write(payload);
-        writer.Write((ushort)3554);
+        writer.Write(tags.Checkback);
         writer.Write(fault == "checkback" ? size + 1 : size);
     }
 }

@@ -11,17 +11,26 @@ namespace RvtIO.Parsing;
 /// </summary>
 internal static class ElemTableLayout
 {
-    internal readonly record struct Row(long Id, long OriginalId, int CreationDate, int PartitionId, long OwningId);
+    internal readonly record struct Row(long Id, long OriginalId, int CreationDate, int PartitionId, long OwningId, int? LastModificationDate = null);
 
     internal const int HeaderLength = 6;
 
     /// <summary>Byte width of one ElemRec row of this schema, or null when the schema does not have the expected shape.</summary>
     internal static int? RowLength(FormatsSchema schema)
-        => schema.Get("ElemRec") is { } rec ? Width(schema, rec, 0) : null;
+        => schema.Get("ElemRec") is { } rec && Width(schema, rec, 0) is int width && Agrees(SchemaRelease.RowLength(schema.Release), width) ? width : null;
 
     /// <summary>Byte width of the element id field (<c>Identifier</c>): 4 or 8, null when it is neither.</summary>
     internal static int? IdWidth(FormatsSchema schema)
-        => schema.Get("Identifier") is { Fields: [{ } field] } ? LeafWidth(field.Type) : null;
+        => schema.Get("Identifier") is { Fields: [{ } field] } && LeafWidth(field.Type) is int width && Agrees(SchemaRelease.IdWidth(schema.Release), width) ? width : null;
+
+    /// <summary>True when the schema declares an element id width that the release in force does not have (a file saved by an older
+    /// release than its schema): the layout of that release is not the layout of the bytes.</summary>
+    internal static bool DisagreesWithRelease(FormatsSchema schema)
+        => schema.Get("Identifier") is { Fields: [{ } field] } && LeafWidth(field.Type) is int width && !Agrees(SchemaRelease.IdWidth(schema.Release), width);
+
+    /// <summary>The widths the schema declares must be those of the release in force (the older of the saved and the schema release);
+    /// a file whose two releases disagree on the layout is not decoded by a layout it does not have.</summary>
+    private static bool Agrees(int? releaseWidth, int declared) => releaseWidth is not int expected || expected == declared;
 
     /// <summary>The rows of a decoded Global/ElemTable stream, or null unless the stream is this schema's ElemTable: the class
     /// id and the m_elemArr element class match, every row fits, and the ids strictly increase.</summary>
@@ -39,7 +48,7 @@ internal static class ElemTableLayout
 
         // offsets of the leaves the reader needs, found by their declared path
         int? id = Offset(schema, rec, ["m_id"]), original = Offset(schema, rec, ["m_history", "m_originalElementId"]),
-            created = Offset(schema, rec, ["m_history", "m_creationDate"]), partition = Offset(schema, rec, ["m_partitionId"]),
+            created = Offset(schema, rec, ["m_history", "m_creationDate"]), modified = Offset(schema, rec, ["m_history", "m_lastModificationDate"]), partition = Offset(schema, rec, ["m_partitionId"]),
             owner = Offset(schema, rec, ["m_OwningElementId"]);
         if (id is null || original is null || created is null || partition is null || owner is null) return null;
         int idWidth = IdWidth(schema)!.Value;
@@ -54,7 +63,7 @@ internal static class ElemTableLayout
             if (rowId <= previous) return null;
             previous = rowId;
             rows.Add(new Row(rowId, Read(data, at + original.Value, idWidth), BitConverter.ToInt32(data, at + created.Value),
-                BitConverter.ToInt32(data, at + partition.Value), Read(data, at + owner.Value, idWidth)));
+                BitConverter.ToInt32(data, at + partition.Value), Read(data, at + owner.Value, idWidth), modified is int m ? BitConverter.ToInt32(data, at + m) : null));
         }
         return rows;
     }

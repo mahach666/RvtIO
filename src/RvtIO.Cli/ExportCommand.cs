@@ -27,6 +27,7 @@ internal static partial class Program
             SeparateFacesWithDistinctOpenings = profile == RvtIO.Ifc.IfcProfile.Current,
             // IFC export reads the geometry with the Revit 2022 readers; --no-r22-layout keeps the 64-bit schema path alone
             R22Layout = isIfcOutput && !args.Contains("--no-r22-layout") || args.Contains("--r22-layout"),
+            ResolveCurrentCopies = args.Contains("--resolve-current-copies"),
         };
 
         var reader = new RvtFileReader(options);

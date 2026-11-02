@@ -83,7 +83,11 @@ internal static class BlockParser
             if (eid == 0) { pos += 4; continue; }
             if (dataSize == 0) { pos++; continue; }
             // Hard stop if block would exceed chunk (format broken at this point)
-            if (pos + 16 + (int)dataSize > chunk.Length) break;
+            if (pos + 16 + (int)dataSize > chunk.Length)
+            {
+                if (state.StaleCopiesRemoved && !state.AllKnownIds.Contains(eid)) { pos++; continue; }
+                break;
+            }
 
             // A block owner is authoritative when it is present in ElemTable or when the
             // block's on-disk footer repeats dataSize. This exact format signature rejects
@@ -782,7 +786,7 @@ internal static class BlockParser
     //   EndParams: [doublex2] (no count field - always exactly 2 for wall curves)
     //   GLine: OriginPoint(3d) + DirectionVector(3d)
     //   GArc:  XDirection(3d) + YDirection(3d) + Radius(double) + Center(3d) + IsFilled(bool)
-    private static void ExtractCurveDriverFromBlock(byte[] d, int start, int end, uint eid,
+    internal static void ExtractCurveDriverFromBlock(byte[] d, int start, int end, uint eid,
         Dictionary<uint, List<CurveDriverData>> curveDriverCandidates,
         Dictionary<uint, ElementRecord> records)
     {
