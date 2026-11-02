@@ -32,7 +32,8 @@ public static class RvtContainerCheck
         using (root)
         {
             var buffer = new byte[1 << 20];
-            try { Walk(root, "", buffer); }
+            int visited = 0;
+            try { Walk(root, "", buffer, ref visited); }
             catch (Exception ex) when (ex is not (OutOfMemoryException or RvtLimitException))
             {
                 string where = ex is EndOfStreamException eos && eos.Data["stream"] is string name ? $" in stream '{name}'" : "";
@@ -44,14 +45,17 @@ public static class RvtContainerCheck
 
     // A Revit file nests storages only a few levels deep; a damaged directory can loop back on itself, which would overflow the stack.
     private const int MaxDepth = 64;
+    // Bounds the total work when a damaged directory points several entries at the same children.
+    private const int MaxEntries = 200_000;
 
-    private static void Walk(Storage storage, string prefix, byte[] buffer, int depth = 0)
+    private static void Walk(Storage storage, string prefix, byte[] buffer, ref int visited, int depth = 0)
     {
         if (depth > MaxDepth) throw new InvalidDataException($"storage nesting deeper than {MaxDepth} levels at '{prefix}'");
         foreach (var entry in storage.EnumerateEntries())
         {
+            if (++visited > MaxEntries) throw new InvalidDataException($"more than {MaxEntries} directory entries");
             string name = prefix + entry.Name;
-            if (entry.Type == EntryType.Storage) { Walk(storage.OpenStorage(entry.Name), name + "/", buffer, depth + 1); continue; }
+            if (entry.Type == EntryType.Storage) { Walk(storage.OpenStorage(entry.Name), name + "/", buffer, ref visited, depth + 1); continue; }
             if (entry.Type != EntryType.Stream) continue;
             if (entry.Length > Array.MaxLength)
                 throw new RvtLimitException(new ReaderLimitHit(name, "array-length", Array.MaxLength, Raisable: false,
