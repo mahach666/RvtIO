@@ -12,6 +12,10 @@ internal class ChunkDecompressor
     private static readonly byte[] RvtGzipHeader =
         [0x1F, 0x8B, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x0B];
 
+    /// <summary>Members of the stream read by the last <see cref="DecompressAll"/>: all, decoded, left without output, rescued by a
+    /// structural relock, and kept although their gzip trailer did not match.</summary>
+    public (int Members, int Decoded, int Failed, int Recovered, int Unverified) LastStats { get; private set; }
+
     /// <summary>
     /// Find all GZIP markers in raw partition data and decompress each chunk.
     ///
@@ -271,6 +275,9 @@ internal class ChunkDecompressor
             }
         }
 
+        int unverified = statuses.Count(status => status == "window-corrupt");
+        int rescued = statuses.Count(status => status is "recovered-loss" or "recovered-corrupt");
+        LastStats = (markers.Count, chunks.Count, markers.Count - chunks.Count, rescued, unverified);
         DiagnosticSink.WriteLine($"Decompression: {gzipOk} gzip, {pagedOk} paged-exact, {windowOk} window-carry, {failed} failed, {recovered} desync-recovered (of {markers.Count} markers)");
         return chunks;
     }
