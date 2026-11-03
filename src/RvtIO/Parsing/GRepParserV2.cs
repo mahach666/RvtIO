@@ -4998,7 +4998,7 @@ internal static partial class GRepParserV2
     /// Surface.Envelope describes the underlying analytic surface and may include regions outside a
     /// Face; the EdgeLoop is authoritative.
     /// </summary>
-    private static List<List<double[]>>? TessellateTrimmedGrid(
+    internal static List<List<double[]>>? TessellateTrimmedGrid(
         List<(double U1, double V1, double U2, double V2)> edges,
         List<double> uSamples, List<double> vSamples,
         Func<double, double, double[]> evaluate, bool refineV)

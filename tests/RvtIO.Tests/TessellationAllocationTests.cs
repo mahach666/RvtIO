@@ -219,4 +219,27 @@ public class TessellationAllocationTests
         Assert.Equal(2, rings.Count);
         Assert.Equal(Describe(TessellationReference.OrderRingsW(segments), segments), Describe(rings, segments));
     }
+
+    private static List<(double U1, double V1, double U2, double V2)> SquareEdges(double min, double max) =>
+    [
+        (min, min, max, min), (max, min, max, max), (max, max, min, max), (min, max, min, min),
+    ];
+
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public void TessellateTrimmedGrid_cuts_a_region_with_a_hole_in_V_only_when_asked(bool refineV)
+    {
+        // a square with a square hole: two rings, so refineV decides whether the cells are cut at the V sample lines
+        var edges = SquareEdges(0, 4);
+        edges.AddRange(SquareEdges(1, 3));
+        List<double> samples = [0, 1, 2, 3, 4];
+        var cells = GRepParserV2.TessellateTrimmedGrid(edges, samples, samples, (u, v) => [u, v, 0], refineV);
+        Assert.NotNull(cells);
+        double area = cells.Sum(cell => Math.Abs(Enumerable.Range(0, cell.Count).Sum(i =>
+            cell[i][0] * cell[(i + 1) % cell.Count][1] - cell[(i + 1) % cell.Count][0] * cell[i][1])) / 2);
+        Assert.Equal(12, area, 9);
+        bool anyCellSpansBands = cells.Any(cell => cell.Max(p => p[1]) - cell.Min(p => p[1]) > 1 + 1e-9);
+        Assert.Equal(!refineV, anyCellSpansBands);
+    }
 }
